@@ -52,6 +52,7 @@ DJANGO_APPS = [
 ]
 PROJECT_APPS = [
     "users.apps.UsersConfig",
+    "core.apps.CoreConfig",
 ]
 THIRD_APPS = [
 ]
@@ -66,6 +67,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+AUTH_USER_MODEL = "users.User"
 
 ROOT_URLCONF = 'UpcyProject.urls'
 

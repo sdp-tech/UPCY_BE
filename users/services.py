@@ -46,9 +46,9 @@ class UserService:
             certificate_studentship: InMemoryUploadedFile,
             ):
 
-        ext = certificate_studentship.name.split(".")[-1]
-        file_path = '{}.{}'.format(str(time.time())+str(uuid.uuid4().hex), ext)
-        certificate_studentship = ImageFile(io.BytesIO(certificate_studentship.read()), name=file_path)
+        # ext = certificate_studentship.name.split(".")[-1]
+        # file_path = '{}.{}'.format(str(time.time())+str(uuid.uuid4().hex), ext)
+        # certificate_studentship = ImageFile(io.BytesIO(certificate_studentship.read()), name=file_path)
 
         user = User(
             email = email,

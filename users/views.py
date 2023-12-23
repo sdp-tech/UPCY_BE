@@ -55,3 +55,46 @@ class ReformerSignUpApi(APIView):
         return Response({
             'stauts': 'success',
         },status = status.HTTP_201_CREATED)
+    
+
+class ConsumerSignUpApi(APIView):
+    permission_classes = (AllowAny, )
+
+    class ConsumerSignUpInputSerializer(serializers.Serializer):
+        #TODO전화번호인증필요
+        email = serializers.EmailField()
+        password = serializers.CharField()
+        nickname = serializers.CharField()
+        phone = serializers.CharField()
+        profile_image = serializers.ImageField()
+        agreement_terms = serializers.CharField()
+        area = serializers.CharField()
+        prefer_style = serializers.ListField()
+
+    def post(self, request):
+        serializers = self.ConsumerSignUpInputSerializer(data = request.data)
+        serializers.is_valid(raise_exception=True)
+        data = serializers.validated_data
+
+        UserService.consumer_sign_up(
+            email = data.get('email'),
+            password = data.get('password'),
+            nickname = data.get('nickname'),
+            phone = data.get('phone'),
+            profile_image = data.get('profile_image'),
+            agreement_terms= data.get('agreement_terms'),
+            area = data.get('area'),
+            prefer_style = data.get('prefer_style'),
+        )
+
+        return Response({
+            'stauts': 'success',
+        },status = status.HTTP_201_CREATED)
+    
+
+        # return Response({
+        #     'status': 'success',
+        #     'data': {'id': user.id},
+        # }, status=status.HTTP_200_OK)
+
+        

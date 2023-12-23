@@ -31,6 +31,7 @@ class UserService:
     def __init__(self):
         pass
 
+    #리포머회원가입
     def reformer_sign_up(
             email: str, 
             password: str, 
@@ -68,7 +69,36 @@ class UserService:
         )
 
         user.set_password(password)
-        user.is_active = False
+        user.is_active = True
         user.save()
 
         user.work_style.set(work_style)
+
+    #소비자회원가입
+    def consumer_sign_up(
+            email: str,
+            password: str,
+            nickname: str,
+            phone: str,
+            profile_image: InMemoryUploadedFile,
+            agreement_terms: bool,
+            area: str,
+            prefer_style:list[str],
+            ):
+        
+        user = User(
+            email = email,
+            nickname = nickname,
+            password = password,
+            phone = phone,
+            profile_image = profile_image,
+            is_consumer = True,
+            agreement_terms = agreement_terms,
+            area = area,
+        )
+
+        user.set_password(password)
+        user.is_active = False
+        user.save()
+
+        user.prefer_style.set(prefer_style)

@@ -21,6 +21,7 @@ from django.core.files.images import ImageFile
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
 from users.models import User
+from users.selectors import UserSelector
 # from core.exceptions import ApplicationError
 
 
@@ -102,3 +103,31 @@ class UserService:
         user.save()
 
         user.prefer_style.set(prefer_style)
+
+    def login(self, email: str, password: str):
+        selector = UserSelector()
+
+        user = selector.get_user_by_email(email)
+
+        # if user.social_provider:
+        #     raise ApplicationError(
+        #         user.social_provider + " 소셜 로그인 사용자입니다. 소셜 로그인을 이용해주세요."
+        #     )
+
+        if not selector.check_password(user, password):
+            raise exceptions.ValidationError(
+                {'detail': "아이디나 비밀번호가 올바르지 않습니다."}
+            )
+        
+        token = RefreshToken.for_user(user=user)
+
+        data={
+            "email": user.email,
+            'refresh':str(token),
+            'access': str(token.access_token),
+            'nickname': user.nickname,
+            'is_reformer': user.is_reformer,
+            'is_consumer': user.is_consumer,
+        }
+
+        return data

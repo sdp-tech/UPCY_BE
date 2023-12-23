@@ -91,4 +91,37 @@ class ConsumerSignUpApi(APIView):
             'stauts': 'success',
         },status = status.HTTP_201_CREATED)
 
-        
+class UserLoginApi(APIView):
+    permission_classes = (AllowAny, )
+
+    class UserLoginInputSerializer(serializers.Serializer):
+        email = serializers.CharField()
+        password = serializers.CharField()
+
+    class UserLoginOutputSerializer(serializers.Serializer):
+        email = serializers.CharField()
+        refresh = serializers.CharField()
+        access = serializers.CharField()
+        nickname = serializers.CharField(allow_blank = True)
+        is_reformer = serializers.BooleanField()
+        is_consumer = serializers.BooleanField()
+
+    def post(self, request):
+        input_serializer = self.UserLoginInputSerializer(data=request.data)
+        input_serializer.is_valid(raise_exception=True)
+        data = input_serializer.validated_data
+
+        service = UserService()
+
+        login_data = service.login(
+            email = data.get('email'),
+            password = data.get('password'),
+        )
+
+        output_serializer = self.UserLoginOutputSerializer(data = login_data)
+        output_serializer.is_valid(raise_exception=True)
+
+        return Response({
+            'status': 'success',
+            'data': output_serializer.data,
+        }, status = status.HTTP_200_OK)

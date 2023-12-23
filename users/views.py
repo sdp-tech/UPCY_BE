@@ -55,3 +55,5 @@ class ReformerSignUpApi(APIView):
         return Response({
             'stauts': 'success',
         },status = status.HTTP_201_CREATED)
+    
+#소비자 회원가입 구현 필요

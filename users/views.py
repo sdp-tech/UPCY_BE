@@ -16,11 +16,12 @@ class ReformerSignUpApi(APIView):
     permission_classes = (AllowAny,)
 
     class ReformerSignupInputSerializer(serializers.Serializer):
-        #TODO재학증명서, 전화번호 인증 구현 필요
+        #TODO전화번호 인증 구현 필요
         email = serializers.EmailField()
         password = serializers.CharField()
         nickname = serializers.CharField()
         phone = serializers.CharField()
+        profile_image = serializers.ImageField()
         agreement_terms = serializers.BooleanField()
         school = serializers.CharField()
         is_enrolled = serializers.CharField()
@@ -40,6 +41,7 @@ class ReformerSignUpApi(APIView):
             password = data.get('password'),
             nickname = data.get('nickname'),
             phone = data.get('phone'),
+            profile_image = data.get('profile_image'),
             agreement_terms= data.get('agreement_terms'),
             school = data.get('school'),
             is_enrolled = data.get('is_enrolled'),

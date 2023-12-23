@@ -90,11 +90,5 @@ class ConsumerSignUpApi(APIView):
         return Response({
             'stauts': 'success',
         },status = status.HTTP_201_CREATED)
-    
-
-        # return Response({
-        #     'status': 'success',
-        #     'data': {'id': user.id},
-        # }, status=status.HTTP_200_OK)
 
         

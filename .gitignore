@@ -157,3 +157,6 @@ secrets.json
 media
 .env
 .Dockerfile.swp
+product/photo/
+users/profile/
+.idea

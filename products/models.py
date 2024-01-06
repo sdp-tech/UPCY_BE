@@ -23,15 +23,15 @@ class Product(TimeStampedModel):
 class ProductKeyword(models.Model):
     name = models.CharField(max_length=100)
     product = models.ForeignKey(
-        'Product', related_name='keywords', on_delete=models.CASCADE, null=False, blank=False)
+        'Product', related_name='keywords', on_delete=models.CASCADE, null=True, blank=True)
     
 
 #Product_Photo 모델 만들기
 def get_product_photo_upload_path(instance, filename):
-    return 'product/photo/{}'.format(filename)
+    return 'products/photo/{}'.format(filename)
 
 class ProductPhoto(models.Model):
     image = models.ImageField(
         upload_to=get_product_photo_upload_path, default='product_photo.png')
     product = models.ForeignKey(
-        'Product', related_name='product_photos', on_delete=models.CASCADE, null=False, blank=False)
+        'Product', related_name='product_photos', on_delete=models.CASCADE, null=True, blank=True)

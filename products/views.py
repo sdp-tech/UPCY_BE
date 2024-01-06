@@ -17,45 +17,66 @@ class ProductCreateApi(APIView):
     class ProductCreateInputSerializer(serializers.Serializer):
         name = serializers.CharField()
         category = serializers.CharField()
-        keywords = serializers.ListField()
+        keywords = serializers.ListField(required=False)
         basic_price = serializers.CharField()
         option = serializers.CharField()
-        product_photos = serializers.ListField()
+        product_photos = serializers.ListField(required=False)
         info = serializers.CharField()
         notice = serializers.CharField()
         period = serializers.CharField()
         transaction_direct = serializers.BooleanField()
         transaction_package = serializers.BooleanField()
         refund = serializers.CharField()
-        reformer = serializers.EmailField()
     
     def post(self,request):
         serializers = self.ProductCreateInputSerializer(data=request.data)
         serializers.is_valid(raise_exception=True)
         data = serializers.validated_data
-    
-        reformer_email=data.get('reformer')
-        reformer, created = User.objects.get_or_create(email=reformer_email)
-        category_name=data.get('category')
-        category, created = Category.objects.get_or_create(name=category_name)
         
-        product=ProductService.create(
+        service=ProductCoordinatorService(user=request.user)
+        
+        print(request.user)
+        
+        product=service.create(
             name=data.get('name'),
-            category=category,
-            #keywords=data.get('keywords',[]),
+            category=data.get('category'),
+            keywords=data.get('keywords',[]),
             basic_price=data.get('basic_price'),
             option=data.get('option'),
-            #product_photos=data.get('product_photos',[]),
+            product_photos=data.get('product_photos',[]),
             info=data.get('info'),
             notice=data.get('notice'),
             period=data.get('period'),
             transaction_direct=data.get('transaction_direct'),
             transaction_package=data.get('transaction_package'),
             refund=data.get('refund'),
-            reformer=reformer,
+            #reformer=request.user,
         )
+        #product_photos = data.get('product_photos', [])
+        ProductPhotoService.process_photos(product=product, product_photos=product.product_photos)
         
         return Response({
             'status': 'success',
             'data' : {'id': product.id},
         }, status=status.HTTP_201_CREATED)
+        
+class ProductPhotoCreateApi(APIView):
+    permission_classes=(AllowAny,)
+    
+    class ProductPhotoCreateInputSerializer(serializers.Serializer):
+        image = serializers.ImageField()
+    
+    def post(self, request):
+        serializers = self.ProductPhotoCreateInputSerializer(data=request.data)
+        serializers.is_valid(raise_exception=True)
+        data = serializers.validated_data
+        
+        product_photo_url = ProductPhotoService.create(
+            image=data.get('image'),
+        )
+        
+        return Response({
+            'status':'success',
+            'data':{'location': product_photo_url},
+        }, status = status.HTTP_201_CREATED)
+        

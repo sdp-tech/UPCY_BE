@@ -69,10 +69,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
 
     email = models.EmailField(max_length=64, unique=True)
-    phone = models.CharField(max_length = 15, blank=True)
-    code = models.CharField(max_length=5, blank=True)
+    phone = models.CharField(max_length = 15, blank=True, null=True)
+    code = models.CharField(max_length=5, blank=True, null=True)
     nickname = models.CharField(max_length=20, blank=True)
-    profile_image = models.ImageField(upload_to=get_upload_path, default = 'user_profile_image.png')
+    profile_image = models.ImageField(upload_to=get_upload_path, default = 'user_profile_image.png', blank=True, null=True)
     agreement_terms = models.BooleanField(default = False)
     follows = models.ManyToManyField("users.User", related_name='followers', blank=True)
     is_superuser = models.BooleanField(default=False)
@@ -88,7 +88,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     #리폼러 가입시 필요 필드
     school = models.CharField(max_length=20, blank=True)
     is_enrolled = models.CharField(choices=SCHOOL_CHOICES, max_length=20, blank=True)
-    area = models.CharField(max_length=50, blank=True)
+    area = models.CharField(max_length=50, blank=True, null=True)
     career = models.TextField(blank=True)
     work_style = models.ManyToManyField("users.Style", related_name = 'styled_refomers', blank=True)
     bios = models.TextField(blank=True)

@@ -23,23 +23,44 @@ class ProductCoordinatorService:
                transaction_package : bool,refund : str,
         ) -> Product:
         product_service=ProductService()
-        product= product_service.create(
-            reformer=self.user,
-            category=category,
-            name=name,
-            basic_price=basic_price,
-            option=option,
-            info=info,
-            notice=notice,
-            period=period,
-            transaction_direct=transaction_direct,
-            transaction_package=transaction_package,
-            refund=refund,
-        )
-        ##productPhoto랑 keywords 다시 구현 필요
-        ProductPhotoService.process_photos(product=product,product_photos=product_photos)
-        ProductKeywordService.process_keywords(product=product,keywords=keywords)
-        return product
+        
+        try:
+            product= product_service.create(
+                reformer=self.user,
+                category=category,
+                name=name,
+                basic_price=basic_price,
+                option=option,
+                info=info,
+                notice=notice,
+                period=period,
+                transaction_direct=transaction_direct,
+                transaction_package=transaction_package,
+                refund=refund,
+            )
+            print('create에 필요한 항목들 잘 가져오는지 확인 :',self.user,category, name, basic_price, option, info, notice, period, transaction_direct, transaction_package, refund)
+            print(product,product.name)
+            ##여기까지는 잘됨 !!!
+            # 이 밑에서 잘 안되는 듯..
+            if product is not None:
+                ProductPhotoService.process_photos(product=product, product_photos=product_photos )
+                ProductKeywordService.process_keywords(product=product, keywords=keywords)
+                print(product)
+                return product
+            else:
+                raise ValueError('Product 생성 실패')
+            
+        except ValueError as ve:
+            print(f'productCoordinateService.create 에서 오류 발생 :{ve}')
+            raise ve
+        except Exception as e:
+            print(f"ProductCoorniasdfad 에서 예상치 못한 오류 발생 :{e}")
+            raise e
+        # print(product_photos)
+        # ProductPhotoService.process_photos(product=product,product_photos=product_photos)
+        # ProductKeywordService.process_keywords(product=product,keywords=keywords)
+        # return product
+    
     
 class ProductService:
     def __init__(self):
@@ -48,39 +69,45 @@ class ProductService:
     @staticmethod
     def create(category: str,name : str,basic_price : str,option : str,info : str,notice : str,
                period : str,transaction_direct : bool,transaction_package : bool,refund : str, reformer : User):
-        
-        category = get_object_or_404(Category, id=category)
-        #reformer = User.objects.get(email='0321minji@ewhain.net')
-        
-        product = Product(
-            name = name,
-            category = category,
-            basic_price = basic_price,
-            option = option,
-            info = info,
-            notice = notice,
-            period = period,
-            transaction_direct = transaction_direct,
-            transaction_package = transaction_package,
-            refund = refund,
-            reformer = reformer,
-        )
-        print('reformer',product.reformer)
-        product.full_clean()
-        product.save()
-        
-        return product
+        try:
+            category = get_object_or_404(Category, id=category)
+            
+            product = Product(
+                name = name,
+                category = category,
+                basic_price = basic_price,
+                option = option,
+                info = info,
+                notice = notice,
+                period = period,
+                transaction_direct = transaction_direct,
+                transaction_package = transaction_package,
+                refund = refund,
+                reformer = reformer,
+            )
+
+            product.full_clean()
+            product.save()
+            
+            return product
+    
+        except Category.DoesNotExist:
+            print('해당 카테고리를 찾을 수 X')
+            raise ValueError("해당카테고리를 찾을 수 없습니다")
+        except Exception as e:
+            print(f'ProductService.create 오류 : {e}')
+            raise ValueError("ProductSerivce.create 오류 발생")
 
 class ProductPhotoService:
     def __init__(self):
         pass
     
     @staticmethod
-    def create(image:InMemoryUploadedFile):
+    def create(image:InMemoryUploadedFile, product:Product):
         ext = image.name.split(".")[-1]
         file_path = '{}.{}'.format(str(time.time())+str(uuid.uuid4().hex),ext)
         image = ImageFile(io.BytesIO(image.read()),name=file_path)
-        product_photo = ProductPhoto(image=image, product=None)
+        product_photo = ProductPhoto(image=image, product=product)
         
         product_photo.full_clean()
         product_photo.save()
@@ -91,8 +118,14 @@ class ProductPhotoService:
     def process_photos(product: Product, product_photos: list[str]):
         for product_photo in product_photos:
             op, photo_url = product_photo.split(',')
-            product_photo = get_object_or_404(
-                ProductPhoto, image=photo_url.replace(settings.MEDIA_URL,''))
+            
+            photo_path = photo_url.replace(settings.MEDIA_ROOT,'').lstrip('/')
+            
+            try:
+                product_photo, created = ProductPhoto.objects.get_or_create(image=photo_path)
+            except Exception as e:
+                print(f"Error in process_photos: {e}")
+                product_photo = None
             
             if op == 'add':
                 product_photo.product = product
@@ -100,6 +133,8 @@ class ProductPhotoService:
                 product_photo.save()
             elif op == 'remove':
                 product_photo.delete()
+
+            
                 
 class ProductKeywordService:
     def __init__(self):
@@ -107,13 +142,17 @@ class ProductKeywordService:
     
     @staticmethod
     def process_keywords(product: Product, keywords: list[str]):
-        for keyword in keywords:
-            op, name= keyword.split(',')
-            keyword = ProductKeyword.objects.filter(product=product,name=name)
+        print(keywords)
+        for keyword_str in keywords:
+            keyword_list= keyword_str.split(',')
+            print(keyword_list)
             
-            if op=='add' and not keywords.exits():
-                keyword= ProductKeyword(product=product,name=name)
-                keyword.full_clean()
-                keyword.save()
-            # else:
-            #     raise ApplicationError("지원하지 않는 keyword 연산입니다.")
+            for k in keyword_list:
+                ex_keyword = ProductKeyword.objects.filter(product=product,name=k)
+                
+                if not ex_keyword.exists():
+                    new = ProductKeyword(product=product,name=k)
+                    new.full_clean()
+                    new.save()
+                    print(f"Keyword : '{k}' 추가")
+            

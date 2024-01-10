@@ -34,26 +34,49 @@ class ProductCreateApi(APIView):
         data = serializers.validated_data
         
         service=ProductCoordinatorService(user=request.user)
+        #product=None
         
-        print(request.user)
-        
-        product=service.create(
+        try:
+            product = service.create(
             name=data.get('name'),
             category=data.get('category'),
-            keywords=data.get('keywords',[]),
+            keywords=data.get('keywords', []),
             basic_price=data.get('basic_price'),
             option=data.get('option'),
-            product_photos=data.get('product_photos',[]),
+            product_photos=data.get('product_photos', []),
             info=data.get('info'),
             notice=data.get('notice'),
             period=data.get('period'),
             transaction_direct=data.get('transaction_direct'),
             transaction_package=data.get('transaction_package'),
             refund=data.get('refund'),
-            #reformer=request.user,
-        )
-        #product_photos = data.get('product_photos', [])
-        ProductPhotoService.process_photos(product=product, product_photos=product.product_photos)
+            )
+            print('여기까지 정상 출력됨')
+            
+            if product is not None:
+                return Response({
+                'status' : 'success',
+                'data' : {'id': product.id},
+                },status=status.HTTP_201_CREATED)
+            else:
+                return Response({
+                    'status':'failure','message':'Product생성 실패',
+                },status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+            # if product.product_photos:
+            #     ProductPhotoService.process_photos(product=product, product_photos=product.product_photos)
+            # else:
+            #     print("product_photos가 none 입니다.")
+
+        except Exception as e:
+            print('오류 발생:', e)
+            
+            return Response({
+                'status':'failure',
+                'message':'서버 오류 발생',
+            },status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        #ProductPhotoService.process_photos(product=product, product_photos=product.product_photos)
         
         return Response({
             'status': 'success',

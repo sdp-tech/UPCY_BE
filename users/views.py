@@ -65,11 +65,11 @@ class ConsumerSignUpApi(APIView):
         email = serializers.EmailField()
         password = serializers.CharField()
         nickname = serializers.CharField()
-        phone = serializers.CharField()
-        profile_image = serializers.ImageField()
-        agreement_terms = serializers.CharField()
-        area = serializers.CharField()
-        prefer_style = serializers.ListField()
+        phone = serializers.CharField(required = False)
+        profile_image = serializers.ImageField(required = False)
+        agreement_terms = serializers.BooleanField(required = False)
+        area = serializers.CharField(required = False)
+        prefer_style = serializers.ListField(required = False)
 
     def post(self, request):
         serializers = self.ConsumerSignUpInputSerializer(data = request.data)
@@ -79,12 +79,12 @@ class ConsumerSignUpApi(APIView):
         UserService.consumer_sign_up(
             email = data.get('email'),
             password = data.get('password'),
-            nickname = data.get('nickname'),
-            phone = data.get('phone'),
+            nickname = data.get('nickname',),
+            phone = data.get('phone', None),
             profile_image = data.get('profile_image'),
-            agreement_terms= data.get('agreement_terms'),
-            area = data.get('area'),
-            prefer_style = data.get('prefer_style'),
+            agreement_terms= data.get('agreement_terms', False),
+            area = data.get('area', None),
+            prefer_style = data.get('prefer_style',[]),
         )
 
         return Response({

@@ -24,44 +24,27 @@ class ProductCoordinatorService:
         ) -> Product:
         product_service=ProductService()
         
-        try:
-            product= product_service.create(
-                reformer=self.user,
-                category=category,
-                name=name,
-                basic_price=basic_price,
-                option=option,
-                info=info,
-                notice=notice,
-                period=period,
-                transaction_direct=transaction_direct,
-                transaction_package=transaction_package,
-                refund=refund,
-            )
-            print('create에 필요한 항목들 잘 가져오는지 확인 :',self.user,category, name, basic_price, option, info, notice, period, transaction_direct, transaction_package, refund)
-            print(product,product.name)
-            ##여기까지는 잘됨 !!!
-            # 이 밑에서 잘 안되는 듯..
-            if product is not None:
-                ProductPhotoService.process_photos(product=product, product_photos=product_photos )
-                ProductKeywordService.process_keywords(product=product, keywords=keywords)
-                print(product)
-                return product
-            else:
-                raise ValueError('Product 생성 실패')
-            
-        except ValueError as ve:
-            print(f'productCoordinateService.create 에서 오류 발생 :{ve}')
-            raise ve
-        except Exception as e:
-            print(f"ProductCoorniasdfad 에서 예상치 못한 오류 발생 :{e}")
-            raise e
-        # print(product_photos)
-        # ProductPhotoService.process_photos(product=product,product_photos=product_photos)
-        # ProductKeywordService.process_keywords(product=product,keywords=keywords)
-        # return product
-    
-    
+        product= product_service.create(
+            reformer=self.user,
+            category=category,
+            name=name,
+            basic_price=basic_price,
+            option=option,
+            info=info,
+            notice=notice,
+            period=period,
+            transaction_direct=transaction_direct,
+            transaction_package=transaction_package,
+            refund=refund,
+        )
+
+        if product is not None:
+            ProductPhotoService.process_photos(product=product, product_photos=product_photos )
+            ProductKeywordService.process_keywords(product=product, keywords=keywords)
+            return product
+        else:
+            raise ValueError('Product 생성 실패')
+
 class ProductService:
     def __init__(self):
         pass
@@ -69,7 +52,6 @@ class ProductService:
     @staticmethod
     def create(category: str,name : str,basic_price : str,option : str,info : str,notice : str,
                period : str,transaction_direct : bool,transaction_package : bool,refund : str, reformer : User):
-        try:
             category = get_object_or_404(Category, id=category)
             
             product = Product(
@@ -91,12 +73,6 @@ class ProductService:
             
             return product
     
-        except Category.DoesNotExist:
-            print('해당 카테고리를 찾을 수 X')
-            raise ValueError("해당카테고리를 찾을 수 없습니다")
-        except Exception as e:
-            print(f'ProductService.create 오류 : {e}')
-            raise ValueError("ProductSerivce.create 오류 발생")
 
 class ProductPhotoService:
     def __init__(self):
@@ -155,4 +131,3 @@ class ProductKeywordService:
                     new.full_clean()
                     new.save()
                     print(f"Keyword : '{k}' 추가")
-            

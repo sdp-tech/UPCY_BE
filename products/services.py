@@ -11,7 +11,7 @@ from django.conf import settings
 
 from products.models import Product, ProductKeyword, ProductPhoto
 from users.models import User
-from .selectors import ProductSelector
+# from .selectors import ProductSelector
 #from core.exceptions import ApplicationError
 
 class ProductCoordinatorService:

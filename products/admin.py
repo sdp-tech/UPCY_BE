@@ -2,13 +2,6 @@ from django.contrib import admin
 from . import models
 
 
-@admin.register(models.Category)
-class Category(admin.ModelAdmin):
-
-    """ """
-
-    pass
-
 
 @admin.register(models.Product)
 class Product(admin.ModelAdmin):

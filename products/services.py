@@ -9,8 +9,9 @@ from django.core.files.images import ImageFile
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.conf import settings
 
-from products.models import Category, Product, ProductKeyword, ProductPhoto
+from products.models import Product, ProductKeyword, ProductPhoto
 from users.models import User
+from .selectors import ProductSelector
 #from core.exceptions import ApplicationError
 
 class ProductCoordinatorService:
@@ -18,7 +19,7 @@ class ProductCoordinatorService:
         self.user=user
         #pass
     @transaction.atomic
-    def create(self, category: str, name : str,keywords : list[str],basic_price : str,option : str,
+    def create(self, name : str,keywords : list[str],basic_price : str,option : str,
                product_photos : list[str],info : str,notice : str,period : str,transaction_direct : bool,
                transaction_package : bool,refund : str,
         ) -> Product:
@@ -26,7 +27,6 @@ class ProductCoordinatorService:
         
         product= product_service.create(
             reformer=self.user,
-            category=category,
             name=name,
             basic_price=basic_price,
             option=option,
@@ -50,13 +50,31 @@ class ProductService:
         pass
 
     @staticmethod
-    def create(category: str,name : str,basic_price : str,option : str,info : str,notice : str,
+    def like_or_dislike(product:Product, user: User)-> bool:
+        if ProductSelector.likes(product=product, user=user):
+            product.likeuser_set.remove(user)
+            product.like_cnt-=1
+            
+            product.full_clean()
+            product.save()
+            
+            return False
+        else:
+            product.likeuser_set.add(user)
+            product.like_cnt +=1
+            
+            product.full_clean()
+            product.save()
+            
+            return True
+
+
+    @staticmethod
+    def create(name : str,basic_price : str,option : str,info : str,notice : str,
                period : str,transaction_direct : bool,transaction_package : bool,refund : str, reformer : User):
-            category = get_object_or_404(Category, id=category)
             
             product = Product(
                 name = name,
-                category = category,
                 basic_price = basic_price,
                 option = option,
                 info = info,

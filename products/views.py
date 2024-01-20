@@ -7,7 +7,7 @@ from rest_framework.response import Response
 
 from users.models import User
 
-from .models import Category, Product
+from .models import Product
 from .services import ProductCoordinatorService, ProductPhotoService, ProductKeywordService, ProductService
 
 
@@ -16,7 +16,6 @@ class ProductCreateApi(APIView):
     
     class ProductCreateInputSerializer(serializers.Serializer):
         name = serializers.CharField()
-        category = serializers.CharField()
         keywords = serializers.ListField(required=False)
         basic_price = serializers.CharField()
         option = serializers.CharField()
@@ -37,7 +36,6 @@ class ProductCreateApi(APIView):
         
         product = service.create(
             name=data.get('name'),
-            category=data.get('category'),
             keywords=data.get('keywords', []),
             basic_price=data.get('basic_price'),
             option=data.get('option'),

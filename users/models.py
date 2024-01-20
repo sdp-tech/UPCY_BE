@@ -57,22 +57,11 @@ def get_upload_path(instance, filename):
 
 class User(AbstractBaseUser, PermissionsMixin):
     username = None
-    
-    #재학여부 선택 상수
-    SCHOOL_ENROLLED = 'enrolled'
-    SCHOOL_LEAVEOFABSENCE = 'leave_of_absence'
-    SCHOOL_GRADUATED = 'graduated'
-    SCHOOL_CHOICES = (
-        (SCHOOL_ENROLLED, 'Enrolled'),
-        (SCHOOL_LEAVEOFABSENCE, 'LeaveOfAbsence'),
-        (SCHOOL_GRADUATED, 'Graduated'),
-    )
-
     email = models.EmailField(max_length=64, unique=True)
     phone = models.CharField(max_length = 15, blank=True, null=True)
     code = models.CharField(max_length=5, blank=True, null=True)
     nickname = models.CharField(max_length=20, blank=True)
-    profile_image = models.ImageField(upload_to=get_upload_path, default = 'user_profile_image.png', blank=True, null=True)
+    profile_image = models.ImageField(upload_to=get_upload_path, blank=True, null=True)
     agreement_terms = models.BooleanField(default = False)
     follows = models.ManyToManyField("users.User", related_name='followers', blank=True)
     is_superuser = models.BooleanField(default=False)
@@ -86,13 +75,18 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_consumer = models.BooleanField(default=False)
 
     #리폼러 가입시 필요 필드
-    school = models.CharField(max_length=20, blank=True)
-    is_enrolled = models.CharField(choices=SCHOOL_CHOICES, max_length=20, blank=True)
     area = models.CharField(max_length=50, blank=True, null=True)
-    career = models.TextField(blank=True)
+    school_ability = models.TextField(blank=True, null=True)
+    school_certification = models.FileField(blank=True, null=True)
+    career_ability = models.TextField(blank=True, null=True)
+    career_certification = models.FileField(blank=True, null=True)
+    license_ability = models.TextField(blank=True, null=True)
+    license_certification = models.FileField(blank=True, null=True)
     work_style = models.ManyToManyField("users.Style", related_name = 'styled_refomers', blank=True)
-    bios = models.TextField(blank=True)
-    certificate_studentship = models.ImageField(upload_to = get_upload_path, default= 'student_certificate_image.png')
+    links = models.TextField(blank=True, null=True)
+    market_name = models.CharField(max_length=50, blank=True, null=True)
+    market_intro = models.TextField(blank=True, null=True)
+    thumbnail_image = models.ImageField(upload_to=get_upload_path, blank=True, null=True)
 
     #소비자 가입시 필요 필드
     prefer_style = models.ManyToManyField("users.Style", related_name = 'styled_consumers', blank=True)
@@ -117,7 +111,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         # if not user_type_is_valid(self):
         #     raise ValidationError('유저 타입이 잘못되었습니다.')
 
-#Portfolio_Photo 모델 만들기
+#Portfolio photo 모델
 def get_portfolio_photo_upload_path(instance, filename):
     return 'users/protfolio/{}'.format(filename)
 
@@ -126,6 +120,7 @@ class PortfolioPhoto(TimeStampedModel):
         upload_to=get_portfolio_photo_upload_path, default='portfolio_photo.png')
     user = models.ForeignKey(
         'users.User', related_name='portfolio_photos', on_delete=models.CASCADE, null=False, blank=False)
+    introduction = models.TextField(null=True, blank=True)
 
 #Style 모델 만들기
 class Style(models.Model):

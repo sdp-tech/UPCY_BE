@@ -35,6 +35,7 @@ class ReformerSignUpApi(APIView):
         career_certification = serializers.FileField(required = False)
         license_ability =serializers.CharField(required = False)
         license_certification = serializers.FileField(required = False)
+        special_material = serializers.ListField(required = False)
 
     def post(self, request):
         serializer = self.ReformerSignupInputSerializer(data = request.data)
@@ -60,6 +61,7 @@ class ReformerSignUpApi(APIView):
             career_certification = data.get('career_certification', None),
             license_ability =data.get('license_ability', None),
             license_certification = data.get('license_certification', None),
+            special_material = data.get('special_material', []),
         )
 
         return Response({

@@ -51,7 +51,8 @@ class UserService:
             career_ability : str,
             career_certification : InMemoryUploadedFile,
             license_ability : str,
-            license_certification: InMemoryUploadedFile
+            license_certification: InMemoryUploadedFile,
+            special_material : list[str],
             ):
 
         # ext = certificate_studentship.name.split(".")[-1]
@@ -84,6 +85,7 @@ class UserService:
         user.save()
 
         user.work_style.set(work_style)
+        user.special_material.set(special_material)
 
     #소비자회원가입
     def consumer_sign_up(

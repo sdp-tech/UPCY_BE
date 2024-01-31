@@ -13,3 +13,7 @@ class PortfolioPhoto(admin.ModelAdmin):
 @admin.register(models.Style)
 class Style(admin.ModelAdmin):
     pass
+
+@admin.register(models.Material)
+class Material(admin.ModelAdmin):
+    pass

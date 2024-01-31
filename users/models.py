@@ -87,6 +87,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     market_name = models.CharField(max_length=50, blank=True, null=True)
     market_intro = models.TextField(blank=True, null=True)
     thumbnail_image = models.ImageField(upload_to=get_upload_path, blank=True, null=True)
+    special_material = models.ManyToManyField("users.Material", related_name = 'reformers', blank=True)
 
     #소비자 가입시 필요 필드
     prefer_style = models.ManyToManyField("users.Style", related_name = 'styled_consumers', blank=True)
@@ -124,4 +125,8 @@ class PortfolioPhoto(TimeStampedModel):
 
 #Style 모델 만들기
 class Style(models.Model):
+    name = models.CharField(max_length=200)
+
+#특수소재 모델
+class Material(models.Model):
     name = models.CharField(max_length=200)

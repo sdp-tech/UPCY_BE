@@ -21,11 +21,11 @@ class ProductCreateApi(APIView):
     class ProductCreateInputSerializer(serializers.Serializer):
         name = serializers.CharField()
         
-        category = serializers.CharField()
-        style = serializers.CharField()
-        fit = serializers.CharField()
-        texture = serializers.CharField()
-        detail=serializers.CharField()
+        category = serializers.CharField(required=False)
+        style = serializers.ListField(required=False)
+        fit = serializers.ListField(required=False)
+        texture = serializers.ListField(required=False)
+        detail=serializers.ListField(required=False)
         
         keywords = serializers.ListField(required=False)
         basic_price = serializers.CharField()
@@ -49,10 +49,10 @@ class ProductCreateApi(APIView):
             name=data.get('name'),
             
             category = data.get('category'),
-            style=data.get('style'),
-            fit=data.get('fit'),
-            texture=data.get('texture'),
-            detail=data.get('detail'),
+            style=data.get('style',[]),
+            fit=data.get('fit',[]),
+            texture=data.get('texture',[]),
+            detail=data.get('detail',[]),
                         
             keywords=data.get('keywords', []),
             basic_price=data.get('basic_price'),

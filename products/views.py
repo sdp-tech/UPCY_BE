@@ -1,14 +1,18 @@
 from django.shortcuts import render
+from django.shortcuts import get_object_or_404
 
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework import serializers, status
 from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
 
+from core.views import get_paginated_response
 from users.models import User
 
-from .models import Product
+from .models import Product, Category, Style, Fit, Texture, Detail
 from .services import ProductCoordinatorService, ProductPhotoService, ProductKeywordService, ProductService
+from .selectors import ProductSelector
 
 
 class ProductCreateApi(APIView):
@@ -16,6 +20,13 @@ class ProductCreateApi(APIView):
     
     class ProductCreateInputSerializer(serializers.Serializer):
         name = serializers.CharField()
+        
+        category = serializers.CharField()
+        style = serializers.CharField()
+        fit = serializers.CharField()
+        texture = serializers.CharField()
+        detail=serializers.CharField()
+        
         keywords = serializers.ListField(required=False)
         basic_price = serializers.CharField()
         option = serializers.CharField()
@@ -36,6 +47,13 @@ class ProductCreateApi(APIView):
         
         product = service.create(
             name=data.get('name'),
+            
+            category = data.get('category'),
+            style=data.get('style'),
+            fit=data.get('fit'),
+            texture=data.get('texture'),
+            detail=data.get('detail'),
+                        
             keywords=data.get('keywords', []),
             basic_price=data.get('basic_price'),
             option=data.get('option'),
@@ -71,7 +89,7 @@ class ProductPhotoCreateApi(APIView):
         data = serializers.validated_data
         
         product_photo_url = ProductPhotoService.create(
-            image=data.get('image'),
+            image=data.get('image')
         )
         
         return Response({
@@ -79,3 +97,79 @@ class ProductPhotoCreateApi(APIView):
             'data':{'location': product_photo_url},
         }, status = status.HTTP_201_CREATED)
         
+
+class ProductListApi(APIView):
+    permission_classes = (AllowAny,)
+    
+    class Pagination(PageNumberPagination):
+        page_size= 4
+        page_size_query_param = 'page_size'
+    
+    class ProductListFilterSerializer(serializers.Serializer):
+        search = serializers.CharField(required=False)
+        order = serializers.CharField(required=False)
+        ## 필터 
+        category_filter = serializers.CharField(required=False)
+        style_filter = serializers.ListField(required=False)
+        fit_filter = serializers.ListField(required=False)
+        texture_filter = serializers.ListField(required=False)
+        detail_filter = serializers.ListField(required=False)
+        #금액 & 수선기간 필터링 추가
+        
+    
+    class ProductListOutputSerializer(serializers.Serializer):
+        id = serializers.IntegerField()
+        name = serializers.CharField()
+        reformer = serializers.CharField()
+        basic_price = serializers.CharField()
+        #info = serializers.CharField()
+        #notice = serializers.CharField()
+        #period = serializers.CharField()
+        user_likes = serializers.BooleanField()
+        category = serializers.DictField()
+        photos = serializers.ListField()
+        style = serializers.ListField(child=serializers.DictField())
+        texture = serializers.ListField(child=serializers.DictField())
+        fit = serializers.ListField(child=serializers.DictField())
+        detail = serializers.ListField(child=serializers.DictField())
+        
+    def get(self,request):
+        filters_serializer = self.ProductListFilterSerializer(
+            data=request.query_params)
+        filters_serializer.is_valid(raise_exception=True)
+        filters = filters_serializer.validated_data
+        
+        products = ProductSelector.list(
+            search=filters.get('search',''),
+            order=filters.get('order','latest'),
+            category_filter=filters.get('category_filter',''),
+            style_filters = filters.get('style_filter',[]),
+            fit_filters=filters.get('fit_filter',[]),
+            texture_filters=filters.get('texture_filter',[]),
+            detail_filters=filters.get('detail_filter',[]),
+            user=request.user,
+        )
+        
+        return get_paginated_response(
+            pagination_class=self.Pagination,
+            serializer_class=self.ProductListOutputSerializer,
+            queryset=products,
+            request=request,
+            view=self
+        )
+        
+        
+
+class ProductLikeApi(APIView):
+    permission_classes = (IsAuthenticated, )
+    
+    def post(self, request, product_id):
+        likes = ProductService.like_or_dislike(
+            product=get_object_or_404(Product,pk=product_id),
+            user=request.user
+        )
+
+        return Response({
+            'status' : 'success',
+            'data':{'likes':likes},
+        },status=status.HTTP_200_OK)

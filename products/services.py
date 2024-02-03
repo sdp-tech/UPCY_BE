@@ -3,7 +3,7 @@ import time
 import uuid
 
 
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_list_or_404, get_object_or_404
 from django.db import transaction
 from django.core.files.images import ImageFile
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -23,13 +23,13 @@ class ProductCoordinatorService:
     def create(self, name : str,keywords : list[str],basic_price : str,option : str,
                product_photos : list[str],info : str,notice : str,period : str,transaction_direct : bool,
                transaction_package : bool,refund : str,
-               category : str, style : str, texture : str, fit : str, detail:str,
+               category : str, style : list[str], texture : list[str], fit : list[str], detail:list[str],
         ) -> Product:
         product_service=ProductService()
         
         product= product_service.create(
             reformer=self.user,
-            
+    
             category=category,
             style=style,
             texture=texture,
@@ -81,21 +81,16 @@ class ProductService:
     @staticmethod
     def create(name : str,basic_price : str,option : str,info : str,notice : str,
                period : str,transaction_direct : bool,transaction_package : bool,refund : str, reformer : User,
-               category : str, style : str, texture : str, fit : str, detail:str,):
+               category : str, style : list[str], texture : list[str], fit : list[str], detail:list[str],):
             category=get_object_or_404(Category,id=category)
-            style=get_object_or_404(Style,id=style)
-            texture=get_object_or_404(Texture,id=texture)
-            fit=get_object_or_404(Fit,id=fit)
-            detail=get_object_or_404(detail,id=detail)
+            style=Style.objects.filter(id__in=style)
+            texture=Texture.objects.filter(id__in=texture)
+            fit=Fit.objects.filter(id__in=fit)
+            detail=Detail.objects.filter(id__in=detail)
             
             product = Product(
                 name = name,
-                category = category,
-                style=style,
-                texture=texture,
-                fit=fit,
-                detail=detail,
-                
+                category=category,                
                 basic_price = basic_price,
                 option = option,
                 info = info,
@@ -110,6 +105,10 @@ class ProductService:
             product.full_clean()
             product.save()
             
+            product.style.set(style)
+            product.texture.set(texture)
+            product.fit.set(fit)
+            product.detail.set(detail)
             return product
     
 

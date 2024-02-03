@@ -76,17 +76,30 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     #리폼러 가입시 필요 필드
     area = models.CharField(max_length=50, blank=True, null=True)
+    #학력
     school_ability = models.TextField(blank=True, null=True)
     school_certification = models.FileField(blank=True, null=True)
+    #실무,인턴
     career_ability = models.TextField(blank=True, null=True)
     career_certification = models.FileField(blank=True, null=True)
+    #자격증
     license_ability = models.TextField(blank=True, null=True)
     license_certification = models.FileField(blank=True, null=True)
+    #프리랜서
+    freelancer_ability = models.TextField(blank=True, null=True)
+    freelancer_certification = models.FileField(blank=True, null = True)
+    #공모전
+    contest_ability = models.TextField(blank=True, null=True)
+    contest_certification = models.FileField(blank=True, null = True)
+    #기타
+    etc_ability = models.TextField(blank=True, null=True)
+    etc_certification = models.FileField(blank=True, null = True)
     work_style = models.ManyToManyField("users.Style", related_name = 'styled_refomers', blank=True)
     links = models.TextField(blank=True, null=True)
     market_name = models.CharField(max_length=50, blank=True, null=True)
     market_intro = models.TextField(blank=True, null=True)
     thumbnail_image = models.ImageField(upload_to=get_upload_path, blank=True, null=True)
+    special_material = models.ManyToManyField("users.Material", related_name = 'reformers', blank=True)
 
     #소비자 가입시 필요 필드
     prefer_style = models.ManyToManyField("users.Style", related_name = 'styled_consumers', blank=True)
@@ -124,4 +137,8 @@ class PortfolioPhoto(TimeStampedModel):
 
 #Style 모델 만들기
 class Style(models.Model):
+    name = models.CharField(max_length=200)
+
+#특수소재 모델
+class Material(models.Model):
     name = models.CharField(max_length=200)

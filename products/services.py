@@ -9,9 +9,10 @@ from django.core.files.images import ImageFile
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.conf import settings
 
-from products.models import Product, ProductKeyword, ProductPhoto
+from products.models import Product, ProductKeyword, ProductPhoto, Category, Style, Fit, Texture, Detail
+from products.selectors import ProductSelector
 from users.models import User
-from .selectors import ProductSelector
+# from .selectors import ProductSelector
 #from core.exceptions import ApplicationError
 
 class ProductCoordinatorService:
@@ -22,11 +23,19 @@ class ProductCoordinatorService:
     def create(self, name : str,keywords : list[str],basic_price : str,option : str,
                product_photos : list[str],info : str,notice : str,period : str,transaction_direct : bool,
                transaction_package : bool,refund : str,
+               category : str, style : str, texture : str, fit : str, detail:str,
         ) -> Product:
         product_service=ProductService()
         
         product= product_service.create(
             reformer=self.user,
+            
+            category=category,
+            style=style,
+            texture=texture,
+            fit=fit,
+            detail=detail,
+            
             name=name,
             basic_price=basic_price,
             option=option,
@@ -71,10 +80,22 @@ class ProductService:
 
     @staticmethod
     def create(name : str,basic_price : str,option : str,info : str,notice : str,
-               period : str,transaction_direct : bool,transaction_package : bool,refund : str, reformer : User):
+               period : str,transaction_direct : bool,transaction_package : bool,refund : str, reformer : User,
+               category : str, style : str, texture : str, fit : str, detail:str,):
+            category=get_object_or_404(Category,id=category)
+            style=get_object_or_404(Style,id=style)
+            texture=get_object_or_404(Texture,id=texture)
+            fit=get_object_or_404(Fit,id=fit)
+            detail=get_object_or_404(detail,id=detail)
             
             product = Product(
                 name = name,
+                category = category,
+                style=style,
+                texture=texture,
+                fit=fit,
+                detail=detail,
+                
                 basic_price = basic_price,
                 option = option,
                 info = info,
@@ -97,11 +118,11 @@ class ProductPhotoService:
         pass
     
     @staticmethod
-    def create(image:InMemoryUploadedFile, product:Product):
+    def create(image:InMemoryUploadedFile):
         ext = image.name.split(".")[-1]
         file_path = '{}.{}'.format(str(time.time())+str(uuid.uuid4().hex),ext)
         image = ImageFile(io.BytesIO(image.read()),name=file_path)
-        product_photo = ProductPhoto(image=image, product=product)
+        product_photo = ProductPhoto(image=image, product=None)
         
         product_photo.full_clean()
         product_photo.save()

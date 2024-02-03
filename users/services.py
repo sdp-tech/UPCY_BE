@@ -39,14 +39,26 @@ class UserService:
             nickname:str, 
             phone:str, 
             profile_image: InMemoryUploadedFile,
+            thumbnail_image : InMemoryUploadedFile,
             agreement_terms:bool,
-            school:str,
-            is_enrolled:str,
-            area:str,
-            career:str,
+            market_name : str,
+            market_intro : str,
+            links : str,
+            area : str,
             work_style:list[str],
-            bios:str,
-            certificate_studentship: InMemoryUploadedFile,
+            school_ability : str,
+            school_certification : InMemoryUploadedFile,
+            career_ability : str,
+            career_certification : InMemoryUploadedFile,
+            license_ability : str,
+            license_certification: InMemoryUploadedFile,
+            freelancer_ability : str,
+            freelancer_certification: InMemoryUploadedFile,
+            contest_ability : str,
+            contest_certification: InMemoryUploadedFile,
+            etc_ability : str,
+            etc_certification: InMemoryUploadedFile,
+            special_material : list[str],
             ):
 
         # ext = certificate_studentship.name.split(".")[-1]
@@ -54,19 +66,30 @@ class UserService:
         # certificate_studentship = ImageFile(io.BytesIO(certificate_studentship.read()), name=file_path)
 
         user = User(
+            is_reformer=True,
             email = email,
             nickname = nickname,
             password = password,
             phone = phone,
             profile_image = profile_image,
-            is_reformer=True,
+            thumbnail_image  = thumbnail_image,
             agreement_terms=agreement_terms,
-            school = school,
-            is_enrolled = is_enrolled,
+            market_name = market_name,
+            market_intro=market_intro,
+            links = links,
             area = area,
-            career = career,
-            bios = bios,
-            certificate_studentship=certificate_studentship,
+            school_ability = school_ability,
+            school_certification = school_certification,
+            career_ability = career_ability,
+            career_certification = career_certification,
+            license_ability = license_ability,
+            license_certification = license_certification,
+            freelancer_ability = freelancer_ability,
+            freelancer_certification = freelancer_certification,
+            contest_ability = contest_ability,
+            contest_certification = contest_certification,
+            etc_ability = etc_ability,
+            etc_certification = etc_certification,
         )
 
         user.set_password(password)
@@ -74,6 +97,7 @@ class UserService:
         user.save()
 
         user.work_style.set(work_style)
+        user.special_material.set(special_material)
 
     #소비자회원가입
     def consumer_sign_up(

@@ -16,20 +16,32 @@ class ReformerSignUpApi(APIView):
     permission_classes = (AllowAny,)
 
     class ReformerSignupInputSerializer(serializers.Serializer):
-        #TODO전화번호 인증 구현 필요
+        #TODO전화번호 인증 구현 필요, 테스트 후 required=False 삭제 필요
         email = serializers.EmailField()
         password = serializers.CharField()
         nickname = serializers.CharField()
         phone = serializers.CharField()
-        profile_image = serializers.ImageField()
-        agreement_terms = serializers.BooleanField()
-        school = serializers.CharField()
-        is_enrolled = serializers.CharField()
-        area = serializers.CharField()
-        career = serializers.CharField()
-        work_style = serializers.ListField()
-        bios = serializers.CharField()
-        certificate_studentship = serializers.ImageField()
+        profile_image = serializers.ImageField(required = False)
+        thumbnail_image = serializers.ImageField(required = False)
+        agreement_terms = serializers.BooleanField(required = False)
+        market_name = serializers.CharField(required = False)
+        market_intro = serializers.CharField(required = False)
+        links = serializers.CharField(required = False)
+        area = serializers.CharField(required = False)
+        work_style = serializers.ListField(required = False)
+        school_ability = serializers.CharField(required = False)
+        school_certification = serializers.FileField(required = False)
+        career_ability = serializers.CharField(required = False)
+        career_certification = serializers.FileField(required = False)
+        license_ability =serializers.CharField(required = False)
+        license_certification = serializers.FileField(required = False)
+        freelancer_ability =serializers.CharField(required = False)
+        freelancer_certification = serializers.FileField(required = False)
+        contest_ability =serializers.CharField(required = False)
+        contest_certification = serializers.FileField(required = False)
+        etc_ability =serializers.CharField(required = False)
+        etc_certification = serializers.FileField(required = False)
+        special_material = serializers.ListField(required = False)
 
     def post(self, request):
         serializer = self.ReformerSignupInputSerializer(data = request.data)
@@ -40,16 +52,28 @@ class ReformerSignUpApi(APIView):
             email = data.get('email'),
             password = data.get('password'),
             nickname = data.get('nickname'),
-            phone = data.get('phone'),
+            phone = data.get('phone', None),
             profile_image = data.get('profile_image'),
-            agreement_terms= data.get('agreement_terms'),
-            school = data.get('school'),
-            is_enrolled = data.get('is_enrolled'),
-            area = data.get('area'),
-            career = data.get('career'),
-            work_style=data.get('work_style'),
-            bios = data.get('bios'),
-            certificate_studentship = data.get('certificate_studentship'),
+            thumbnail_image = data.get('thumbnail_image'),
+            agreement_terms= data.get('agreement_terms', False),
+            market_name = data.get('market_name', None),
+            market_intro = data.get('market_intro', None),
+            links = data.get('links', None),
+            area = data.get('area', None),
+            work_style = data.get('work_style', []),
+            school_ability = data.get('school_ability', None),
+            school_certification = data.get('school_certification', None),
+            career_ability = data.get('career_ability', None),
+            career_certification = data.get('career_certification', None),
+            license_ability =data.get('license_ability', None),
+            license_certification = data.get('license_certification', None),
+            freelancer_ability =data.get('license_ability', None),
+            freelancer_certification = data.get('license_certification', None),
+            contest_ability =data.get('license_ability', None),
+            contest_certification = data.get('license_certification', None),
+            etc_ability =data.get('license_ability', None),
+            etc_certification = data.get('license_certification', None),
+            special_material = data.get('special_material', []),
         )
 
         return Response({

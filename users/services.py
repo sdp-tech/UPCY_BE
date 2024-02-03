@@ -52,6 +52,12 @@ class UserService:
             career_certification : InMemoryUploadedFile,
             license_ability : str,
             license_certification: InMemoryUploadedFile,
+            freelancer_ability : str,
+            freelancer_certification: InMemoryUploadedFile,
+            contest_ability : str,
+            contest_certification: InMemoryUploadedFile,
+            etc_ability : str,
+            etc_certification: InMemoryUploadedFile,
             special_material : list[str],
             ):
 
@@ -78,6 +84,12 @@ class UserService:
             career_certification = career_certification,
             license_ability = license_ability,
             license_certification = license_certification,
+            freelancer_ability = freelancer_ability,
+            freelancer_certification = freelancer_certification,
+            contest_ability = contest_ability,
+            contest_certification = contest_certification,
+            etc_ability = etc_ability,
+            etc_certification = etc_certification,
         )
 
         user.set_password(password)

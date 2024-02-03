@@ -35,6 +35,12 @@ class ReformerSignUpApi(APIView):
         career_certification = serializers.FileField(required = False)
         license_ability =serializers.CharField(required = False)
         license_certification = serializers.FileField(required = False)
+        freelancer_ability =serializers.CharField(required = False)
+        freelancer_certification = serializers.FileField(required = False)
+        contest_ability =serializers.CharField(required = False)
+        contest_certification = serializers.FileField(required = False)
+        etc_ability =serializers.CharField(required = False)
+        etc_certification = serializers.FileField(required = False)
         special_material = serializers.ListField(required = False)
 
     def post(self, request):
@@ -61,6 +67,12 @@ class ReformerSignUpApi(APIView):
             career_certification = data.get('career_certification', None),
             license_ability =data.get('license_ability', None),
             license_certification = data.get('license_certification', None),
+            freelancer_ability =data.get('license_ability', None),
+            freelancer_certification = data.get('license_certification', None),
+            contest_ability =data.get('license_ability', None),
+            contest_certification = data.get('license_certification', None),
+            etc_ability =data.get('license_ability', None),
+            etc_certification = data.get('license_certification', None),
             special_material = data.get('special_material', []),
         )
 

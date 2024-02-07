@@ -8,4 +8,5 @@ urlpatterns = [
     path('photos/create/',ProductPhotoCreateApi.as_view(), name='product_photo_create'),
     path('',ProductListApi.as_view(),name='product_list'),
     path('<int:product_id>/like/',ProductLikeApi.as_view(), name='product_like'),
+    path('<int:product_id>/',ProductDetailApi.as_view(), name='product_detail'),
 ]

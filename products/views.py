@@ -97,6 +97,40 @@ class ProductPhotoCreateApi(APIView):
             'data':{'location': product_photo_url},
         }, status = status.HTTP_201_CREATED)
         
+class ProductDetailApi(APIView):
+    permission_classes=(AllowAny,)
+    
+    class ProductDetailOuutputSerializer(serializers.Serializer):
+        id=serializers.IntegerField()
+        market=serializers.CharField()
+        nickname=serializers.CharField()
+                    
+        name = serializers.CharField()
+        reformer = serializers.CharField()
+        basic_price = serializers.CharField()
+        info = serializers.CharField()
+        notice = serializers.CharField()
+        period = serializers.CharField()
+        user_likes = serializers.BooleanField()
+        category = serializers.DictField()
+        photos = serializers.ListField()
+        
+        style = serializers.ListField(child=serializers.DictField())
+        texture = serializers.ListField(child=serializers.DictField())
+        fit = serializers.ListField(child=serializers.DictField())
+        detail = serializers.ListField(child=serializers.DictField())
+        category=serializers.DictField()
+        option = serializers.CharField()
+
+    def get(self,request,product_id):
+        product= ProductSelector.detail(product_id=product_id, user=request.user)
+        serializer=self.ProductDetailOuutputSerializer(product)
+        
+        return Response({
+            'status': 'success',
+            'data': serializer.data,
+        }, status=status.HTTP_200_OK)
+        
 
 class ProductListApi(APIView):
     permission_classes = (AllowAny,)
@@ -122,9 +156,6 @@ class ProductListApi(APIView):
         name = serializers.CharField()
         reformer = serializers.CharField()
         basic_price = serializers.CharField()
-        #info = serializers.CharField()
-        #notice = serializers.CharField()
-        #period = serializers.CharField()
         user_likes = serializers.BooleanField()
         category = serializers.DictField()
         photos = serializers.ListField()

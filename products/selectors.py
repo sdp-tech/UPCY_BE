@@ -10,6 +10,7 @@ from users.models import User
 @dataclass
 class ProductDto:
     id : int
+
     name : str
     basic_price : str
     category: dict
@@ -18,7 +19,7 @@ class ProductDto:
     texture:list[dict]
     fit : list[dict]
     detail :list[dict]
- 
+
     user_likes : bool  
     
     created: datetime
@@ -34,12 +35,72 @@ class ProductDto:
     
     keywords: list[str] = None
     photos: list[str] = None
-    
+    nickname : str = None
+    market:str = None
+ 
+    transaction_direct:bool=None
+    transaction_package:bool=None
     
 class ProductSelector:
     def __init__(self):
         pass
+    
+    @staticmethod
+    def detail(product_id:str, user:User):
+        product=Product.objects.annotate(
+            user_likes=Case(
+                When(Exists(Product.likeuser_set.through.objects.filter(
+                    product_id=OuterRef('pk'),
+                    user_id=user.pk
+                )),
+                    then=Value(1)),
+                default=Value(0),
+            ),
+        ).select_related(
+            'category','reformer'
+        ).prefetch_related(
+            'keywords','product_photos','style','fit','texture','detail'
+        ).get(
+            id=product_id
+        )
+        
+        product_dto=ProductDto(
+            id=product.id,
+            name=product.name,
+            nickname=product.reformer.nickname,
+            market=user.market_name,
+            basic_price=product.basic_price,
+            reformer=product.reformer,
+            user_likes=product.user_likes,
+            created=product.created.strftime('%Y-%m-%dT%H:%M:%S%z'),
+            updated=product.updated.strftime('%Y-%m-%dT%H:%M:%S%z'),
+            
+            transaction_direct=product.transaction_direct,
+            transaction_package=product.transaction_package,
+            
+            category={'id':product.category.id,
+                      'name':product.category.name},
+            style=[{'id':s.id,'name':s.name}
+                   for s in product.style.all()],
+            fit=[{'id':f.id,'name':f.name}
+                 for f in product.fit.all()],
+            texture=[{'id':t.id,'name':t.name}
+                     for t in product.texture.all()],
+            detail=[{'id':d.id,'name':d.name}
+                     for d in product.detail.all()],
 
+            keywords=[keywords.name for keywords in product.keywords.all()],
+            photos=[photos.image.url for photos in product.product_photos.all()],
+            
+            period=product.period,
+            option=product.option,
+            info=product.info,
+            notice=product.notice,
+            like_cnt=product.like_cnt  
+        )
+        return product_dto
+    
+    
     @staticmethod
     def list(search: str,order : str, user: User,
              category_filter:str, style_filters:list[str], fit_filters:list[str],texture_filters:list[str],detail_filters:list[str],):

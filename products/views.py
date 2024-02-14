@@ -104,6 +104,13 @@ class ProductDetailApi(APIView):
         id=serializers.IntegerField()
         market=serializers.CharField()
         nickname=serializers.CharField()
+        
+        style = serializers.ListField(child=serializers.DictField())
+        texture = serializers.ListField(child=serializers.DictField())
+        fit = serializers.ListField(child=serializers.DictField())
+        detail = serializers.ListField(child=serializers.DictField())
+        category=serializers.DictField()
+        option = serializers.CharField()
                     
         name = serializers.CharField()
         reformer = serializers.CharField()
@@ -112,15 +119,13 @@ class ProductDetailApi(APIView):
         notice = serializers.CharField()
         period = serializers.CharField()
         user_likes = serializers.BooleanField()
+        like_cnt=serializers.IntegerField()
         category = serializers.DictField()
         photos = serializers.ListField()
+    
+        transaction_direct = serializers.BooleanField()
+        transaction_package = serializers.BooleanField()
         
-        style = serializers.ListField(child=serializers.DictField())
-        texture = serializers.ListField(child=serializers.DictField())
-        fit = serializers.ListField(child=serializers.DictField())
-        detail = serializers.ListField(child=serializers.DictField())
-        category=serializers.DictField()
-        option = serializers.CharField()
 
     def get(self,request,product_id):
         product= ProductSelector.detail(product_id=product_id, user=request.user)

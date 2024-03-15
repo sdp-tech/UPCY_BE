@@ -6,6 +6,7 @@ import datetime
 import io
 import time
 import uuid
+from xmlrpc.client import APPLICATION_ERROR
 
 from django.conf import settings
 # from django.core.mail import EmailMultiAlternatives
@@ -32,101 +33,112 @@ class UserService:
     def __init__(self):
         pass
 
-    #리포머회원가입
-    def reformer_sign_up(
-            email: str, 
-            password: str, 
-            nickname:str, 
-            phone:str, 
-            profile_image: InMemoryUploadedFile,
-            thumbnail_image : InMemoryUploadedFile,
-            agreement_terms:bool,
-            market_name : str,
-            market_intro : str,
-            links : str,
-            area : str,
-            work_style:list[str],
-            school_ability : str,
-            school_certification : InMemoryUploadedFile,
-            career_ability : str,
-            career_certification : InMemoryUploadedFile,
-            license_ability : str,
-            license_certification: InMemoryUploadedFile,
-            freelancer_ability : str,
-            freelancer_certification: InMemoryUploadedFile,
-            contest_ability : str,
-            contest_certification: InMemoryUploadedFile,
-            etc_ability : str,
-            etc_certification: InMemoryUploadedFile,
-            special_material : list[str],
-            ):
+    # #리포머회원가입
+    # def reformer_sign_up(
+    #         email: str, 
+    #         password: str, 
+    #         nickname:str, 
+    #         phone:str, 
+    #         profile_image: InMemoryUploadedFile,
+    #         thumbnail_image : InMemoryUploadedFile,
+    #         agreement_terms:bool,
+    #         market_name : str,
+    #         market_intro : str,
+    #         links : str,
+    #         area : str,
+    #         work_style:list[str],
+    #         school_ability : str,
+    #         school_certification : InMemoryUploadedFile,
+    #         career_ability : str,
+    #         career_certification : InMemoryUploadedFile,
+    #         license_ability : str,
+    #         license_certification: InMemoryUploadedFile,
+    #         freelancer_ability : str,
+    #         freelancer_certification: InMemoryUploadedFile,
+    #         contest_ability : str,
+    #         contest_certification: InMemoryUploadedFile,
+    #         etc_ability : str,
+    #         etc_certification: InMemoryUploadedFile,
+    #         special_material : list[str],
+    #         ):
 
-        # ext = certificate_studentship.name.split(".")[-1]
-        # file_path = '{}.{}'.format(str(time.time())+str(uuid.uuid4().hex), ext)
-        # certificate_studentship = ImageFile(io.BytesIO(certificate_studentship.read()), name=file_path)
+    #     # ext = certificate_studentship.name.split(".")[-1]
+    #     # file_path = '{}.{}'.format(str(time.time())+str(uuid.uuid4().hex), ext)
+    #     # certificate_studentship = ImageFile(io.BytesIO(certificate_studentship.read()), name=file_path)
 
-        user = User(
-            is_reformer=True,
-            email = email,
-            nickname = nickname,
-            password = password,
-            phone = phone,
-            profile_image = profile_image,
-            thumbnail_image  = thumbnail_image,
-            agreement_terms=agreement_terms,
-            market_name = market_name,
-            market_intro=market_intro,
-            links = links,
-            area = area,
-            school_ability = school_ability,
-            school_certification = school_certification,
-            career_ability = career_ability,
-            career_certification = career_certification,
-            license_ability = license_ability,
-            license_certification = license_certification,
-            freelancer_ability = freelancer_ability,
-            freelancer_certification = freelancer_certification,
-            contest_ability = contest_ability,
-            contest_certification = contest_certification,
-            etc_ability = etc_ability,
-            etc_certification = etc_certification,
-        )
+    #     user = User(
+    #         is_reformer=True,
+    #         email = email,
+    #         nickname = nickname,
+    #         password = password,
+    #         phone = phone,
+    #         profile_image = profile_image,
+    #         thumbnail_image  = thumbnail_image,
+    #         agreement_terms=agreement_terms,
+    #         market_name = market_name,
+    #         market_intro=market_intro,
+    #         links = links,
+    #         area = area,
+    #         school_ability = school_ability,
+    #         school_certification = school_certification,
+    #         career_ability = career_ability,
+    #         career_certification = career_certification,
+    #         license_ability = license_ability,
+    #         license_certification = license_certification,
+    #         freelancer_ability = freelancer_ability,
+    #         freelancer_certification = freelancer_certification,
+    #         contest_ability = contest_ability,
+    #         contest_certification = contest_certification,
+    #         etc_ability = etc_ability,
+    #         etc_certification = etc_certification,
+    #     )
 
-        user.set_password(password)
-        user.is_active = True
-        user.save()
+    #     user.set_password(password)
+    #     user.is_active = True
+    #     user.save()
 
-        user.work_style.set(work_style)
-        user.special_material.set(special_material)
+    #     user.work_style.set(work_style)
+    #     user.special_material.set(special_material)
 
-    #소비자회원가입
-    def consumer_sign_up(
-            email: str,
-            password: str,
-            nickname: str,
-            phone: str,
-            profile_image: InMemoryUploadedFile,
-            agreement_terms: bool,
-            area: str,
-            prefer_style:list[str],
-            ):
+    # #소비자회원가입
+    # def consumer_sign_up(
+    #         email: str,
+    #         password: str,
+    #         nickname: str,
+    #         phone: str,
+    #         profile_image: InMemoryUploadedFile,
+    #         agreement_terms: bool,
+    #         area: str,
+    #         prefer_style:list[str],
+    #         ):
         
-        user = User(
-            email = email,
-            nickname = nickname,
-            password = password,
-            phone = phone,
-            profile_image = profile_image,
-            is_consumer = True,
-            agreement_terms = agreement_terms,
-            area = area,
-        )
+    #     user = User(
+    #         email = email,
+    #         nickname = nickname,
+    #         password = password,
+    #         phone = phone,
+    #         profile_image = profile_image,
+    #         is_consumer = True,
+    #         agreement_terms = agreement_terms,
+    #         area = area,
+    #     )
 
+    #     user.set_password(password)
+    #     user.is_active = False
+    #     user.save()
+
+    #     user.prefer_style.set(prefer_style)
+
+    def user_sign_up(email:str,password:str,re_password:str, area:str):
+        if password!=re_password:
+            raise APPLICATION_ERROR(
+                "비밀번호를 다시 확인해주세요."
+            )
+        user=User(email=email, password=password, area=area,)
+        
         user.set_password(password)
-        user.is_active = False
+        user.is_active=False
         user.save()
-
-        user.prefer_style.set(prefer_style)
 
     def login(self, email: str, password: str):
         selector = UserSelector()

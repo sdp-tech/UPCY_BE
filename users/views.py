@@ -177,3 +177,38 @@ class UserLoginApi(APIView):
             'status': 'success',
             'data': output_serializer.data,
         }, status = status.HTTP_200_OK)
+        
+class ReformerProfileApi(APIView):
+    permission_classes = (AllowAny,)
+    
+    class ReformerProfileInputSerializer(serializers.Serializer):
+        nickname= serializers.CharField()
+        market_name=serializers.CharField()
+        market_intro=serializers.CharField()
+        links=serializers.CharField()
+        area=serializers.CharField()
+        
+        work_style=serializers.CharField()
+        special_material=serializers.CharField()
+    
+    def put(self,request):
+        serializer = self.ReformerProfileInputSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data=serializer.validated_data
+        
+        service = UserService()
+        
+        service.reformer_profile_register(
+            user=request.user,
+            nickname=data.get('nickname'),
+            market_name=data.get('market_name'),
+            market_intro=data.get('market_intro',None),
+            links=data.get('links'),
+            area=data.get('area'),
+            work_style=data.get('work_style',[]),
+            special_material=data.get('special_material',[]),
+        )
+        
+        return Response({
+            'status':'success',
+        },status=status.HTTP_200_OK)

@@ -167,3 +167,18 @@ class UserService:
         }
 
         return data
+    
+    def reformer_profile_register(self,user:User, nickname:str, market_name:str,market_intro:str,links:str,area:str,
+        work_style:list[str],special_material:list[str]):
+        
+        user.nickname=nickname
+        user.market_name=market_name
+        user.market_intro=market_intro
+        user.links=links
+        user.area=area
+        
+        user.work_style.set(work_style)
+        user.special_material.set(special_material)
+        user.full_clean()
+        user.save()
+        

@@ -60,8 +60,8 @@ class ProductService:
 
     @staticmethod
     def like_or_dislike(product:Product, user: User)-> bool:
-        selecter=ProductSelector()
-        if selecter.likes(product=product, user=user):
+        selector=ProductSelector()
+        if selector.likes(product=product, user=user):
             product.likeuser_set.remove(user)
             product.like_cnt-=1
             

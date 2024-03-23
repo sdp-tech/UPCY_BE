@@ -1,4 +1,5 @@
 from django.db import models
+from core.models import TimeStampedModel
 
 # Create your models here.
 class Category(models.Model):
@@ -16,7 +17,7 @@ class Fit(models.Model):
 class Detail(models.Model):
     name = models.CharField(max_length=100,blank=False)
     
-class Service(models.Model):
+class Service(TimeStampedModel):
     name = models.CharField(max_length=100)
     #필터링 항목
     category = models.ForeignKey('Category', related_name='services',on_delete=models.CASCADE, null=True, blank=True)

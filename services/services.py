@@ -9,8 +9,9 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.conf import settings
 
 from services.models import Service, ServiceKeyword, ServicePhoto, Category, Style, Fit, Texture, Detail
-from users.models import User
 from .selectors import ServiceSelector
+from users.models import User
+
 
 class ServiceCoordinatorService:
     def __init__(self,user:User):
@@ -23,7 +24,6 @@ class ServiceCoordinatorService:
                category : str, style : list[str], texture : list[str], fit : list[str], detail:list[str],
         ) -> Service:
         service_service=ServiceService()
-        print(service_service)
         service= service_service.create(
             reformer=self.user,
     
@@ -50,7 +50,7 @@ class ServiceCoordinatorService:
             ServiceKeywordService.process_keywords(service=service, keywords=keywords)
             return service
         else:
-            raise ValueError('생성 실패')
+            raise ValueError('Service 생성 실패')
 
     
 class ServiceService:
@@ -59,7 +59,8 @@ class ServiceService:
     
     @staticmethod
     def like_or_dislike(service:Service, user: User)-> bool:
-        if ServiceSelector.likes(service=service, user=user):
+        selector = ServiceSelector()
+        if selector.likes(service=service, user=user):
             service.likeuser_set.remove(user)
             service.like_cnt-=1
             

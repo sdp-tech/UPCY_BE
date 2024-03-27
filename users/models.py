@@ -1,10 +1,12 @@
 from django.db import models
 
 # Create your models here.
-
+from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import UserManager, PermissionsMixin
 from django.core.exceptions import ValidationError
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 import re
 from email.policy import default
 from core.models import TimeStampedModel
@@ -74,33 +76,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_reformer = models.BooleanField(default=False)
     is_consumer = models.BooleanField(default=False)
 
-    #리폼러 가입시 필요 필드
-    area = models.CharField(max_length=50, blank=True, null=True)
-    #학력
-    school_ability = models.TextField(blank=True, null=True)
-    school_certification = models.FileField(blank=True, null=True)
-    #실무,인턴
-    career_ability = models.TextField(blank=True, null=True)
-    career_certification = models.FileField(blank=True, null=True)
-    #자격증
-    license_ability = models.TextField(blank=True, null=True)
-    license_certification = models.FileField(blank=True, null=True)
-    #프리랜서
-    freelancer_ability = models.TextField(blank=True, null=True)
-    freelancer_certification = models.FileField(blank=True, null = True)
-    #공모전
-    contest_ability = models.TextField(blank=True, null=True)
-    contest_certification = models.FileField(blank=True, null = True)
-    #기타
-    etc_ability = models.TextField(blank=True, null=True)
-    etc_certification = models.FileField(blank=True, null = True)
-    work_style = models.ManyToManyField("users.Style", related_name = 'styled_refomers', blank=True)
-    links = models.TextField(blank=True, null=True)
-    market_name = models.CharField(max_length=50, blank=True, null=True)
-    market_intro = models.TextField(blank=True, null=True)
-    thumbnail_image = models.ImageField(upload_to=get_upload_path, blank=True, null=True)
-    special_material = models.ManyToManyField("users.Material", related_name = 'reformers', blank=True)
-
     #소비자 가입시 필요 필드
     prefer_style = models.ManyToManyField("users.Style", related_name = 'styled_consumers', blank=True)
 
@@ -124,6 +99,26 @@ class User(AbstractBaseUser, PermissionsMixin):
         # if not user_type_is_valid(self):
         #     raise ValidationError('유저 타입이 잘못되었습니다.')
 
+#Reformer profile 모델
+class ReformerProfile(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reformer_profile')
+    # 여기에 리폼러 기본 필드
+    work_style = models.ManyToManyField("users.Style", related_name = 'styled_refomers', blank=True)
+    links = models.TextField(blank=True, null=True)
+    market_name = models.CharField(max_length=50, blank=True, null=True)
+    market_intro = models.TextField(blank=True, null=True)
+    thumbnail_image = models.ImageField(upload_to=get_upload_path, blank=True, null=True)
+    special_material = models.ManyToManyField("users.Material", related_name = 'reformers', blank=True)
+
+    #리포머 학력
+    school = models.CharField(max_length=100,blank=True,null=True)
+    major = models.CharField(max_length=100,blank=True,null=True)
+    status = models.CharField(max_length=100,blank=True,null=True)
+    school_certification = models.FileField(null=True)
+
+    def __str__(self):
+        return self.user.email  # 또는 user의 다른 식별가능한 정보
+
 #Portfolio photo 모델
 def get_portfolio_photo_upload_path(instance, filename):
     return 'users/protfolio/{}'.format(filename)
@@ -142,3 +137,56 @@ class Style(models.Model):
 #특수소재 모델
 class Material(models.Model):
     name = models.CharField(max_length=200)
+    
+class Certification(models.Model):
+    profile = models.ForeignKey(ReformerProfile,on_delete=models.CASCADE, related_name='certification')
+    name = models.CharField(max_length=100)
+    issuing_authority = models.CharField(max_length=100)
+    issue_date = models.DateField()
+    proof_document = models.FileField()
+
+class Competition(models.Model):
+    profile = models.ForeignKey(ReformerProfile,on_delete=models.CASCADE, related_name='competition')
+    name = models.CharField(max_length=100)
+    organizer = models.CharField(max_length=100)
+    award_date = models.DateField()
+    proof_document = models.FileField()
+        
+class Internship(models.Model):
+    profile = models.ForeignKey(ReformerProfile,on_delete=models.CASCADE, related_name='internship')
+    company_name = models.CharField(max_length=100)
+    department = models.CharField(max_length=100,null=True,blank=True)
+    position = models.CharField(max_length=100,null=True,blank=True)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    period=models.DurationField()
+    proof_document = models.FileField()
+    
+@receiver(pre_save, sender=Internship)
+def calculate_period(sender, instance, **kwargs):
+    if instance.start_date and instance.end_date:
+        instance.period = instance.end_date - instance.start_date
+    else:
+        instance.period = None   
+    
+
+class Freelancer(models.Model):
+    profile = models.ForeignKey(ReformerProfile,on_delete=models.CASCADE, related_name='freelancer')
+    
+    
+class Outsourcing(models.Model):
+    profile = models.ForeignKey(ReformerProfile,on_delete=models.CASCADE, related_name='outsourcing')
+    project_name = models.CharField(max_length=100)
+    client = models.CharField(max_length=100)
+    main_tasks = models.TextField()
+    start_date = models.DateField()
+    end_date = models.DateField()
+    period=models.DurationField()
+    proof_document = models.FileField()
+    
+@receiver(pre_save, sender=Outsourcing)
+def calculate_period(sender, instance, **kwargs):
+    if instance.start_date and instance.end_date:
+        instance.period = instance.end_date - instance.start_date
+    else:
+        instance.period = None   

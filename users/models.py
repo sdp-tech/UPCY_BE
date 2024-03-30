@@ -103,6 +103,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 class ReformerProfile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reformer_profile')
     # 여기에 리폼러 기본 필드
+    nickname=models.CharField(max_length=50)
     work_style = models.ManyToManyField("users.Style", related_name = 'styled_refomers', blank=True)
     links = models.TextField(blank=True, null=True)
     market_name = models.CharField(max_length=50, blank=True, null=True)
@@ -164,15 +165,24 @@ class Internship(models.Model):
     
 @receiver(pre_save, sender=Internship)
 def calculate_period(sender, instance, **kwargs):
-    if instance.start_date and instance.end_date:
-        instance.period = instance.end_date - instance.start_date
-    else:
-        instance.period = None   
+    instance.period = instance.end_date - instance.start_date if instance.start_date and instance.end_date else None
+
     
 
 class Freelancer(models.Model):
     profile = models.ForeignKey(ReformerProfile,on_delete=models.CASCADE, related_name='freelancer')
+    project_name = models.CharField(max_length=100)
+    client = models.CharField(max_length=100)
+    main_tasks = models.TextField()
+    start_date = models.DateField()
+    end_date = models.DateField()
+    period=models.DurationField()
+    proof_document = models.FileField()
     
+@receiver(pre_save, sender=Freelancer)
+def calculate_period(sender, instance, **kwargs):
+    instance.period = instance.end_date - instance.start_date if instance.start_date and instance.end_date else None
+
     
 class Outsourcing(models.Model):
     profile = models.ForeignKey(ReformerProfile,on_delete=models.CASCADE, related_name='outsourcing')
@@ -186,7 +196,4 @@ class Outsourcing(models.Model):
     
 @receiver(pre_save, sender=Outsourcing)
 def calculate_period(sender, instance, **kwargs):
-    if instance.start_date and instance.end_date:
-        instance.period = instance.end_date - instance.start_date
-    else:
-        instance.period = None   
+    instance.period = instance.end_date - instance.start_date if instance.start_date and instance.end_date else None

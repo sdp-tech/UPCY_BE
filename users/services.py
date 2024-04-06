@@ -20,8 +20,9 @@ from rest_framework_simplejwt.exceptions import InvalidToken
 from rest_framework_jwt.settings import api_settings
 from django.core.files.images import ImageFile
 from django.core.files.uploadedfile import InMemoryUploadedFile
-
-from users.models import User
+from django.core.files import File
+from django.core.files.base import ContentFile
+from users.models import User, ReformerProfile, Certification
 from users.selectors import UserSelector
 # from core.exceptions import ApplicationError
 
@@ -171,14 +172,20 @@ class UserService:
     def reformer_profile_register(self,user:User, nickname:str, market_name:str,market_intro:str,links:str,area:str,
         work_style:list[str],special_material:list[str]):
         
-        user.nickname=nickname
-        user.market_name=market_name
-        user.market_intro=market_intro
-        user.links=links
-        user.area=area
-        
-        user.work_style.set(work_style)
-        user.special_material.set(special_material)
-        user.full_clean()
-        user.save()
+        reformer=ReformerProfile(user=user,nickname=nickname,market_name=market_name, market_intro=market_intro,
+                                 links=links,)
+        reformer.save()
+        reformer.work_style.set(work_style)
+        reformer.special_material.set(special_material)
+    #reformer 학력 파일 등 파일 필드 서버로 추가 기능 필요(현재 로컬에 저장됨)
+    
+    def certification_register(self,profile:ReformerProfile,name:str,issuing_authority:str,issue_date:datetime,proof_document:InMemoryUploadedFile):
+        certification=Certification(profile=profile,name=name,issuing_authority=issuing_authority,issue_date=issue_date)
+
+        ext = proof_document.name.split(".")[-1]
+        file_path = 'users/profile/certification/{}{}'.format(str(time.time())+str(uuid.uuid4().hex), ext)
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        #proof_document = File(io.BytesIO(proof_document.read()), name=file_path)
+        certification.proof_document.save(file_path, ContentFile(proof_document.read()), save=False)
+        certification.save()
         

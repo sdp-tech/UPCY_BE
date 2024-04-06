@@ -158,5 +158,6 @@ media
 .env
 .Dockerfile.swp
 products/photo/
+services/photo/
 users/profile/
 .idea

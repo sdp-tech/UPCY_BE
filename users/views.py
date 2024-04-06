@@ -182,7 +182,7 @@ class ReformerProfileApi(APIView):
     permission_classes = (AllowAny,)
     
     class ReformerProfileInputSerializer(serializers.Serializer):
-        nickname= serializers.CharField()
+        nickname=serializers.CharField()
         market_name=serializers.CharField()
         market_intro=serializers.CharField()
         links=serializers.CharField()
@@ -191,7 +191,7 @@ class ReformerProfileApi(APIView):
         work_style=serializers.CharField()
         special_material=serializers.CharField()
     
-    def put(self,request):
+    def post(self,request):
         serializer = self.ReformerProfileInputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data=serializer.validated_data
@@ -212,3 +212,32 @@ class ReformerProfileApi(APIView):
         return Response({
             'status':'success',
         },status=status.HTTP_200_OK)
+        
+class CertificationCreateApi(APIView):
+    permission_classes=(AllowAny,)
+    
+    class CertificationCreateInputSerializer(serializers.Serializer):
+        name = serializers.CharField()
+        issuing_authority = serializers.CharField()
+        issue_date = serializers.DateField()
+        proof_document = serializers.FileField()
+        
+    def post(self,request):
+        input_serializer = self.CertificationCreateInputSerializer(data=request.data)
+        input_serializer.is_valid(raise_exception=True)
+        data = input_serializer.validated_data
+        
+        service=UserService()
+        
+        service.certification_register(
+            profile=request.user.reformer_profile,
+            name=data.get('name'),
+            issuing_authority=data.get('issuing_authority'),
+            issue_date=data.get('issue_date'),
+            proof_document=data.get('proof_document'),
+        )
+        
+        return Response({
+            'status':'success',
+        },status=status.HTTP_200_OK)
+        

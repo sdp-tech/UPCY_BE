@@ -11,5 +11,4 @@ urlpatterns =[
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('profile_register/',ReformerProfileApi.as_view(),name='profile_register'),   
     path('certification_register/',CertificationCreateApi.as_view(),name='certification'),
-
 ]

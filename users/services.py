@@ -188,4 +188,3 @@ class UserService:
         #proof_document = File(io.BytesIO(proof_document.read()), name=file_path)
         certification.proof_document.save(file_path, ContentFile(proof_document.read()), save=False)
         certification.save()
-        

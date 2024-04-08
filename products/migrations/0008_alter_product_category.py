@@ -15,5 +15,5 @@ class Migration(migrations.Migration):
             model_name='product',
             name='category',
             field=models.ForeignKey(blank=False, null=False, on_delete=django.db.models.deletion.CASCADE, related_name='products', to='products.category'),
-        ),
+        ), # 여기 수정해야할 수도 있음
     ]

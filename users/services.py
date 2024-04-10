@@ -22,7 +22,8 @@ from django.core.files.images import ImageFile
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.files import File
 from django.core.files.base import ContentFile
-from users.models import User, ReformerProfile, Certification
+
+from users.models import User, ReformerProfile, Certification, Competition
 from users.selectors import UserSelector
 # from core.exceptions import ApplicationError
 
@@ -188,3 +189,12 @@ class UserService:
         #proof_document = File(io.BytesIO(proof_document.read()), name=file_path)
         certification.proof_document.save(file_path, ContentFile(proof_document.read()), save=False)
         certification.save()
+        
+    def competition_register(self,profile:ReformerProfile,name:str,organizer:str,award_date:str,proof_document:InMemoryUploadedFile):
+        competition=Competition(profile=profile,name=name,organizer=organizer,award_date=award_date)
+        
+        ext = proof_document.name.split(".")[-1]
+        file_path = 'users/profile/competition/{}{}'.format(str(time.time())+str(uuid.uuid4().hex), ext)
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        competition.proof_document.save(file_path,ContentFile(proof_document.read()),save=False)
+        competition.save()

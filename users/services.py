@@ -22,7 +22,7 @@ from django.core.files.images import ImageFile
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.files import File
 from django.core.files.base import ContentFile
-from users.models import User, ReformerProfile, Certification, Competition, Internship
+from users.models import User, ReformerProfile, Certification, Competition, Internship, Freelancer
 from users.selectors import UserSelector
 # from core.exceptions import ApplicationError
 
@@ -206,3 +206,12 @@ class UserService:
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         intership.proof_document.save(file_path,ContentFile(proof_document.read()),save=False)
         intership.save()
+        
+    def freelancer_register(self,profile:ReformerProfile,project_name:str,client:str,main_tasks:str,start_date:str,end_date:str,proof_document:InMemoryUploadedFile):
+        freelancer=Freelancer(profile=profile,project_name=project_name,client=client,main_tasks=main_tasks,start_date=start_date,end_date=end_date)
+                
+        ext = proof_document.name.split(".")[-1]
+        file_path = 'users/profile/freelancer/{}{}'.format(str(time.time())+str(uuid.uuid4().hex), ext)
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        freelancer.proof_document.save(file_path,ContentFile(proof_document.read()),save=False)
+        freelancer.save()   

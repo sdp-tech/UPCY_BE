@@ -301,3 +301,35 @@ class IntershipCreateApi(APIView):
             'status':'success',
         },status=status.HTTP_200_OK)
 
+
+class FreelancerCreateApi(APIView):
+    permission_classes=(AllowAny,)
+    
+    class FreelancerCreateInputSerializer(serializers.Serializer):
+        project_name = serializers.CharField()
+        client = serializers.CharField()
+        main_tasks = serializers.CharField()
+        start_date = serializers.DateField()
+        end_date = serializers.DateField()
+        proof_document = serializers.FileField()
+        
+    def post(self,request):
+        input_serializer = self.FreelancerCreateInputSerializer(data=request.data)
+        input_serializer.is_valid(raise_exception=True)
+        data = input_serializer.validated_data
+        
+        service=UserService()
+        
+        service.freelancer_register(
+            profile=request.user.reformer_profile,
+            project_name=data.get('project_name'),
+            client=data.get('client'),
+            main_tasks=data.get('main_tasks'),
+            start_date=data.get('start_date'),
+            end_date=data.get('end_date'),
+            proof_document=data.get('proof_document'),
+        )
+        
+        return Response({
+            'status':'success',
+        },status=status.HTTP_200_OK)

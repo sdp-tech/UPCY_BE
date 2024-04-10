@@ -22,8 +22,7 @@ from django.core.files.images import ImageFile
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.files import File
 from django.core.files.base import ContentFile
-
-from users.models import User, ReformerProfile, Certification, Competition
+from users.models import User, ReformerProfile, Certification, Competition, Internship
 from users.selectors import UserSelector
 # from core.exceptions import ApplicationError
 
@@ -198,3 +197,12 @@ class UserService:
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         competition.proof_document.save(file_path,ContentFile(proof_document.read()),save=False)
         competition.save()
+        
+    def intership_register(self,profile:ReformerProfile,company_name:str,department:str,position:str,start_date:str,end_date:str,proof_document:InMemoryUploadedFile):
+        intership=Internship(profile=profile,company_name=company_name,department=department,position=position,start_date=start_date,end_date=end_date)
+                
+        ext = proof_document.name.split(".")[-1]
+        file_path = 'users/profile/internship/{}{}'.format(str(time.time())+str(uuid.uuid4().hex), ext)
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        intership.proof_document.save(file_path,ContentFile(proof_document.read()),save=False)
+        intership.save()

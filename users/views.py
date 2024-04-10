@@ -268,4 +268,36 @@ class CompetitionCreateApi(APIView):
         return Response({
             'status':'success',
         },status=status.HTTP_200_OK)
+        
+class IntershipCreateApi(APIView):
+    permission_classes=(AllowAny,)
+    
+    class IntershipCreateInputSerializer(serializers.Serializer):
+        company_name = serializers.CharField()
+        department = serializers.CharField(required=False)
+        position = serializers.CharField(required=False)
+        start_date = serializers.DateField()
+        end_date = serializers.DateField()
+        proof_document = serializers.FileField()
+        
+    def post(self,request):
+        input_serializer = self.IntershipCreateInputSerializer(data=request.data)
+        input_serializer.is_valid(raise_exception=True)
+        data = input_serializer.validated_data
+        
+        service=UserService()
+        
+        service.intership_register(
+            profile=request.user.reformer_profile,
+            company_name=data.get('company_name'),
+            department=data.get('department',None),
+            position=data.get('position',None),
+            start_date=data.get('start_date'),
+            end_date=data.get('end_date'),
+            proof_document=data.get('proof_document'),
+        )
+        
+        return Response({
+            'status':'success',
+        },status=status.HTTP_200_OK)
 

@@ -29,3 +29,7 @@ class Certification(admin.ModelAdmin):
 @admin.register(models.Competition)
 class Competition(admin.ModelAdmin):
     pass
+
+@admin.register(models.Internship)
+class Intership(admin.ModelAdmin):
+    pass

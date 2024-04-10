@@ -25,3 +25,7 @@ class ReformerProfile(admin.ModelAdmin):
 @admin.register(models.Certification)
 class Certification(admin.ModelAdmin):
     pass
+
+@admin.register(models.Competition)
+class Competition(admin.ModelAdmin):
+    pass

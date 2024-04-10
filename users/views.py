@@ -240,4 +240,32 @@ class CertificationCreateApi(APIView):
         return Response({
             'status':'success',
         },status=status.HTTP_200_OK)
+
+class CompetitionCreateApi(APIView):
+    permission_classes=(AllowAny,)
+    
+    class CompetitionCreateInputSerializer(serializers.Serializer):
+        name = serializers.CharField()
+        organizer = serializers.CharField()
+        award_date = serializers.DateField()
+        proof_document = serializers.FileField()
         
+    def post(self,request):
+        input_serializer = self.CompetitionCreateInputSerializer(data=request.data)
+        input_serializer.is_valid(raise_exception=True)
+        data = input_serializer.validated_data
+        
+        service=UserService()
+        
+        service.competition_register(
+            profile=request.user.reformer_profile,
+            name=data.get('name'),
+            organizer=data.get('organizer'),
+            award_date=data.get('award_date'),
+            proof_document=data.get('proof_document'),
+        )
+        
+        return Response({
+            'status':'success',
+        },status=status.HTTP_200_OK)
+

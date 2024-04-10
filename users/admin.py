@@ -17,3 +17,15 @@ class Style(admin.ModelAdmin):
 @admin.register(models.Material)
 class Material(admin.ModelAdmin):
     pass
+
+@admin.register(models.ReformerProfile)
+class ReformerProfile(admin.ModelAdmin):
+    pass
+
+@admin.register(models.Certification)
+class Certification(admin.ModelAdmin):
+    pass
+
+@admin.register(models.Competition)
+class Competition(admin.ModelAdmin):
+    pass

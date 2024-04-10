@@ -189,6 +189,7 @@ class UserService:
         certification.proof_document.save(file_path, ContentFile(proof_document.read()), save=False)
         certification.save()
         
+        
     def competition_register(self,profile:ReformerProfile,name:str,organizer:str,award_date:str,proof_document:InMemoryUploadedFile):
         competition=Competition(profile=profile,name=name,organizer=organizer,award_date=award_date)
         

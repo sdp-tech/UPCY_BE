@@ -182,7 +182,7 @@ class ReformerProfileApi(APIView):
     permission_classes = (AllowAny,)
     
     class ReformerProfileInputSerializer(serializers.Serializer):
-        nickname= serializers.CharField()
+        nickname=serializers.CharField()
         market_name=serializers.CharField()
         market_intro=serializers.CharField()
         links=serializers.CharField()
@@ -191,7 +191,7 @@ class ReformerProfileApi(APIView):
         work_style=serializers.CharField()
         special_material=serializers.CharField()
     
-    def put(self,request):
+    def post(self,request):
         serializer = self.ReformerProfileInputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data=serializer.validated_data
@@ -240,6 +240,7 @@ class CertificationCreateApi(APIView):
         return Response({
             'status':'success',
         },status=status.HTTP_200_OK)
+
 class CompetitionCreateApi(APIView):
     permission_classes=(AllowAny,)
     
@@ -267,3 +268,4 @@ class CompetitionCreateApi(APIView):
         return Response({
             'status':'success',
         },status=status.HTTP_200_OK)
+

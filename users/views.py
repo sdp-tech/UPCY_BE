@@ -294,7 +294,7 @@ class IntershipCreateApi(APIView):
         request_body=IntershipCreateInputSerializer,
         security=[],
         operation_id='인턴 등록 API',
-        operation_description="리포머 프로필 경력 등록 중 하나인 인턴/외주 경력 등록 API 입니다.",
+        operation_description="리포머 프로필 경력 등록 중 하나인 인턴 경력 등록 API 입니다.",
         responses={
             "200":openapi.Response(
                 description="OK",
@@ -342,6 +342,26 @@ class FreelancerCreateApi(APIView):
         start_date = serializers.DateField()
         end_date = serializers.DateField()
         proof_document = serializers.FileField()
+    
+    @swagger_auto_schema(
+        request_body=FreelancerCreateInputSerializer,
+        security=[],
+        operation_id='프리랜서 등록 API',
+        operation_description="리포머 프로필 경력 등록 중 하나인 프리랜서/외주 경력 등록 API 입니다.",
+        responses={
+            "200":openapi.Response(
+                description="OK",
+                examples={
+                    "application/json":{
+                        "status":"success"
+                    }
+                }
+            ),
+            "400":openapi.Response(
+                description="Bad Request",
+            ),
+        }
+    )
         
     def post(self,request):
         input_serializer = self.FreelancerCreateInputSerializer(data=request.data)

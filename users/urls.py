@@ -1,6 +1,6 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView, TokenVerifyView
-from .views import UserSignUpApi,UserLoginApi,ReformerProfileApi,CertificationCreateApi,CompetitionCreateApi,IntershipCreateApi
+from .views import UserSignUpApi,UserLoginApi,ReformerProfileApi,CertificationCreateApi,CompetitionCreateApi,IntershipCreateApi,FreelancerCreateApi
 app_name = "users"
 
 urlpatterns =[
@@ -13,4 +13,6 @@ urlpatterns =[
     path('certification_register/',CertificationCreateApi.as_view(),name='certification'),
     path('competition_register/',CompetitionCreateApi.as_view(),name='competition'),
     path('intership_register/',IntershipCreateApi.as_view(),name='intership'),
+    path('freelancer_register/',FreelancerCreateApi.as_view(),name='freelancer'),
+    
 ]

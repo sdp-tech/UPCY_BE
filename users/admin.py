@@ -33,3 +33,7 @@ class Competition(admin.ModelAdmin):
 @admin.register(models.Internship)
 class Intership(admin.ModelAdmin):
     pass
+
+@admin.register(models.Freelancer)
+class Freelancer(admin.ModelAdmin):
+    pass

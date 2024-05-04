@@ -51,6 +51,7 @@ DJANGO_APPS = [
 
 ]
 PROJECT_APPS = [
+    "drf_yasg",
     "users.apps.UsersConfig",
     "core.apps.CoreConfig",
     "products.apps.ProductsConfig",

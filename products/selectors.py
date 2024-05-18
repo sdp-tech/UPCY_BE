@@ -68,7 +68,7 @@ class ProductSelector:
             id=product.id,
             name=product.name,
             nickname=product.reformer.nickname,
-            market=user.market_name,
+            # market=user.market_name,
             basic_price=product.basic_price,
             reformer=product.reformer,
             user_likes=product.user_likes,

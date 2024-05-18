@@ -68,7 +68,7 @@ class ServiceSelector:
             id=service.id,
             name=service.name,
             nickname=service.reformer.nickname,
-            market=user.market_name,
+            # market=user.market_name,
             basic_price=service.basic_price,
             reformer=service.reformer,
             user_likes=service.user_likes,

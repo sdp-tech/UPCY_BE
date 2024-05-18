@@ -10,7 +10,7 @@ jobs: # 아래의 jobs를 수행
     runs-on: ubuntu-latest # 여러 OS 중 우분투 환경 선택
     steps:
       - name: checkout # 마스터 브랜치로 checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v3

@@ -14,6 +14,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='product',
             name='category',
+<<<<<<< Updated upstream
             field=models.ForeignKey(blank=False, null=False, on_delete=django.db.models.deletion.CASCADE, related_name='products', to='products.category'),
         ), # 여기 수정해야할 수도 있음
+=======
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='products', to='products.category'),
+        ),
+>>>>>>> Stashed changes
     ]

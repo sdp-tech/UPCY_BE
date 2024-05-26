@@ -1,5 +1,7 @@
 from django.db import models
 from core.models import TimeStampedModel
+from django.conf import settings # s3를 이용한 이미지 업로드용
+from datetime import datetime # s3를 이용한 이미지 업로드용
 
 # Create your models here.
 class Category(models.Model):
@@ -54,11 +56,24 @@ class ServiceKeyword(models.Model):
     
 
 #Service_Photo 모델 만들기
+# get_service_photo_upload_path 함수는 수정 가능성 있음
 def get_service_photo_upload_path(instance, filename):
     return 'services/photo/{}'.format(filename)
+# get_service_photo_upload_path 함수가 꼭 필요할까?
+
+#class ServicePhoto(models.Model):
+#    image = models.ImageField(
+#        upload_to=get_service_photo_upload_path, default='service_photo.png')
+#   service = models.ForeignKey(
+#       'Service', related_name='service_photos', on_delete=models.CASCADE, null=True, blank=True)
 
 class ServicePhoto(models.Model):
-    image = models.ImageField(
-        upload_to=get_service_photo_upload_path, default='service_photo.png')
+<<<<<<< Updated upstream
+    image = models.URLField(default='service_photo.png')
     service = models.ForeignKey(
         'Service', related_name='service_photos', on_delete=models.CASCADE, null=True, blank=True)
+=======
+    image = models.URLField(max_length = 100)
+    service = models.ForeignKey(Service, related_name='images', on_delete=models.CASCADE)
+    host_id = models.CharField(max_length=100) # 필요에 따라서 추가
+>>>>>>> Stashed changes

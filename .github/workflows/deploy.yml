@@ -24,7 +24,7 @@ jobs: # 아래의 jobs를 수행
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: create remote directory # ec2 서버에 접속해 리모트 디렉토리 생성
-        uses: appleboy/ssh-action@v0.1.5
+        uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
           username: ubuntu
@@ -33,9 +33,9 @@ jobs: # 아래의 jobs를 수행
             mkdir -p /home/ubuntu/UPCY_BE
 
       - name: copy source via ssh key # ssh key로 현재 푸시된 소스를 서버에 복사 (rsync로 github runners와 ec2 동기화)
-        uses: burnett01/rsync-deployments@4.1
+        uses: burnett01/rsync-deployments@5.2
         with:
-          switches: -avzr --delete
+          switches: -avzr --update #--delete 에서 update로 바꿈
           remote_path: /home/ubuntu/UPCY_BE
           remote_host: ${{ secrets.HOST }}
           remote_user: ubuntu

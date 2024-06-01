@@ -171,7 +171,6 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-<<<<<<< Updated upstream
 #s3 setting
 load_dotenv()
 
@@ -179,14 +178,3 @@ AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', 'cognisle-bucket')
 AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'ap-northeast-2')
-=======
-# 수정 시작
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-AWS_ACCESS_KEY_ID = 767398068893 #얘도 ''필요하나 모르겠넹
-AWS_SECRET_ACCESS_KEY_ID = 'irL6%v3i'
-AWS_STORAGE_BUCKET_NAME = 'upcybucket'
-AWS_QUERYSTRING_AUTH = False
-AWS_REGION = 'ap-northeast-2'
-IMAGE_URL = "https://%s.s3.%s.amazonaws.com/" % (AWS_STORAGE_BUCKET_NAME, AWS_REGION)
-# 수정 끝
->>>>>>> Stashed changes

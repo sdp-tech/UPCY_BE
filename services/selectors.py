@@ -192,5 +192,7 @@ class ServiceSelector:
         ) for service in services]
 
         return services_dtos
-    def likes(self, service:Service, user:User):
+    def likes(self, service, user:User):
+        from services.models import Service
+        from users.models import User
         return service.likeuser_set.filter(pk=user.pk).exists()

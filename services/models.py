@@ -68,12 +68,6 @@ def get_service_photo_upload_path(instance, filename):
 #       'Service', related_name='service_photos', on_delete=models.CASCADE, null=True, blank=True)
 
 class ServicePhoto(models.Model):
-<<<<<<< Updated upstream
     image = models.URLField(default='service_photo.png')
     service = models.ForeignKey(
         'Service', related_name='service_photos', on_delete=models.CASCADE, null=True, blank=True)
-=======
-    image = models.URLField(max_length = 100)
-    service = models.ForeignKey(Service, related_name='images', on_delete=models.CASCADE)
-    host_id = models.CharField(max_length=100) # 필요에 따라서 추가
->>>>>>> Stashed changes

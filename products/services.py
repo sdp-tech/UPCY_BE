@@ -26,7 +26,6 @@ class ProductCoordinatorService:
                category : str, style : list[str], texture : list[str], fit : list[str], detail:list[str],
         ) -> Product:
         product_service=ProductService()
-        
         product= product_service.create(
             reformer=self.user,
     
@@ -46,8 +45,8 @@ class ProductCoordinatorService:
             transaction_package=transaction_package,
             refund=refund,
         )
-
         if product is not None:
+            print('here')
             ProductPhotoService.process_photos(product=product, product_photos=product_photos )
             ProductKeywordService.process_keywords(product=product, keywords=keywords)
             return product

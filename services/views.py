@@ -146,14 +146,21 @@ class ServicePhotoCreateApi(APIView):
         serializers = self.ServicePhotoCreateInputSerializer(data=request.data)
         serializers.is_valid(raise_exception=True)
         data = serializers.validated_data
+
+        image_file = data.get('image')
+
+
+        service_photo_service = ServicePhotoService(file=image_file)
+
+        service_photo_url = service_photo_service.upload()
         
-        service_photo_url = ServicePhotoService.create(
-            image=data.get('image')
-        )
+        #service_photo_url = ServicePhotoService.upload(
+        #    image=data.get('image')
+        #)
         
         return Response({
             'status':'success',
-            'data':{'location': service_photo_url}, 
+            'data':{'location': service_photo_url},
         }, status = status.HTTP_201_CREATED)
     
 class ServiceDetailApi(APIView):

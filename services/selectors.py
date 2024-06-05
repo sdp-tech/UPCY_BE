@@ -34,7 +34,7 @@ class ServiceDto:
      notice : str = None
     
      keywords: list[str] = None
-     photos: list[str] = None
+     photos: str = None #원래는 list[str]인데, 일단 service 하나당 photo 하나만 추가할 수 있는 것으로
      nickname : str = None
      market:str = None
  
@@ -192,5 +192,7 @@ class ServiceSelector:
         ) for service in services]
 
         return services_dtos
-    def likes(self, service:Service, user:User):
+    def likes(self, service, user:User):
+        from services.models import Service
+        from users.models import User
         return service.likeuser_set.filter(pk=user.pk).exists()

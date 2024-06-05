@@ -110,6 +110,37 @@ class ServiceService:
             service.detail.set(detail)
             return service
     
+    # @staticmethod
+    # @transaction.atomic
+    # def update(service:Service,
+    #            name : str,basic_price : str, max_price: str, option : str,info : str,notice : str,
+    #            period : str,transaction_direct : bool,transaction_package : bool,refund : str, reformer : User,
+    #            category : str, style : list[str], texture : list[str], fit : list[str], detail:list[str]):
+    #         category=get_object_or_404(Category,id=category)
+    #         style=Style.objects.filter(id__in=style)
+    #         texture=Texture.objects.filter(id__in=texture)
+    #         fit=Fit.objects.filter(id__in=fit)
+    #         detail=Detail.objects.filter(id__in=detail)
+
+    #         service.name=name
+    #         service.basic_price=basic_price
+    #         service.
+            
+    #         service.style.set(style)
+    #         service.texture.set(texture)
+    #         service.fit.set(fit)
+    #         service.detail.set(detail)
+            
+    #         service.full_clean()
+    #         service.save()
+    #         return service
+    @staticmethod
+    def update(service,data):
+        for key,value in data.items():
+            setattr(service,key,value)
+        service.save()
+        return service
+    
 class ServicePhotoService:
     def __init__(self):
         pass

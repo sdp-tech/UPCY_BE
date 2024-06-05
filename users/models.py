@@ -71,7 +71,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_verified = models.BooleanField(default = False)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default = False)
-
+    area = models.CharField(max_length=20,blank=True)
     #리폼러, 소비자 여부
     is_reformer = models.BooleanField(default=False)
     is_consumer = models.BooleanField(default=False)

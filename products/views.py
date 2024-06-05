@@ -103,7 +103,6 @@ class ProductCreateApi(APIView):
             transaction_package=data.get('transaction_package'),
             refund=data.get('refund'),
             )
-
         if product is not None:
             return Response({
                 'status' : 'success',

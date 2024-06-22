@@ -191,7 +191,16 @@ class CertificationCreateApi(APIView):
         issuing_authority = serializers.CharField()
         issue_date = serializers.DateField()
         proof_document = serializers.FileField()
-       
+        
+        #파일 유효성 검증
+        def validate_proof_document(self, value):
+            max_size = 20 * 1024 * 1024  # 20MB
+            if value.size > max_size:
+                raise serializers.ValidationError("The file size exceeds the limit of 20MB.")
+            if not value.name.endswith('.pdf'):
+                raise serializers.ValidationError("Only PDF files are allowed.")
+            return value
+        
     @swagger_auto_schema(
         request_body=CertificationCreateInputSerializer,
         security=[],
@@ -218,18 +227,17 @@ class CertificationCreateApi(APIView):
         data = input_serializer.validated_data
         
         service=UserService()
-        
-        service.certification_register(
-            profile=request.user.reformer_profile,
-            name=data.get('name'),
-            issuing_authority=data.get('issuing_authority'),
-            issue_date=data.get('issue_date'),
-            proof_document=data.get('proof_document'),
-        )
-        
-        return Response({
-            'status':'success',
-        },status=status.HTTP_200_OK)
+        try:
+            service.certification_register(
+                profile=request.user.reformer_profile,
+                name=data.get('name'),
+                issuing_authority=data.get('issuing_authority'),
+                issue_date=data.get('issue_date'),
+                proof_document=data.get('proof_document')
+            )
+            return Response({'status': 'success'}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'status': 'error', 'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class CompetitionCreateApi(APIView):
     permission_classes=(AllowAny,)
@@ -239,7 +247,15 @@ class CompetitionCreateApi(APIView):
         organizer = serializers.CharField()
         award_date = serializers.DateField()
         proof_document = serializers.FileField()
-     
+        #파일 유효성 검증
+        def validate_proof_document(self, value):
+            max_size = 20 * 1024 * 1024  # 20MB
+            if value.size > max_size:
+                raise serializers.ValidationError("The file size exceeds the limit of 20MB.")
+            if not value.name.endswith('.pdf'):
+                raise serializers.ValidationError("Only PDF files are allowed.")
+            return value
+        
     @swagger_auto_schema(
         request_body=CompetitionCreateInputSerializer,
         security=[],
@@ -266,18 +282,17 @@ class CompetitionCreateApi(APIView):
         data = input_serializer.validated_data
         
         service=UserService()
-        
-        service.competition_register(
-            profile=request.user.reformer_profile,
-            name=data.get('name'),
-            organizer=data.get('organizer'),
-            award_date=data.get('award_date'),
-            proof_document=data.get('proof_document'),
-        )
-        
-        return Response({
-            'status':'success',
-        },status=status.HTTP_200_OK)
+        try:
+            service.competition_register(
+                profile=request.user.reformer_profile,
+                name=data.get('name'),
+                organizer=data.get('organizer'),
+                award_date=data.get('award_date'),
+                proof_document=data.get('proof_document'),
+            )
+            return Response({'status': 'success'}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'status': 'error', 'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 class IntershipCreateApi(APIView):
     permission_classes=(AllowAny,)
@@ -289,7 +304,15 @@ class IntershipCreateApi(APIView):
         start_date = serializers.DateField()
         end_date = serializers.DateField()
         proof_document = serializers.FileField()
-    
+        #파일 유효성 검증
+        def validate_proof_document(self, value):
+            max_size = 20 * 1024 * 1024  # 20MB
+            if value.size > max_size:
+                raise serializers.ValidationError("The file size exceeds the limit of 20MB.")
+            if not value.name.endswith('.pdf'):
+                raise serializers.ValidationError("Only PDF files are allowed.")
+            return value
+        
     @swagger_auto_schema(
         request_body=IntershipCreateInputSerializer,
         security=[],
@@ -316,21 +339,22 @@ class IntershipCreateApi(APIView):
         data = input_serializer.validated_data
         
         service=UserService()
-        
-        service.intership_register(
-            profile=request.user.reformer_profile,
-            company_name=data.get('company_name'),
-            department=data.get('department',None),
-            position=data.get('position',None),
-            start_date=data.get('start_date'),
-            end_date=data.get('end_date'),
-            proof_document=data.get('proof_document'),
-        )
-        
-        return Response({
-            'status':'success',
-        },status=status.HTTP_200_OK)
-
+        try:
+            service.intership_register(
+                profile=request.user.reformer_profile,
+                company_name=data.get('company_name'),
+                department=data.get('department',None),
+                position=data.get('position',None),
+                start_date=data.get('start_date'),
+                end_date=data.get('end_date'),
+                proof_document=data.get('proof_document'),
+            )
+            
+            return Response({
+                'status':'success',
+            },status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'status': 'error', 'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class FreelancerCreateApi(APIView):
     permission_classes=(AllowAny,)
@@ -342,7 +366,15 @@ class FreelancerCreateApi(APIView):
         start_date = serializers.DateField()
         end_date = serializers.DateField()
         proof_document = serializers.FileField()
-    
+        #파일 유효성 검증
+        def validate_proof_document(self, value):
+            max_size = 20 * 1024 * 1024  # 20MB
+            if value.size > max_size:
+                raise serializers.ValidationError("The file size exceeds the limit of 20MB.")
+            if not value.name.endswith('.pdf'):
+                raise serializers.ValidationError("Only PDF files are allowed.")
+            return value
+        
     @swagger_auto_schema(
         request_body=FreelancerCreateInputSerializer,
         security=[],
@@ -369,17 +401,19 @@ class FreelancerCreateApi(APIView):
         data = input_serializer.validated_data
         
         service=UserService()
-        
-        service.freelancer_register(
-            profile=request.user.reformer_profile,
-            project_name=data.get('project_name'),
-            client=data.get('client'),
-            main_tasks=data.get('main_tasks'),
-            start_date=data.get('start_date'),
-            end_date=data.get('end_date'),
-            proof_document=data.get('proof_document'),
-        )
-        
-        return Response({
-            'status':'success',
-        },status=status.HTTP_200_OK)
+        try:
+            service.freelancer_register(
+                profile=request.user.reformer_profile,
+                project_name=data.get('project_name'),
+                client=data.get('client'),
+                main_tasks=data.get('main_tasks'),
+                start_date=data.get('start_date'),
+                end_date=data.get('end_date'),
+                proof_document=data.get('proof_document'),
+            )
+            
+            return Response({
+                'status':'success',
+            },status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'status': 'error', 'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

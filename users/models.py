@@ -10,7 +10,6 @@ from django.dispatch import receiver
 import re
 from email.policy import default
 from core.models import TimeStampedModel
-
 #UserManager
 class UserManager(BaseUserManager):
     def create_user(self, email, password, **extra_fields):
@@ -144,15 +143,15 @@ class Certification(models.Model):
     name = models.CharField(max_length=100)
     issuing_authority = models.CharField(max_length=100)
     issue_date = models.DateField()
-    proof_document = models.FileField()
-
+    proof_document = models.URLField()
+    
 class Competition(models.Model):
     profile = models.ForeignKey(ReformerProfile,on_delete=models.CASCADE, related_name='competition')
     name = models.CharField(max_length=100)
     organizer = models.CharField(max_length=100)
     award_date = models.DateField()
-    proof_document = models.FileField()
-        
+    proof_document = models.URLField()
+
 class Internship(models.Model):
     profile = models.ForeignKey(ReformerProfile,on_delete=models.CASCADE, related_name='internship')
     company_name = models.CharField(max_length=100)
@@ -161,8 +160,8 @@ class Internship(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
     period=models.DurationField()
-    proof_document = models.FileField()
-    
+    proof_document = models.URLField()
+
 @receiver(pre_save, sender=Internship)
 def calculate_period(sender, instance, **kwargs):
     instance.period = instance.end_date - instance.start_date if instance.start_date and instance.end_date else None
@@ -177,8 +176,8 @@ class Freelancer(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
     period=models.DurationField()
-    proof_document = models.FileField()
-    
+    proof_document = models.URLField()
+
 @receiver(pre_save, sender=Freelancer)
 def calculate_period(sender, instance, **kwargs):
     instance.period = instance.end_date - instance.start_date if instance.start_date and instance.end_date else None
@@ -192,7 +191,7 @@ class Outsourcing(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
     period=models.DurationField()
-    proof_document = models.FileField()
+    proof_document = models.URLField()
     
 @receiver(pre_save, sender=Outsourcing)
 def calculate_period(sender, instance, **kwargs):

@@ -146,14 +146,21 @@ class ServicePhotoCreateApi(APIView):
         serializers = self.ServicePhotoCreateInputSerializer(data=request.data)
         serializers.is_valid(raise_exception=True)
         data = serializers.validated_data
+
+        image_file = data.get('image')
+
+
+        service_photo_service = ServicePhotoService(file=image_file)
+
+        service_photo_url = service_photo_service.upload()
         
-        service_photo_url = ServicePhotoService.create(
-            image=data.get('image')
-        )
+        #service_photo_url = ServicePhotoService.upload(
+        #    image=data.get('image')
+        #)
         
         return Response({
             'status':'success',
-            'data':{'location': service_photo_url}, 
+            'data':{'location': service_photo_url},
         }, status = status.HTTP_201_CREATED)
     
 class ServiceDetailApi(APIView):
@@ -383,5 +390,82 @@ class ServiceLikeApi(APIView):
             'data':{'likes':likes},
         },status=status.HTTP_200_OK)
 
+class ServiceUpdateApi(APIView):
+    permission_classes=(IsAuthenticated,)
+    
+    class ServiceUpdateInputSerializer(serializers.Serializer):
+        name= serializers.CharField(required=False)
+        category=serializers.CharField(required=False)
+        style=serializers.ListField(required=False)
+        fit=serializers.ListField(required=False)
+        texture=serializers.ListField(required=False)
+        detail=serializers.ListField(required=False)
+        keywords = serializers.ListField(required=False)
+        basic_price = serializers.CharField(required=False)
+        max_price = serializers.CharField(required=False)
+        option = serializers.CharField(required=False)
+        service_photos = serializers.ListField(required=False)
+        info = serializers.CharField(required=False)
+        notice = serializers.CharField(required=False)
+        period = serializers.CharField(required=False)
+        transaction_direct = serializers.BooleanField(required=False)
+        transaction_package = serializers.BooleanField(required=False)
+        refund = serializers.CharField(required=False)
+        def __init__(self, *args, **kwargs):
+            self.service = kwargs.pop('service', None)
+            super().__init__(*args, **kwargs)
 
-
+    @swagger_auto_schema(
+        request_body=ServiceUpdateInputSerializer,
+        security=[],
+        operation_id='서비스 업데이트 API',
+        operation_description="서비스를 업데이트하는 API입니다.",
+        responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                    "application/json": {
+                        "name": "서비스 이름",
+                        "category": "1",
+                        "style": [1, 2],
+                        "fit": [1],
+                        "texture": [1],
+                        "detail": [],
+                        "keywords": [],
+                        "basic_price": '8000',
+                        "max_price": '12000',
+                        "option": '단추',
+                        "service_photos": '~~~.img',
+                        "info": "서비스 정보",
+                        "notice": '서비스 관련 공지사항',
+                        "period": "3",
+                        "transaction_direct": "true",
+                        "transaction_package": 'true',
+                        "refund": "환불 관련 정보",
+                    }
+                }
+            ),
+            "400": openapi.Response(
+                description="Bad Request",
+            )
+        }
+    )
+    
+    def patch(self,request,service_id):
+        try:
+            service=Service.objects.get(pk=service_id)
+        except Service.DoesNotExist:
+            return Response({
+                'status':'failure',
+                'message':'Service is not found',
+            },status=status.HTTP_404_NOT_FOUND)
+        
+        serializer=self.ServiceUpdateInputSerializer(service=service,data=request.data,partial=True)
+        serializer.is_valid(raise_exception=True)
+        data=serializer.validated_data
+        
+        service=ServiceService.update(service,data)
+        return Response({
+            'status': 'success',
+            'data': {'id': service.id},
+        }, status=status.HTTP_200_OK)

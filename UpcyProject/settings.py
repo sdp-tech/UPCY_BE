@@ -57,6 +57,7 @@ PROJECT_APPS = [
     "core.apps.CoreConfig",
     "products.apps.ProductsConfig",
     "services.apps.ServicesConfig",
+    "sslserver",
 ]
 THIRD_APPS = [
 ]

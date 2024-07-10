@@ -3,7 +3,7 @@ Description=UWSGI service
 After=syslog.target
 
 [Service]
-ExecStart=/home/ububtu/myvenv/bin/uwsgi -i /home/ubuntu/UPCY_BE/.config/uwsgi/UPCY.ini
+ExecStart=/home/ubuntu/myvenv/bin/uwsgi -i /home/ubuntu/UPCY_BE/.config/uwsgi/UPCY.ini
 
 Restart=always
 KillSignal=SIGQUIT

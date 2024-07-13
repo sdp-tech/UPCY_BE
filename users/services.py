@@ -25,6 +25,7 @@ from django.core.files.base import ContentFile
 from users.models import User, ReformerProfile, Certification, Competition, Internship, Freelancer
 from users.selectors import UserSelector
 # from core.exceptions import ApplicationError
+from core.utils import s3_file_upload_by_file_data
 
 
 JWT_PAYLOAD_HANDLER = api_settings.JWT_PAYLOAD_HANDLER
@@ -180,39 +181,66 @@ class UserService:
     #reformer 학력 파일 등 파일 필드 서버로 추가 기능 필요(현재 로컬에 저장됨)
     
     def certification_register(self,profile:ReformerProfile,name:str,issuing_authority:str,issue_date:datetime,proof_document:InMemoryUploadedFile):
-        certification=Certification(profile=profile,name=name,issuing_authority=issuing_authority,issue_date=issue_date)
+        # 파일을 S3에 업로드
+        file_url = s3_file_upload_by_file_data(
+            upload_file=proof_document,
+            region_name=settings.AWS_S3_REGION_NAME,
+            bucket_name=settings.AWS_STORAGE_BUCKET_NAME,
+            bucket_path=f'profile/{profile.user.pk}/certification'
+        )
 
-        ext = proof_document.name.split(".")[-1]
-        file_path = 'users/profile/certification/{}{}'.format(str(time.time())+str(uuid.uuid4().hex), ext)
-        os.makedirs(os.path.dirname(file_path), exist_ok=True)
-        #proof_document = File(io.BytesIO(proof_document.read()), name=file_path)
-        certification.proof_document.save(file_path, ContentFile(proof_document.read()), save=False)
+        # Certification 인스턴스 생성 및 저장
+        certification = Certification(
+            profile=profile,
+            name=name,
+            issuing_authority=issuing_authority,
+            issue_date=issue_date,
+            proof_document=file_url  # S3 파일 URL 저장
+        )
         certification.save()
         
         
     def competition_register(self,profile:ReformerProfile,name:str,organizer:str,award_date:str,proof_document:InMemoryUploadedFile):
-        competition=Competition(profile=profile,name=name,organizer=organizer,award_date=award_date)
-        
-        ext = proof_document.name.split(".")[-1]
-        file_path = 'users/profile/competition/{}{}'.format(str(time.time())+str(uuid.uuid4().hex), ext)
-        os.makedirs(os.path.dirname(file_path), exist_ok=True)
-        competition.proof_document.save(file_path,ContentFile(proof_document.read()),save=False)
+        # 파일을 S3에 업로드
+        file_url = s3_file_upload_by_file_data(
+            upload_file=proof_document,
+            region_name=settings.AWS_S3_REGION_NAME,
+            bucket_name=settings.AWS_STORAGE_BUCKET_NAME,
+            bucket_path=f'profile/{profile.user.pk}/competition'
+        )
+        competition=Competition(
+            profile=profile,
+            name=name,
+            organizer=organizer,
+            award_date=award_date,
+            proof_document=file_url,
+        )
         competition.save()
         
     def intership_register(self,profile:ReformerProfile,company_name:str,department:str,position:str,start_date:str,end_date:str,proof_document:InMemoryUploadedFile):
-        intership=Internship(profile=profile,company_name=company_name,department=department,position=position,start_date=start_date,end_date=end_date)
-                
-        ext = proof_document.name.split(".")[-1]
-        file_path = 'users/profile/internship/{}{}'.format(str(time.time())+str(uuid.uuid4().hex), ext)
-        os.makedirs(os.path.dirname(file_path), exist_ok=True)
-        intership.proof_document.save(file_path,ContentFile(proof_document.read()),save=False)
-        intership.save()
+        # 파일을 S3에 업로드
+        file_url = s3_file_upload_by_file_data(
+            upload_file=proof_document,
+            region_name=settings.AWS_S3_REGION_NAME,
+            bucket_name=settings.AWS_STORAGE_BUCKET_NAME,
+            bucket_path=f'profile/{profile.user.pk}/intership'
+        )        
+        
+        internship=Internship(
+            profile=profile,company_name=company_name,department=department,position=position,start_date=start_date,end_date=end_date,
+                    proof_document=file_url,
+        )
+        internship.save()
         
     def freelancer_register(self,profile:ReformerProfile,project_name:str,client:str,main_tasks:str,start_date:str,end_date:str,proof_document:InMemoryUploadedFile):
-        freelancer=Freelancer(profile=profile,project_name=project_name,client=client,main_tasks=main_tasks,start_date=start_date,end_date=end_date)
-                
-        ext = proof_document.name.split(".")[-1]
-        file_path = 'users/profile/freelancer/{}{}'.format(str(time.time())+str(uuid.uuid4().hex), ext)
-        os.makedirs(os.path.dirname(file_path), exist_ok=True)
-        freelancer.proof_document.save(file_path,ContentFile(proof_document.read()),save=False)
+        # 파일을 S3에 업로드
+        file_url = s3_file_upload_by_file_data(
+            upload_file=proof_document,
+            region_name=settings.AWS_S3_REGION_NAME,
+            bucket_name=settings.AWS_STORAGE_BUCKET_NAME,
+            bucket_path=f'profile/{profile.user.pk}/freelancer'
+        )        
+        freelancer=Freelancer(
+            profile=profile,project_name=project_name,client=client,main_tasks=main_tasks,start_date=start_date,end_date=end_date,
+                    proof_document=file_url)
         freelancer.save()   

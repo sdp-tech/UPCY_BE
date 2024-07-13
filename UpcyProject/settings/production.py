@@ -1,4 +1,5 @@
 from .settings import *
+
 ALLOWED_HOSTS = ['.upcy.co.kr']
 LOGGING = {
     'version': 1,

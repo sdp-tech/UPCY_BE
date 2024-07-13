@@ -3,6 +3,7 @@ Description=UWSGI service
 After=syslog.target
 
 [Service]
+Environment="DJANGO_SETTINGS_MODULE=UpcyProject.production"
 ExecStart=/home/ubuntu/myvenv/bin/uwsgi -i /home/ubuntu/UPCY_BE/.config/uwsgi/UPCY.ini
 
 Restart=always

@@ -7,7 +7,7 @@ import io
 import boto3
 import uuid
 from django.conf import settings
-from UpcyProject import settings
+from UpcyProject.settings import settings
 from datetime import datetime
 
 

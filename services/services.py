@@ -11,7 +11,7 @@ from services.models import Service, ServiceKeyword, ServicePhoto, Category, Sty
 from .selectors import ServiceSelector
 from users.models import User
 from core.utils import s3_file_upload_by_file_data
-from UpcyProject import settings
+from UpcyProject.settings import settings
 
 
 class ServiceCoordinatorService:

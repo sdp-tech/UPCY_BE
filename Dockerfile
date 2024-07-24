@@ -1,16 +1,16 @@
 # pull official base image
 FROM python:3.10-alpine as builder
 # Dockerfile
-# www-data 사용자 및 그룹 추가
-RUN addgroup -S www-data || true && adduser -S www-data -G www-data || true
+# ubuntu 사용자 및 그룹 추가
+RUN addgroup -S ubuntu || true && adduser -S ubuntu -G ubuntu || true
 # 기존 명령들 위에 아래 명령을 추가합니다
 RUN mkdir -p /UPCY_BE/logs
 RUN touch /UPCY_BE/logs/debug.log
-RUN chown -R www-data:www-data /UPCY_BE/logs
+RUN chown -R ubuntu:ubuntu /UPCY_BE/logs
 
 
 # 의존성 패키지 설치 및 삭제
-RUN apk update && apk add python3 python3-dev mariadb-dev build-base coreutils && pip3 install mysqlclient && apk del python3-dev mariadb-dev build-base
+RUN apk update && apk add python3 python3-dev mariadb-dev build-base coreutils linux-headers pcre-dev && pip3 install mysqlclient && apk del python3-dev mariadb-dev build-base
 RUN apk add --no-cache gcc musl-dev python3-dev mariadb-connector-c-dev
 RUN pip install ruamel.yaml.clib
 RUN mkdir /srv/UPCY_BE

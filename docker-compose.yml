@@ -12,9 +12,10 @@ services:
     env_file:
       - .env
     volumes:
-      - .:/UPCY_BE
+      - .:/srv/UPCY_BE
       - /tmp:/tmp
       - /var/log/uwsgi:/var/log/uwsgi
+      -./logs:/UPCY_BE/logs
     expose:
       - 8000
 

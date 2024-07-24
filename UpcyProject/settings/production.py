@@ -1,6 +1,7 @@
 from .settings import *
 
 ALLOWED_HOSTS = ['.upcy.co.kr']
+ROOT_URLCONF = 'UpcyProject.urls' 
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

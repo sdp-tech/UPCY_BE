@@ -2,7 +2,7 @@
 FROM python:3.10-alpine as builder
 # Dockerfile
 # www-data 사용자 및 그룹 추가
-RUN addgroup -S www-data && adduser -S www-data -G www-data
+RUN addgroup -S www-data || true && adduser -S www-data -G www-data || true
 # 기존 명령들 위에 아래 명령을 추가합니다
 RUN mkdir -p /UPCY_BE/logs
 RUN touch /UPCY_BE/logs/debug.log

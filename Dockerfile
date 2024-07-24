@@ -9,7 +9,10 @@ RUN mkdir -p /var/log/uwsgi/UPCY
 RUN chown -R ubuntu:ubuntu /var/log/uwsgi
 
 # 의존성 패키지 설치 및 삭제
-RUN apk update && apk add python3 python3-dev mariadb-dev build-base coreutils linux-headers pcre-dev gcc musl-dev python3-dev mariadb-connector-c-dev
+
+RUN apk update && apk add python3 python3-dev mariadb-dev build-base coreutils linux-headers pcre-dev && pip3 install mysqlclient && apk del python3-dev mariadb-dev build-base
+RUN apk add --no-cache gcc musl-dev python3-dev mariadb-connector-c-dev
+
 RUN pip install ruamel.yaml.clib
 
 # 애플리케이션 디렉토리로 작업 디렉토리 설정

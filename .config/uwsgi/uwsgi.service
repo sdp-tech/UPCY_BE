@@ -4,7 +4,7 @@ After=syslog.target
 
 [Service]
 Environment="DJANGO_SETTINGS_MODULE=UpcyProject.settings.production"
-ExecStart=/home/ubuntu/myvenv/bin/uwsgi -i /home/ubuntu/UPCY_BE/.config/uwsgi/UPCY.ini
+ExecStart=/UPCY_BE/myvenv/bin/uwsgi -i /UPCY_BE/.config/uwsgi/UPCY.ini
 
 Restart=always
 KillSignal=SIGQUIT

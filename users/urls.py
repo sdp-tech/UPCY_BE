@@ -14,5 +14,5 @@ urlpatterns =[
     path('competition_register/',CompetitionCreateApi.as_view(),name='competition'),
     path('intership_register/',IntershipCreateApi.as_view(),name='intership'),
     path('freelancer_register/',FreelancerCreateApi.as_view(),name='freelancer'),
-    
+    path('reformer_profile/<int:user_id>/',ReformerProfileApi.as_view(),name='profile'),   
 ]

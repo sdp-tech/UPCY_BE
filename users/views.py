@@ -9,7 +9,7 @@ from rest_framework.pagination import PageNumberPagination
 
 from users.models import User
 from users.services import UserService
-
+from users.selectors import ReformerSelector
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 
@@ -136,11 +136,17 @@ class ReformerProfileApi(APIView):
         market_name=serializers.CharField()
         market_intro=serializers.CharField()
         links=serializers.CharField()
-        area=serializers.CharField()
         
         work_style=serializers.CharField()
         special_material=serializers.CharField()
     
+    class ReformerProfileOuputSerializer(serializers.Serializer):
+        market_intro=serializers.CharField()
+        links=serializers.CharField()
+        area=serializers.CharField()
+        carrer=serializers.CharField()
+        
+        
     @swagger_auto_schema(
         request_body=ReformerProfileInputSerializer,
         security=[],
@@ -174,7 +180,6 @@ class ReformerProfileApi(APIView):
             market_name=data.get('market_name'),
             market_intro=data.get('market_intro',None),
             links=data.get('links'),
-            area=data.get('area'),
             work_style=data.get('work_style',[]),
             special_material=data.get('special_material',[]),
         )
@@ -182,6 +187,17 @@ class ReformerProfileApi(APIView):
         return Response({
             'status':'success',
         },status=status.HTTP_200_OK)
+
+    def get(self,request,user_id):
+        profile=ReformerSelector.profile(user_id=user_id)
+        
+        serializers=self.ReformerProfileOuputSerializer(profile)
+        
+        return Response({
+            'status':'success',
+            'data':serializers.data,
+        },status=status.HTTP_200_OK)
+        
         
 class CertificationCreateApi(APIView):
     permission_classes=(AllowAny,)

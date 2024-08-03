@@ -187,7 +187,27 @@ class ReformerProfileApi(APIView):
         return Response({
             'status':'success',
         },status=status.HTTP_200_OK)
-
+        
+    @swagger_auto_schema(
+        security=[],
+        operation_id='리포머 프로필 조회 API',
+        operation_description="리포머의 프로필(소개글,링크,지역 등)을 조회하는 API 입니다.",
+        responses={
+            "200":openapi.Response(
+                description="OK",
+                examples={
+                    "application/json":{
+                        "status":"success",
+                        "data":{"market_intro ":"~~"}
+                    }
+                }
+            ),
+            "400":openapi.Response(
+                description="Bad Request",
+            ),
+        }
+    )
+    
     def get(self,request,user_id):
         profile=ReformerSelector.profile(user_id=user_id)
         

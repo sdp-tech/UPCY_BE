@@ -36,8 +36,7 @@ SECRET_KEY = env('UPCY_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool('DEBUG', default=False)
-
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['*'])
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.ngrok-free.app']
 
 # Application definition
 
@@ -52,6 +51,7 @@ DJANGO_APPS = [
 
 PROJECT_APPS = [
     "drf_yasg",
+    'corsheaders',
     "users.apps.UsersConfig",
     "core.apps.CoreConfig",
     "products.apps.ProductsConfig",
@@ -71,6 +71,13 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware'
+
+]
+CORS_ORIGIN_ALLOW_ALL = True
+CSRF_COOKIE_SECURE = False  # 개발 중일 때는 False로 설정
+CSRF_TRUSTED_ORIGINS = [
+    "https://3d49-165-132-5-152.ngrok-free.app",
 ]
 
 AUTH_USER_MODEL = "users.User"
@@ -92,7 +99,7 @@ REST_FRAMEWORK = {
 REST_USE_JWT = True
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=10),
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=28),
     'ROTATE_REFRESH_TOKENS': False,  # true면 토큰 갱신 시 refresh도 같이 갱신
     'BLACKLIST_AFTER_ROTATION': True,
@@ -175,3 +182,17 @@ AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME', 'upcy-bucket')
 AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME', 'ap-northeast-2')
+# SWAGGER_SETTINGS = {
+#     'USE_SESSION_AUTH': False,
+#     'SECURITY_DEFINITIONS': {
+#         'BearerAuth': {
+#             'type': 'apiKey',
+#             'name': 'Authorization',
+#             'in': 'header',
+#             'description': "Bearer Token"
+#         }
+#     },
+#     'SECURITY_REQUIREMENTS': [{
+#         'BearerAuth': []
+#     }]
+# }

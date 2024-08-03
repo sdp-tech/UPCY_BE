@@ -22,7 +22,7 @@ from django.core.files.images import ImageFile
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.files import File
 from django.core.files.base import ContentFile
-from users.models import User, ReformerProfile, Certification, Competition, Internship, Freelancer
+from users.models import User, ReformerProfile, Certification, Competition, Internship, Freelancer, UserProfile
 from users.selectors import UserSelector
 # from core.exceptions import ApplicationError
 from core.utils import s3_file_upload_by_file_data
@@ -74,6 +74,23 @@ class UserService:
 
         return data
     
+    def user_profile_image_register(self,user:User,img:ImageFile):
+        img_url=s3_file_upload_by_file_data(
+            upload_file=img,
+            region_name=settings.AWS_S3_REGION_NAME,
+            bucket_name=settings.AWS_STORAGE_BUCKET_NAME,
+            bucket_path=f'profile/{user.pk}/img'
+        )
+        
+        user_profile=UserProfile(user=user,profile_image=img_url)
+        user_profile.save()
+        data={
+            "email":user_profile.user.email,
+            "nickname":user_profile.user.nickname,
+            "img":user_profile.profile_image,
+        }
+        return data
+        
     def reformer_profile_register(self,user:User, nickname:str, market_name:str,market_intro:str,links:str,
         work_style:list[str],special_material:list[str]):
         

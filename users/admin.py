@@ -37,3 +37,7 @@ class Intership(admin.ModelAdmin):
 @admin.register(models.Freelancer)
 class Freelancer(admin.ModelAdmin):
     pass
+
+@admin.register(models.UserProfile)
+class UserProfile(admin.ModelAdmin):
+    pass

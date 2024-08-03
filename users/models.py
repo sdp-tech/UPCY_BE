@@ -62,7 +62,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     phone = models.CharField(max_length = 15, blank=True, null=True)
     code = models.CharField(max_length=5, blank=True, null=True)
     nickname = models.CharField(max_length=20, blank=True)
-    profile_image = models.ImageField(upload_to=get_upload_path, blank=True, null=True)
+    #profile_image = models.ImageField(upload_to=get_upload_path, blank=True, null=True)
     agreement_terms = models.BooleanField(default = False)
     follows = models.ManyToManyField("users.User", related_name='followers', blank=True)
     is_superuser = models.BooleanField(default=False)
@@ -97,7 +97,11 @@ class User(AbstractBaseUser, PermissionsMixin):
             raise ValidationError('메일 형식이 올바르지 않습니다.')
         # if not user_type_is_valid(self):
         #     raise ValidationError('유저 타입이 잘못되었습니다.')
-
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    profile_image = models.URLField(blank=True, null=True)
+    introduce=models.TextField(blank=True,null=True)
+    
 #Reformer profile 모델
 class ReformerProfile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reformer_profile')

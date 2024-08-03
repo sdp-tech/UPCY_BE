@@ -9,7 +9,7 @@ from rest_framework.pagination import PageNumberPagination
 
 from users.models import User
 from users.services import UserService
-from users.selectors import ReformerSelector
+from users.selectors import ReformerSelector,UserSelector
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 
@@ -127,7 +127,62 @@ class UserLoginApi(APIView):
             'status': 'success',
             'data': output_serializer.data,
         }, status = status.HTTP_200_OK)
+
+class UserProfileImageApi(APIView):
+    permission_classes=(IsAuthenticated,)
+    
+    class UserProfileInputSerializer(serializers.Serializer):
+        img=serializers.ImageField()
+    
+    class UserProfileOutputSerializer(serializers.Serializer):
+        email=serializers.CharField()
+        nickname=serializers.CharField()
+        img=serializers.URLField()
+    @swagger_auto_schema(
+        request_body=UserProfileInputSerializer,
+        security=[],
+        operation_description='유저 프로필 이미지를 등록하는 API 입니다.',
+        operation_id='유저 프로필 이미지 등록 API',
+        responses={
+            "200": openapi.Response(
+                description="OK",
+                examples={
+                    "application/json": {
+                        "status": "success",
+                        "email":"sdptech@gmail.com",
+                        "nickname":"sdptech",
+                        "img": "https://upcy-bucket.s3.ap-northeast-2.amazonaws.com/profile/1/img/20240803152516_d10b2b3828f7403387ea.webp",
+                    }
+                }
+            ),
+            "400": openapi.Response(
+                description="Bad Request",
+            ),
+        },
+    
+    )    
+    def post(self,request):
+        serializers=self.UserProfileInputSerializer(data=request.data)
+        serializers.is_valid(raise_exception=True)
+        data=serializers.validated_data
         
+        service=UserService()
+        profile_data=service.user_profile_image_register(
+            user=request.user,
+            img=data.get('img')
+        )
+        output_serializer = self.UserProfileOutputSerializer(data = profile_data)
+        output_serializer.is_valid(raise_exception=True)
+        try:
+            # data=service.user_profile_image_register(
+            #     user=request.user,
+            #     img=data.get('img'),
+            # )
+            return Response({'status':'succes',
+                             'data':output_serializer.data},status=status.HTTP_200_OK)
+        except Exception as e:
+            print(f"Failed to upload img to s3:{e}")
+            return None
 class ReformerProfileApi(APIView):
     permission_classes = (AllowAny,)
     
@@ -137,8 +192,12 @@ class ReformerProfileApi(APIView):
         market_intro=serializers.CharField()
         links=serializers.CharField()
         
-        work_style=serializers.CharField()
-        special_material=serializers.CharField()
+        work_style = serializers.ListField(
+            child=serializers.CharField(), allow_empty=True
+        )
+        special_material = serializers.ListField(
+            child=serializers.CharField(), allow_empty=True
+        )
     
     class ReformerProfileOuputSerializer(serializers.Serializer):
         market_intro=serializers.CharField()
@@ -433,3 +492,44 @@ class FreelancerCreateApi(APIView):
             },status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'status': 'error', 'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+class UserDetailApi(APIView):
+    permission_classes=(AllowAny,)
+    
+    class UserDetailOutputSerializer(serializers.Serializer):
+        nickname=serializers.CharField()
+        introduce=serializers.CharField()
+        profile_image=serializers.URLField()
+    
+    @swagger_auto_schema(
+        security=[],
+        operation_id='유저 기본정보 조회 API',
+        operation_description="유저의 기본 정보인 닉네임, 프로필 이미지, 소개글을 반환하는 API 입니다.",
+        responses={
+            "200":openapi.Response(
+                description="OK",
+                examples={
+                    "application/json":{
+                        "status":"success",
+                        "data":{"nickname": "test",
+                                "introduce": "introduce~~~",
+                                "profile_image": "https://upcy-bucket.s3.ap-northeast-2.amazonaws.com/profile/1/img/20240803152516_d10b2b3828f7403387ea.webp"}
+                    }
+                }
+            ),
+            "400":openapi.Response(
+                description="Bad Request",
+            ),
+        }
+    )
+        
+    def get(self,request):
+        user=UserSelector.get_user_profile_by_email(request.user.email)
+        
+        serializers=self.UserDetailOutputSerializer(user)
+        
+        return Response({
+            'status':'success',
+            'data':serializers.data,
+        },status=status.HTTP_200_OK)
+        

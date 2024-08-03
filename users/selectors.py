@@ -2,8 +2,8 @@
 from django.http import Http404, HttpResponseBadRequest
 # from django.db.models import QuerySet, Q, F
 # from django.contrib.auth import authenticate
-
-from users.models import User, ReformerProfile
+from django.core.exceptions import ObjectDoesNotExist
+from users.models import User, ReformerProfile,UserProfile
 
 class UserSelector:
     def __init__(self):
@@ -22,6 +22,23 @@ class UserSelector:
     def check_password(user: User, password: str):
         return user.check_password(password)
     
+    @staticmethod
+    def get_user_profile_by_email(email:str) -> UserProfile:
+        try:
+            user = User.objects.get(email=email)
+            user_profile = UserProfile.objects.get(user=user)
+            
+            data = {
+                "nickname": user.nickname,
+                "profile_image": user_profile.profile_image, 
+                "introduce": user_profile.introduce,
+            }
+            return data
+        except ObjectDoesNotExist:
+            return {
+                "error": "User or UserProfile not found"
+            }
+
 class ReformerSelector:
     def __init__(self):
         pass

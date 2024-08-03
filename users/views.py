@@ -183,6 +183,7 @@ class UserProfileImageApi(APIView):
         except Exception as e:
             print(f"Failed to upload img to s3:{e}")
             return None
+        
 class ReformerProfileApi(APIView):
     permission_classes = (AllowAny,)
     
@@ -198,14 +199,6 @@ class ReformerProfileApi(APIView):
         special_material = serializers.ListField(
             child=serializers.CharField(), allow_empty=True
         )
-    
-    class ReformerProfileOuputSerializer(serializers.Serializer):
-        market_intro=serializers.CharField()
-        links=serializers.CharField()
-        area=serializers.CharField()
-        carrer=serializers.CharField()
-        
-        
     @swagger_auto_schema(
         request_body=ReformerProfileInputSerializer,
         security=[],
@@ -246,7 +239,36 @@ class ReformerProfileApi(APIView):
         return Response({
             'status':'success',
         },status=status.HTTP_200_OK)
-
+    
+        
+class ReformerProfileDetailApi(APIView):
+    permission_classes = (AllowAny,)
+    class ReformerProfileOuputSerializer(serializers.Serializer):
+        market_intro=serializers.CharField()
+        links=serializers.CharField()
+        area=serializers.CharField()
+        carrer=serializers.CharField()
+    
+    @swagger_auto_schema(
+        
+        security=[],
+        operation_id='리포머 프로필 조회 API',
+        operation_description="리포머의 추가 정보를 조회하는 API 입니다.",
+        responses={
+            "200":openapi.Response(
+                description="OK",
+                examples={
+                    "application/json":{
+                        "status":"success",
+                        "data":{"market_intro":"market_intro~~"}
+                    }
+                }
+            ),
+            "400":openapi.Response(
+                description="Bad Request",
+            ),
+        }
+    )
     def get(self,request,user_id):
         profile=ReformerSelector.profile(user_id=user_id)
         
@@ -255,9 +277,8 @@ class ReformerProfileApi(APIView):
         return Response({
             'status':'success',
             'data':serializers.data,
-        },status=status.HTTP_200_OK)
-        
-        
+        },status=status.HTTP_200_OK)    
+          
 class CertificationCreateApi(APIView):
     permission_classes=(AllowAny,)
     

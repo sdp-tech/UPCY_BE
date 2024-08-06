@@ -1,4 +1,4 @@
-UPCY backend using django restframework
+# UPCY backend using django restframework
    
 ## pip install pipenv
 pipenv 설치
@@ -17,3 +17,5 @@ DB에 모델 반영하기
 
 ## python manage.py runserver
 로컬에서 서버 띄우기
+---
+![image](https://github.com/user-attachments/assets/ad611fe7-06ef-4acf-9cea-547c04a3b413)

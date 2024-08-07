@@ -10,4 +10,5 @@ urlpatterns = [
     path('<int:service_id>/like/',ServiceLikeApi.as_view(), name='service_like'),
     path('<int:service_id>/', ServiceDetailApi.as_view(), name='service_detail'),
     path('<int:service_id>/update/',ServiceUpdateApi.as_view(),name='service_update'),
+    path('reformer/',ReformerServiceListApi.as_view(),name='reformer_service'),
 ]

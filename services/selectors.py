@@ -46,7 +46,7 @@ class ServiceSelector:
         pass
 
     @staticmethod
-    def detail(service_id:str, user:User):
+    def  detail(service_id:str, user:User):
         service=Service.objects.annotate(
             user_likes=Case(
                 When(Exists(Service.likeuser_set.through.objects.filter(
@@ -104,7 +104,7 @@ class ServiceSelector:
     def list(search:str, order:str, user:User,
              category_filter:str, style_filters:list[str],
              fit_filters:list[str],texture_filters:list[str],
-             detail_filters:list[str],):
+             detail_filters:list[str],reformer_filters:list[str]):
         q=Q()
         # #검색 조건 후에 수정 
         # q.add(Q(info__icontains=search), q.AND)
@@ -143,7 +143,13 @@ class ServiceSelector:
                     Q(option__id=option_filter), q.OR
                 )
             q.add(option_filter_q, q.AND)
-        
+        if reformer_filters:
+            reformer_filter_q=Q()
+            for reformer_filter in reformer_filters:
+                reformer_filter_q.add(
+                    Q(reformer__id=reformer_filter),q.OR
+                )
+            q.add(reformer_filter_q,q.AND)
         order_pair={'latest':'-created',
                     'oldest':'created',
                     'hot':'-created'}
@@ -196,3 +202,4 @@ class ServiceSelector:
         from services.models import Service
         from users.models import User
         return service.likeuser_set.filter(pk=user.pk).exists()
+    

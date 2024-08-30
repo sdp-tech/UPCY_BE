@@ -9,7 +9,7 @@ LOGGING = {
         'file': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename':'/UPCY_BE/logs/debug.log',
+            'filename':'/home/ubuntu/UPCY_BE/logs/debug.log',
         },
     },
     'loggers': {

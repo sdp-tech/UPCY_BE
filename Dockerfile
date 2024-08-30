@@ -7,6 +7,7 @@ RUN addgroup -S ubuntu && adduser -S ubuntu -G ubuntu
 # 로그 디렉토리 및 파일 생성
 RUN mkdir -p /var/log/uwsgi/UPCY
 RUN chown -R ubuntu:ubuntu /var/log/uwsgi
+RUN chmod -R 777 /var/log/uwsgi
 
 # 의존성 패키지 설치 및 삭제
 

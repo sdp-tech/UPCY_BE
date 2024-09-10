@@ -469,3 +469,99 @@ class ServiceUpdateApi(APIView):
             'status': 'success',
             'data': {'id': service.id},
         }, status=status.HTTP_200_OK)
+
+class StyleSerializer(serializers.Serializer):
+    name=serializers.CharField()
+    
+class ReformerServiceListApi(APIView):
+    permission_classes=(AllowAny,)  
+    class Pagination(PageNumberPagination):
+        page_size=4
+        page_size_query_param='page_size'
+    class ReformerServiceListFilterSerializer(serializers.Serializer):
+        reformer_filter=serializers.ListField(required=False)
+
+    class ServiceListOutputSerializer(serializers.Serializer):
+        id=serializers.IntegerField()
+        name=serializers.CharField()
+        style=serializers.ListField(child=StyleSerializer())
+        basic_price=serializers.CharField()
+        user_likes=serializers.BooleanField()
+    
+    @swagger_auto_schema(
+        query_serializer=ReformerServiceListFilterSerializer,
+        security=[],
+        operation_id='특정 리포머의 서비스 목록 조회 API',
+        operation_description='''
+            쿼리 파라미터로 전달된 특정 리포머(리포머아이디)에 부합하는 서비스 글 리스트를 반환합니다.<br/>
+            <br/>
+            reformer_filter : 리포머 id <br/>
+        ''',
+        responses={ 
+            "200":openapi.Response(
+                description="OK",
+                examples={
+                    "application/json": {
+                    "status": "success",
+                    "data": [
+                        {
+                        "id": 1,
+                        "name": "service_test1",
+                        "style": [
+                            {
+                                "name": "스포티"
+                            }
+                        ],
+                        "basic_price": "13000",
+                        "user_likes": "false"
+                        },
+                        {
+                        "id": 2,
+                        "name": "service2",
+                        "style": [
+                            {
+                                "name": "캐주얼"
+                            }
+                        ],
+                        "basic_price": "15000",
+                        "user_likes": "true"
+                        }
+                    ]
+                }}
+            ),
+            
+            "400":openapi.Response(
+                description="Bad Request",
+            ),
+        }    
+    )    
+    def get(self, request):
+        reformer_id=request.query_params.get('reformer_filter')
+        print(reformer_id)
+        user = request.user  # 요청한 사용자
+        reformer = get_object_or_404(User, id=reformer_id)  # 조회하려는 리포머
+
+        if not reformer.is_reformer:
+            return Response({"error": "This user is not a reformer."}, status=status.HTTP_400_BAD_REQUEST)
+
+        services = Service.objects.filter(reformer=reformer).select_related(
+            'reformer', 'category'
+        ).prefetch_related(
+            'style', 'fit', 'texture', 'detail'
+        )
+
+        # DTO 
+        services_dtos = [{
+            'id': service.id,
+            'name': service.name,
+            'basic_price': service.basic_price,
+            'style': [{'id': s.id, 'name': s.name} for s in service.style.all()],
+            'user_likes': user in service.likeuser_set.all()
+        } for service in services]
+
+        serializer = self.ServiceListOutputSerializer(services_dtos, many=True)
+
+        return Response({
+            'status': 'success',
+            'data': serializer.data,
+        }, status=status.HTTP_200_OK)        

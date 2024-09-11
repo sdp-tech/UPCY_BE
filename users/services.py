@@ -37,13 +37,10 @@ class UserService:
 
     def user_sign_up(email:str,password:str,re_password:str, area:str):
         if password!=re_password:
-            raise APPLICATION_ERROR(
-                "비밀번호를 다시 확인해주세요."
-            )
-        user=User(email=email, password=password, area=area,)
-        
-        user.set_password(password)
-        user.is_active=False
+            raise ValueError("passwords do not match")
+        print("password verification passed")
+
+        user = User.objects.create_user(email=email, password=password)
         user.save()
 
     def login(self, email: str, password: str):

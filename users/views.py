@@ -52,19 +52,24 @@ class UserSignUpApi(APIView):
     )
     
     def post(self, request):
+        print("request.data: ",request.data)
         serializers = self.UserSignUpInputSerializer(data=request.data)
         serializers.is_valid(raise_exception=True)
         data = serializers.validated_data
+        print("data: ", data)
         
         UserService.user_sign_up(
             email=data.get('email'),
             password=data.get('password'),
             re_password=data.get('re_password'),
-            area=data.get('area',None),
+            area=data.get('area', None),
         )
-        return Response({
-            'status':'success',
-        },status=status.HTTP_201_CREATED)
+        return Response(
+            {
+                'status': 'success',
+            },
+            status=status.HTTP_201_CREATED
+        )
         
 class UserLoginApi(APIView):
     permission_classes = (AllowAny, )
@@ -513,7 +518,8 @@ class FreelancerCreateApi(APIView):
             },status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'status': 'error', 'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
+
+
 class UserDetailApi(APIView):
     permission_classes=(AllowAny,)
     
@@ -543,14 +549,16 @@ class UserDetailApi(APIView):
             ),
         }
     )
-        
+
     def get(self,request):
-        user=UserSelector.get_user_profile_by_email(request.user.email)
+        user = UserSelector.get_user_profile_by_email(request.user.email)
+        serializers = self.UserDetailOutputSerializer(user)
         
-        serializers=self.UserDetailOutputSerializer(user)
-        
-        return Response({
-            'status':'success',
-            'data':serializers.data,
-        },status=status.HTTP_200_OK)
+        return Response(
+            {
+                'status':'success',
+                'data':serializers.data,
+            },
+            status=status.HTTP_200_OK
+        )
         

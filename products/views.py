@@ -14,9 +14,6 @@ from .models import Product, Category, Style, Fit, Texture, Detail
 from .services import ProductCoordinatorService, ProductPhotoService, ProductKeywordService, ProductService
 from .selectors import ProductSelector
 
-from drf_yasg import openapi
-from drf_yasg.utils import swagger_auto_schema
-
 
 class ProductCreateApi(APIView):
     permission_classes=(AllowAny,)
@@ -40,42 +37,6 @@ class ProductCreateApi(APIView):
         transaction_direct = serializers.BooleanField()
         transaction_package = serializers.BooleanField()
         refund = serializers.CharField()
-    
-    @swagger_auto_schema(
-        request_body=ProductCreateInputSerializer,
-        security=[],
-        operation_id='상품 생성 API',
-        operation_description="리포머의 상품을 등록하는 API 입니다.",
-        responses={
-            "200":openapi.Response(
-                description="OK",
-                examples={
-                    "application/json":{
-                        "status":"success",
-                        "name":"상품이름",
-                        "category":"1",
-                        "style":[1,2],
-                        "fit":[1],
-                        "texture":[1],
-                        "detail":[],
-                        "keywords":[],
-                        "basic_price":'8000',
-                        "option":'단추',
-                        "product_photos":'~~~.img',
-                        "info":"상품 정보",
-                        "notice":'상품 관련 공지사항',
-                        "period":"3",
-                        "trasaction_direct":"true",
-                        "trasaction_package":'true',
-                        "refund":"환불 관련 정보",
-                    }
-                }
-            ),
-            "400":openapi.Response(
-                description="Bad Request",
-            ),
-        }
-    )
     
     def post(self,request):
         serializers = self.ProductCreateInputSerializer(data=request.data)
@@ -120,27 +81,7 @@ class ProductPhotoCreateApi(APIView):
     
     class ProductPhotoCreateInputSerializer(serializers.Serializer):
         image = serializers.ImageField()
-        
-    @swagger_auto_schema(
-        request_body=ProductPhotoCreateInputSerializer,
-        security=[],
-        operation_id='상품 사진 등록 API',
-        operation_description="상품 사진을 등록하는 API 입니다.",
-        responses={
-            "200":openapi.Response(
-                description="OK",
-                examples={
-                    "application/json":{
-                        "status":"success",
-                    }
-                }
-            ),
-            "400":openapi.Response(
-                description="Bad Request",
-            ),
-        }
-    )
-    
+
     def post(self, request):
         serializers = self.ProductPhotoCreateInputSerializer(data=request.data)
         serializers.is_valid(raise_exception=True)
@@ -183,46 +124,7 @@ class ProductDetailApi(APIView):
     
         transaction_direct = serializers.BooleanField()
         transaction_package = serializers.BooleanField()
-        
-    @swagger_auto_schema(
-        security=[],
-        operation_id='상품 글 조회 API',    
-        operation_description='''
-            전달된 id에 해당하는 상품 글 디테일을 조회합니다.<br/>
-            photos 배열 중 0번째 원소가 대표 이미지(rep_pic)입니다.<br/>
-        ''',
-        responses={ 
-            "200":openapi.Response(
-                description="OK",
-                examples={
-                    "application/json":{
-                        "name":'products_test_240106',
-                        "category":'1',
-                        "style":[1,2],
-                        "fit":[1],
-                        "texture":[1,2,3],
-                        "detail":[],
-                        "keywords":['후드티','후드'],
-                        "basic_price":1000,
-                        "info":'product no 1',
-                        "notice":'noticesssss',
-                        "option":'긴팔',
-                        "period":3,
-                        "transaction_direct":'true',
-                        "transaction_package":'true',
-                        "refund":'환불정책',
-                        "reformer":"sdptech@gmail.com",
-                        "likeuserset":['user1@gmail.com','user2@gmail.com',],
-                        'likecnt':2,
-                    }
-                }
-            ),
-            "400":openapi.Response(
-                description="Bad Request",
-            ),
-        }
-    )
-    
+
     def get(self,request,product_id):
         product= ProductSelector.detail(product_id=product_id, user=request.user)
         serializer=self.ProductDetailOuutputSerializer(product)
@@ -265,65 +167,7 @@ class ProductListApi(APIView):
         fit = serializers.ListField(child=serializers.DictField())
         detail = serializers.ListField(child=serializers.DictField())
      
-    @swagger_auto_schema(
-        security=[],
-        operation_id='상품 목록 조회 API',
-        operation_description='''
-            전달된 쿼리 파라미터에 부합하는 상품 글 리스트를 반환합니다.<br/>
-            photos 배열 중 0번째 원소가 대표 이미지(rep_pic)입니다.<br/>
-            <br/>
-            search : name, info 내 검색어<br/>
-            order : 정렬 기준(latest, hot)<br/>
-            category_filter: 카테고리 id <br/>
-            style_filter: 스타일 id <br/>
-            fit_filter: 핏 id <br/>
-            texture_filter : 텍스쳐 id <br/>
-            detail_filter: 디테일 id <br/>
-        ''',
-        responses={ 
-            "200":openapi.Response(
-                description="OK",
-                examples={
-                    "application/json": {
-                    "status": "success",
-                    "data": {
-                        "count": 1,
-                        "next": None,
-                        "previous": None,
-                        "results": [
-                            {
-                                "id": 1,
-                                "name":'products_test_240106',
-                                "category":'1',
-                                "style":[1,2],
-                                "fit":[1],
-                                "texture":[1,2,3],
-                                "detail":[],
-                                "keywords":['후드티','후드'],
-                                "basic_price":1000,
-                                "info":'product no 1',
-                                "notice":'noticesssss',
-                                "option":'긴팔',
-                                "period":3,
-                                "transaction_direct":'true',
-                                "transaction_package":'true',
-                                "refund":'환불정책',
-                                "reformer":"sdptech@gmail.com",
-                                "likeuserset":['user1@gmail.com','user2@gmail.com',],
-                                'likecnt':2,                   
-                                },
-                            ]
-                        }
-                    }
-                }
-            ),
-            
-            "400":openapi.Response(
-                description="Bad Request",
-            ),
-        }    
-    )
-                       
+
     def get(self,request):
         filters_serializer = self.ProductListFilterSerializer(
             data=request.query_params)
@@ -349,32 +193,10 @@ class ProductListApi(APIView):
             view=self
         )
         
-        
 
 class ProductLikeApi(APIView):
     permission_classes = (IsAuthenticated, )
-    
-    @swagger_auto_schema(
-        operation_id='상품 좋아요 또는 좋아요 취소',
-        operation_description='''
-            입력한 id를 가지는 상품에 대한 사용자의 좋아요/좋아요 취소를 수행합니다.<br/>
-            결과로 좋아요 상태(TRUE:좋아요, FALSE:좋아요X)가 반환됩니다.
-        ''',
-        responses={
-            "200": openapi.Response(
-                description="OK",
-                examples={
-                    "application/json": {
-                        "status": "success",
-                        "data": {"likes": True}
-                    }
-                }
-            ),
-            "400": openapi.Response(
-                description="Bad Request",
-            ),
-        },
-    )
+
     def post(self, request, product_id):
         likes = ProductService.like_or_dislike(
             product=get_object_or_404(Product,pk=product_id),

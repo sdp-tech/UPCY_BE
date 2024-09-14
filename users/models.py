@@ -13,11 +13,19 @@ from core.models import TimeStampedModel
 class UserManager(BaseUserManager):
     def create_user(self, email, password, **extra_fields):
         if not email:
-            raise ValueError(('THe Email must be set'))
+            raise ValueError("Users must have an email address")
         email = self.normalize_email(email)
-        user = self.model(email=email, **extra_fields)
-        user.set_password(password)
-        user.save()
+
+        try:
+            user = self.model(email=email, **extra_fields)
+            user.set_password(password)
+            user.save()
+        except ValidationError as e:
+            print(f"Validation Error: {str(e)}")
+            raise ValidationError(f"Validation Error: {str(e)}")
+        except Exception as e:
+            print(f"An error occurred during sign-up: {str(e)}")
+            raise Exception(f"An error occurred during sign-up: {str(e)}")
         return user
 
     def create_superuser(self, email, password, **extra_fields):
@@ -26,9 +34,9 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault('is_active', True)
 
         if extra_fields.get('is_staff') is not True:
-            raise ValueError(('Superuser must have is_staff=True.'))
+            raise ValueError('Superuser must have is_staff=True.')
         if extra_fields.get('is_superuser') is not True:
-            raise ValueError(('Superuser must have is_superuser=True.'))
+            raise ValueError('Superuser must have is_superuser=True.')
         return self.create_user(email, password, **extra_fields)
 
 
@@ -49,29 +57,22 @@ def get_upload_path(instance, filename):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    username = None
-    email = models.EmailField(max_length=64, unique=True)
-    phone = models.CharField(max_length = 15, blank=True, null=True)
-    code = models.CharField(max_length=5, blank=True, null=True)
-    nickname = models.CharField(max_length=20, blank=True)
-    #profile_image = models.ImageField(upload_to=get_upload_path, blank=True, null=True)
-    agreement_terms = models.BooleanField(default = False)
+    email = models.EmailField(max_length=64, unique=True)  # 이메일
+    phone = models.CharField(max_length=15, null=True, blank=True)  # 휴대전화 번호, now allows blank
+    nickname = models.CharField(max_length=20, null=True, blank=True)  # 사용자 닉네임, now allows blank
+    agreement_terms = models.BooleanField(default=False)  # 약관 동의 여부
+    address = models.CharField(max_length=255, null=True, blank=True)  # 사용자 기본 주소, ensure blank if optional
     follows = models.ManyToManyField("users.User", related_name='followers', blank=True)
     is_superuser = models.BooleanField(default=False)
-    # is_sdp_admin = models.BooleanField(default=False)
-    is_verified = models.BooleanField(default = False)
-    is_staff = models.BooleanField(default=False)
-    is_active = models.BooleanField(default = False)
-    area = models.CharField(max_length=20,blank=True)
-    #리폼러, 소비자 여부
-    is_reformer = models.BooleanField(default=False)
-    is_consumer = models.BooleanField(default=False)
-
-    #소비자 가입시 필요 필드
+    is_active = models.BooleanField(default=True)
+    role = models.CharField(
+        choices=[("customer", "CUSTOMER"), ("reformer", "REFORMER"), ("admin", "ADMIN")],
+        max_length=20,
+        null=False,
+        default="customer"
+    )  # 사용자 타입 (일반 사용자, 리포머, 관리자)
+    # customer 가입시 사용하는 필드
     prefer_style = models.ManyToManyField("users.Style", related_name='styled_consumers', blank=True)
-
-    # 소셜 계정인 경우, 소셜 ID 프로바이더 값 저장(ex. kakao, naver, google)
-    social_provider = models.CharField(max_length=30, blank=True)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
@@ -81,21 +82,14 @@ class User(AbstractBaseUser, PermissionsMixin):
         self.full_clean()
         return super().save(*args, **kwargs)
 
-    def __str__(self):
-        return self.email
-
     def clean(self):
         if not email_isvalid(self.email):
             raise ValidationError('메일 형식이 올바르지 않습니다.')
-        # if not user_type_is_valid(self):
-        #     raise ValidationError('유저 타입이 잘못되었습니다.')
-
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    profile_image = models.URLField(blank=True, null=True)
-    introduce=models.TextField(blank=True,null=True)
-
+    profile_image = models.URLField(null=True)
+    introduce=models.TextField(null=True)
 
 #Reformer profile 모델
 class ReformerProfile(models.Model):
@@ -106,15 +100,14 @@ class ReformerProfile(models.Model):
     links = models.TextField(blank=True, null=True)
     market_name = models.CharField(max_length=50, blank=True, null=True)
     market_intro = models.TextField(blank=True, null=True)
-    thumbnail_image = models.ImageField(upload_to=get_upload_path, blank=True, null=True)
     special_material = models.ManyToManyField("users.Material", related_name = 'reformers', blank=True)
 
-    #리포머 학력
-    school = models.CharField(max_length=100,blank=True,null=True)
-    major = models.CharField(max_length=100,blank=True,null=True)
-    status = models.CharField(max_length=100,blank=True,null=True)
-    school_certification = models.FileField(null=True)
-
+class ReformerEducation(models.Model):
+    profile = models.ForeignKey(ReformerProfile, on_delete=models.CASCADE, related_name='education')
+    school = models.CharField(max_length=100)
+    major = models.CharField(max_length=100)
+    academic_status = models.CharField(max_length=100)
+    proof_document = models.URLField(null=True)
 
 #Portfolio photo 모델
 def get_portfolio_photo_upload_path(instance, filename):
@@ -127,43 +120,36 @@ class PortfolioPhoto(TimeStampedModel):
         'users.User', related_name='portfolio_photos', on_delete=models.CASCADE, null=False, blank=False)
     introduction = models.TextField(null=True, blank=True)
 
-#Style 모델 만들기
+# Style 모델 만들기
 class Style(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200) # 스타일 태그 명
 
-#특수소재 모델
+# 특수소재 모델
 class Material(models.Model):
-    name = models.CharField(max_length=200)
-    
+    name = models.CharField(max_length=200) # 특수소재 명
+
 class Certification(models.Model):
-    profile = models.ForeignKey(ReformerProfile,on_delete=models.CASCADE, related_name='certification')
+    profile = models.ForeignKey(ReformerProfile, on_delete=models.CASCADE, related_name='certification')
     name = models.CharField(max_length=100)
     issuing_authority = models.CharField(max_length=100)
     issue_date = models.DateField()
-    proof_document = models.URLField()
-    
-class Competition(models.Model):
-    profile = models.ForeignKey(ReformerProfile,on_delete=models.CASCADE, related_name='competition')
+    proof_document = models.URLField(null=True)
+
+class Awards(models.Model):
+    profile = models.ForeignKey(ReformerProfile,on_delete=models.CASCADE, related_name='awards')
     name = models.CharField(max_length=100)
     organizer = models.CharField(max_length=100)
     award_date = models.DateField()
-    proof_document = models.URLField()
+    proof_document = models.URLField(null=True)
 
-class Internship(models.Model):
-    profile = models.ForeignKey(ReformerProfile,on_delete=models.CASCADE, related_name='internship')
+class Career(models.Model):
+    profile = models.ForeignKey(ReformerProfile,on_delete=models.CASCADE, related_name='career')
     company_name = models.CharField(max_length=100)
     department = models.CharField(max_length=100,null=True,blank=True)
     position = models.CharField(max_length=100,null=True,blank=True)
     start_date = models.DateField()
     end_date = models.DateField()
-    period=models.DurationField()
-    proof_document = models.URLField()
-
-@receiver(pre_save, sender=Internship)
-def calculate_period(sender, instance, **kwargs):
-    instance.period = instance.end_date - instance.start_date if instance.start_date and instance.end_date else None
-
-    
+    proof_document = models.URLField(null=True)
 
 class Freelancer(models.Model):
     profile = models.ForeignKey(ReformerProfile,on_delete=models.CASCADE, related_name='freelancer')
@@ -172,24 +158,4 @@ class Freelancer(models.Model):
     main_tasks = models.TextField()
     start_date = models.DateField()
     end_date = models.DateField()
-    period=models.DurationField()
-    proof_document = models.URLField()
-
-@receiver(pre_save, sender=Freelancer)
-def calculate_period(sender, instance, **kwargs):
-    instance.period = instance.end_date - instance.start_date if instance.start_date and instance.end_date else None
-
-    
-class Outsourcing(models.Model):
-    profile = models.ForeignKey(ReformerProfile,on_delete=models.CASCADE, related_name='outsourcing')
-    project_name = models.CharField(max_length=100)
-    client = models.CharField(max_length=100)
-    main_tasks = models.TextField()
-    start_date = models.DateField()
-    end_date = models.DateField()
-    period=models.DurationField()
-    proof_document = models.URLField()
-    
-@receiver(pre_save, sender=Outsourcing)
-def calculate_period(sender, instance, **kwargs):
-    instance.period = instance.end_date - instance.start_date if instance.start_date and instance.end_date else None
+    proof_document = models.URLField(null=True)

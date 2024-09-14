@@ -9,27 +9,20 @@ import uuid
 from xmlrpc.client import APPLICATION_ERROR
 
 from django.conf import settings
-# from django.core.mail import EmailMultiAlternatives
-# from django.utils.encoding import force_str, force_bytes
-# from django.utils.http import urlsafe_base64_encode
-# from django.template.loader import render_to_string
 
 from rest_framework import exceptions
-from rest_framework_simplejwt.tokens import RefreshToken, TokenError
-from rest_framework_simplejwt.exceptions import InvalidToken
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_jwt.settings import api_settings
 from django.core.files.images import ImageFile
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from django.core.files import File
-from django.core.files.base import ContentFile
 from users.models import User, ReformerProfile, Certification, Competition, Internship, Freelancer, UserProfile
 from users.selectors import UserSelector
-# from core.exceptions import ApplicationError
 from core.utils import s3_file_upload_by_file_data
 
 
 JWT_PAYLOAD_HANDLER = api_settings.JWT_PAYLOAD_HANDLER
 JWT_ENCODE_HANDLER = api_settings.JWT_ENCODE_HANDLER
+
 
 class UserService:
     def __init__(self):
@@ -62,7 +55,7 @@ class UserService:
 
         data={
             "email": user.email,
-            'refresh':str(token),
+            'refresh': str(token),
             'access': str(token.access_token),
             'nickname': user.nickname,
             'is_reformer': user.is_reformer,
@@ -88,8 +81,8 @@ class UserService:
         }
         return data
         
-    def reformer_profile_register(self,user:User, nickname:str, market_name:str,market_intro:str,links:str,
-        work_style:list[str],special_material:list[str]):
+    def reformer_profile_register(self, user: User, nickname: str, market_name: str,market_intro: str, links: str,
+        work_style: list[str], special_material: list[str]):
         
         reformer=ReformerProfile(user=user,nickname=nickname,market_name=market_name, market_intro=market_intro,
                                  links=links,)

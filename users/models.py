@@ -1,16 +1,15 @@
 from django.db import models
 
-# Create your models here.
 from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
-from django.contrib.auth.models import UserManager, PermissionsMixin
+from django.contrib.auth.models import PermissionsMixin
 from django.core.exceptions import ValidationError
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 import re
-from email.policy import default
 from core.models import TimeStampedModel
-#UserManager
+
+
 class UserManager(BaseUserManager):
     def create_user(self, email, password, **extra_fields):
         if not email:
@@ -31,17 +30,8 @@ class UserManager(BaseUserManager):
         if extra_fields.get('is_superuser') is not True:
             raise ValueError(('Superuser must have is_superuser=True.'))
         return self.create_user(email, password, **extra_fields)
-    
-#사용자 유형 유효성 검사
-# def user_type_is_valid(self):
 
-#     sdp_admin_user = self.is_sdp_admin and not self.is_verified
-#     verified_user = not self.is_sdp_admin and self.is_verified
-#     general_user = not self.is_sdp_admin and not self.is_verified
 
-#     return sdp_admin_user | verified_user | general_user
-
-#이메일 유효성 검사
 def email_isvalid(value):
     try:
         validation = re.compile(
@@ -52,9 +42,11 @@ def email_isvalid(value):
     except Exception as e:
         print('예외가 발생했습니다.', e)
 
+
 #ProfileImage파일 업로드 경로 설정
 def get_upload_path(instance, filename):
     return 'users/profile/{}'.format(filename)
+
 
 class User(AbstractBaseUser, PermissionsMixin):
     username = None
@@ -76,7 +68,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_consumer = models.BooleanField(default=False)
 
     #소비자 가입시 필요 필드
-    prefer_style = models.ManyToManyField("users.Style", related_name = 'styled_consumers', blank=True)
+    prefer_style = models.ManyToManyField("users.Style", related_name='styled_consumers', blank=True)
 
     # 소셜 계정인 경우, 소셜 ID 프로바이더 값 저장(ex. kakao, naver, google)
     social_provider = models.CharField(max_length=30, blank=True)
@@ -97,11 +89,14 @@ class User(AbstractBaseUser, PermissionsMixin):
             raise ValidationError('메일 형식이 올바르지 않습니다.')
         # if not user_type_is_valid(self):
         #     raise ValidationError('유저 타입이 잘못되었습니다.')
+
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     profile_image = models.URLField(blank=True, null=True)
     introduce=models.TextField(blank=True,null=True)
-    
+
+
 #Reformer profile 모델
 class ReformerProfile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reformer_profile')
@@ -120,8 +115,6 @@ class ReformerProfile(models.Model):
     status = models.CharField(max_length=100,blank=True,null=True)
     school_certification = models.FileField(null=True)
 
-    def __str__(self):
-        return self.user.email  # 또는 user의 다른 식별가능한 정보
 
 #Portfolio photo 모델
 def get_portfolio_photo_upload_path(instance, filename):

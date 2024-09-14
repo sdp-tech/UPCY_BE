@@ -6,65 +6,77 @@ import datetime
 import io
 import time
 import uuid
+from typing import Dict
 from xmlrpc.client import APPLICATION_ERROR
 
 from django.conf import settings
 
 from rest_framework import exceptions
+from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_jwt.settings import api_settings
+# from rest_framework_jwt.settings import api_settings
 from django.core.files.images import ImageFile
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from users.models import User, ReformerProfile, Certification, Competition, Internship, Freelancer, UserProfile
+from users.models import User, ReformerProfile, Certification, Awards, Career, Freelancer, UserProfile
 from users.selectors import UserSelector
 from core.utils import s3_file_upload_by_file_data
 
 
-JWT_PAYLOAD_HANDLER = api_settings.JWT_PAYLOAD_HANDLER
-JWT_ENCODE_HANDLER = api_settings.JWT_ENCODE_HANDLER
+# JWT_PAYLOAD_HANDLER = api_settings.JWT_PAYLOAD_HANDLER
+# JWT_ENCODE_HANDLER = api_settings.JWT_ENCODE_HANDLER
 
 
 class UserService:
     def __init__(self):
         pass
 
-    def user_sign_up(email:str,password:str,re_password:str, area:str):
-        if password!=re_password:
-            raise ValueError("passwords do not match")
-        print("password verification passed")
+    @staticmethod
+    def user_sign_up(email: str, password: str, agreement_terms: bool, address: str) -> None:
+        """
+        사용자 회원가입 함수
+        """
+        try:
+            # Check if user already exists
+            if User.objects.filter(email=email).exists():
+                raise ValidationError('A user with this email already exists.')
 
-        user = User.objects.create_user(email=email, password=password)
-        user.save()
 
-    def login(self, email: str, password: str):
+            # Create user with provided details
+            user = User.objects.create_user(
+                email=email,
+                password=password,
+                agreement_terms=agreement_terms,
+                address=address
+            )
+            user.save()
+        except ValidationError as e:
+            # Handle specific validation errors
+            raise ValidationError(f"Validation Error: {str(e)}")
+        except Exception as e:
+            # Handle unexpected errors
+            raise Exception(f"An error occurred during sign-up: {str(e)}")
+
+    @staticmethod
+    def login(email: str, password: str) -> Dict:
+        """
+        사용자 로그인 함수 -> 로그인 성공 시 AccessToken, RefreshToken 발급
+        """
         selector = UserSelector()
-
         user = selector.get_user_by_email(email)
 
-        # if user.social_provider:
-        #     raise ApplicationError(
-        #         user.social_provider + " 소셜 로그인 사용자입니다. 소셜 로그인을 이용해주세요."
-        #     )
-
         if not selector.check_password(user, password):
-            raise exceptions.ValidationError(
-                {'detail': "아이디나 비밀번호가 올바르지 않습니다."}
-            )
+            raise exceptions.ValidationError("아이디나 비밀번호가 올바르지 않습니다.")
         
         token = RefreshToken.for_user(user=user)
 
         data={
-            "email": user.email,
-            'refresh': str(token),
-            'access': str(token.access_token),
-            'nickname': user.nickname,
-            'is_reformer': user.is_reformer,
-            'is_consumer': user.is_consumer,
+            "access": str(token.access_token),
+            "refresh": str(token)
         }
 
         return data
     
-    def user_profile_image_register(self,user:User,img:ImageFile):
+    def user_profile_image_register(self, user: User, img: ImageFile) -> Dict:
         img_url=s3_file_upload_by_file_data(
             upload_file=img,
             region_name=settings.AWS_S3_REGION_NAME,
@@ -119,14 +131,14 @@ class UserService:
             bucket_name=settings.AWS_STORAGE_BUCKET_NAME,
             bucket_path=f'profile/{profile.user.pk}/competition'
         )
-        competition=Competition(
+        award=Awards(
             profile=profile,
             name=name,
             organizer=organizer,
             award_date=award_date,
             proof_document=file_url,
         )
-        competition.save()
+        award.save()
         
     def intership_register(self,profile:ReformerProfile,company_name:str,department:str,position:str,start_date:str,end_date:str,proof_document:InMemoryUploadedFile):
         # 파일을 S3에 업로드
@@ -137,11 +149,11 @@ class UserService:
             bucket_path=f'profile/{profile.user.pk}/intership'
         )        
         
-        internship=Internship(
+        career = Career(
             profile=profile,company_name=company_name,department=department,position=position,start_date=start_date,end_date=end_date,
                     proof_document=file_url,
         )
-        internship.save()
+        career.save()
         
     def freelancer_register(self,profile:ReformerProfile,project_name:str,client:str,main_tasks:str,start_date:str,end_date:str,proof_document:InMemoryUploadedFile):
         # 파일을 S3에 업로드

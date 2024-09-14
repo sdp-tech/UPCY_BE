@@ -28,7 +28,7 @@ class HealthCheckView(APIView):
     def get(self, request):
         return Response(
             {
-                'status': 'success',
+                'message': 'hello',
             },
             status=status.HTTP_200_OK
         )

@@ -1,4 +1,6 @@
 # from typing import List
+from typing import Dict
+
 from django.http import Http404, HttpResponseBadRequest
 # from django.db.models import QuerySet, Q, F
 # from django.contrib.auth import authenticate
@@ -23,7 +25,7 @@ class UserSelector:
         return user.check_password(password)
     
     @staticmethod
-    def get_user_profile_by_email(email:str) -> UserProfile:
+    def get_user_profile_by_email(email:str) -> Dict:
         try:
             user = User.objects.get(email=email)
             user_profile = UserProfile.objects.get(user=user)

@@ -17,18 +17,17 @@ from .selectors import ServiceSelector
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 
-# Create your views here.
+
 class ServiceCreateApi(APIView):
     permission_classes=(AllowAny,)
     
     class ServiceCreateInputSerializer(serializers.Serializer):
-        name= serializers.CharField()
-        
-        category=serializers.CharField()
-        style=serializers.ListField(required=False)
-        fit=serializers.ListField(required=False)
-        texture=serializers.ListField(required=False)
-        detail=serializers.ListField(required=False)
+        name = serializers.CharField()
+        category = serializers.CharField()
+        style = serializers.ListField(required=False)
+        fit = serializers.ListField(required=False)
+        texture = serializers.ListField(required=False)
+        detail = serializers.ListField(required=False)
         keywords = serializers.ListField(required=False)
 
         basic_price = serializers.CharField()

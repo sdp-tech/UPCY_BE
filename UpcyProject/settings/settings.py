@@ -25,7 +25,8 @@ env = environ.Env(
 )
 
 # .env 파일 경로 설정 및 로드
-env.read_env(os.path.join(BASE_DIR, '.env'))
+dotenv_path = os.path.join(BASE_DIR, '.env')
+load_dotenv(dotenv_path)
 
 SECRET_KEY = env('UPCY_SECRET_KEY')
 
@@ -72,8 +73,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware'
-
 ]
+
 CORS_ORIGIN_ALLOW_ALL = True
 CSRF_COOKIE_SECURE = False  # 개발 중일 때는 False로 설정
 CSRF_TRUSTED_ORIGINS = [
@@ -178,24 +179,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # S3 설정
-dotenv_path = os.path.join(BASE_DIR, '.env')
-load_dotenv(dotenv_path)
-
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME', 'upcy-bucket')
 AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME', 'ap-northeast-2')
-# SWAGGER_SETTINGS = {
-#     'USE_SESSION_AUTH': False,
-#     'SECURITY_DEFINITIONS': {
-#         'BearerAuth': {
-#             'type': 'apiKey',
-#             'name': 'Authorization',
-#             'in': 'header',
-#             'description': "Bearer Token"
-#         }
-#     },
-#     'SECURITY_REQUIREMENTS': [{
-#         'BearerAuth': []
-#     }]
-# }

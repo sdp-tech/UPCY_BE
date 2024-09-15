@@ -17,6 +17,7 @@ uvicorn = "^0.30.6"
 boto3 = "^1.35.19"
 django-cors-headers = "^4.4.0"
 python-dotenv = "^1.0.1"
+django-storages = "^1.14.4"
 
 [tool.poetry.group.dev.dependencies]
 flake8 = "^7.1.1"

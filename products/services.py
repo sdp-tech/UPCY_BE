@@ -2,16 +2,17 @@ import io
 import time
 import uuid
 
-
-from django.shortcuts import get_list_or_404, get_object_or_404
-from django.db import transaction
+from django.conf import settings
 from django.core.files.images import ImageFile
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from django.conf import settings
+from django.db import transaction
+from django.shortcuts import get_list_or_404, get_object_or_404
 
-from products.models import Product, ProductKeyword, ProductPhoto, Category, Style, Fit, Texture, Detail
+from products.models import (Category, Detail, Fit, Product, ProductKeyword,
+                             ProductPhoto, Style, Texture)
 from products.selectors import ProductSelector
 from users.models import User
+
 # from .selectors import ProductSelector
 #from core.exceptions import ApplicationError
 

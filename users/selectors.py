@@ -1,11 +1,13 @@
 # from typing import List
 from typing import Dict
 
-from django.http import Http404, HttpResponseBadRequest
 # from django.db.models import QuerySet, Q, F
 # from django.contrib.auth import authenticate
 from django.core.exceptions import ObjectDoesNotExist
-from users.models import User, ReformerProfile,UserProfile
+from django.http import Http404, HttpResponseBadRequest
+
+from users.models import ReformerProfile, User, UserProfile
+
 
 class UserSelector:
     def __init__(self):

@@ -1,18 +1,17 @@
-from django.shortcuts import render
-from django.shortcuts import get_object_or_404
-
-from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from django.shortcuts import get_object_or_404, render
 from rest_framework import serializers, status
-from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from core.views import get_paginated_response
 from users.models import User
 
-from .models import Service, Category, Style, Fit, Texture, Detail
-from .services import ServiceCoordinatorService, ServiceService, ServicePhotoService, ServiceKeywordService
+from .models import Category, Detail, Fit, Service, Style, Texture
 from .selectors import ServiceSelector
+from .services import (ServiceCoordinatorService, ServiceKeywordService,
+                       ServicePhotoService, ServiceService)
 
 
 class ServiceCreateApi(APIView):

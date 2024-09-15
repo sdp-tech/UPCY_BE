@@ -1,35 +1,29 @@
 from rest_framework import serializers
 from users.models import (
-    ReformerProfile,
-    ReformerEducation,
-    Certification,
-    Awards,
-    Career,
-    Freelancer,
-    Style,
-    Material
+    ReformerAwards, ReformerCareer, ReformerCertification, Freelancer,
+    ReformerMaterial, ReformerEducation, ReformerProfile, ReformerStyle
 )
 
 
-class CertificationSerializer(serializers.ModelSerializer):
+class ReformerCertificationSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Certification
+        model = ReformerCertification
         fields = ['name', 'issuing_authority', 'issue_date', 'proof_document']
 
 
-class AwardSerializer(serializers.ModelSerializer):
+class ReformerAwardSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Awards
+        model = ReformerAwards
         fields = ['name', 'organizer', 'award_date', 'proof_document']
 
 
-class CareerSerializer(serializers.ModelSerializer):
+class ReformerCareerSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Career
+        model = ReformerCareer
         fields = ['company_name', 'department', 'position', 'start_date', 'end_date', 'proof_document']
 
 
-class FreelancerSerializer(serializers.ModelSerializer):
+class ReformerFreelancerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Freelancer
         fields = ['project_name', 'client', 'main_tasks', 'start_date', 'end_date', 'proof_document']
@@ -42,11 +36,11 @@ class ReformerEducationSerializer(serializers.ModelSerializer):
 
 
 class ReformerProfileSerializer(serializers.ModelSerializer):
-    education = ReformerEducationSerializer(many=True)
-    certification = CertificationSerializer(many=True)
-    awards = AwardSerializer(many=True)
-    career = CareerSerializer(many=True)
-    freelancer = FreelancerSerializer(many=True)
+    education = ReformerEducationSerializer(many=True, required=False)
+    certification = ReformerCertificationSerializer(many=True, required=False)
+    awards = ReformerAwardSerializer(many=True, required=False)
+    career = ReformerCareerSerializer(many=True, required=False)
+    freelancer = ReformerFreelancerSerializer(many=True, required=False)
     style = serializers.CharField(write_only=True)  # 문자열로 입력받음
     material = serializers.CharField(write_only=True)  # 문자열로 입력받음
 
@@ -57,23 +51,12 @@ class ReformerProfileSerializer(serializers.ModelSerializer):
             'material', 'education', 'certification', 'awards', 'career', 'freelancer'
         ]
 
-    def validate_style(self, value):
-        """콤마로 구분된 문자열을 리스트로 변환하여 스타일 객체로 매핑."""
-        style_names = [name.strip() for name in value.split(',') if name.strip()]
-        style_objects = [Style.objects.get_or_create(name=name)[0] for name in style_names]
-        return style_objects
-
-    def validate_material(self, value):
-        """콤마로 구분된 문자열을 리스트로 변환하여 소재 객체로 매핑."""
-        material_names = [name.strip() for name in value.split(',') if name.strip()]
-        material_objects = [Material.objects.get_or_create(name=name)[0] for name in material_names]
-        return material_objects
-
     def create(self, validated_data):
-        style_objects = validated_data.pop('style', [])
-        material_objects = validated_data.pop('material', [])
+        user = self.context.get('request').user
 
-        # 나머지 데이터를 사용하여 프로필 생성
+        styles = validated_data.pop('style', '')
+        materials = validated_data.pop('material', '')
+
         education_data = validated_data.pop('education', [])
         certification_data = validated_data.pop('certification', [])
         awards_data = validated_data.pop('awards', [])
@@ -81,26 +64,99 @@ class ReformerProfileSerializer(serializers.ModelSerializer):
         freelancer_data = validated_data.pop('freelancer', [])
 
         # 프로필 생성
-        profile = ReformerProfile.objects.create(**validated_data)
+        profile = ReformerProfile.objects.create(user=user, **validated_data)
 
-        # ManyToMany 필드에 객체 추가
-        profile.work_style.set(style_objects)
-        profile.special_material.set(material_objects)
+        # 스타일 및 재료 처리
+        if styles:
+            styles_list = styles.split(',')
+            for style_name in styles_list:
+                ReformerStyle.objects.create(reformer=profile, name=style_name.strip())
 
-        # 교육, 자격증, 수상, 경력, 프리랜서 데이터를 객체로 변환하여 저장
-        for edu in education_data:
-            ReformerEducation.objects.create(profile=profile, **edu)
+        if materials:
+            materials_list = materials.split(',')
+            for material_name in materials_list:
+                ReformerMaterial.objects.create(reformer=profile, name=material_name.strip())
 
-        for cert in certification_data:
-            Certification.objects.create(profile=profile, **cert)
-
-        for award in awards_data:
-            Awards.objects.create(profile=profile, **award)
-
-        for career in career_data:
-            Career.objects.create(profile=profile, **career)
-
-        for freelancer in freelancer_data:
-            Freelancer.objects.create(profile=profile, **freelancer)
+        # 중첩된 데이터 생성
+        self.create_nested_data(profile, education_data, certification_data, awards_data, career_data, freelancer_data)
 
         return profile
+
+    def update(self, instance, validated_data):
+        styles = validated_data.pop('style', '')
+        materials = validated_data.pop('material', '')
+
+        education_data = validated_data.pop('education', [])
+        certification_data = validated_data.pop('certification', [])
+        awards_data = validated_data.pop('awards', [])
+        career_data = validated_data.pop('career', [])
+        freelancer_data = validated_data.pop('freelancer', [])
+
+        # 기본 프로필 데이터 업데이트
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        # 기존 스타일 및 재료 삭제 후 업데이트
+        ReformerStyle.objects.filter(reformer=instance).delete()
+        if styles:
+            styles_list = styles.split(',')
+            for style_name in styles_list:
+                ReformerStyle.objects.create(reformer=instance, name=style_name.strip())
+
+        ReformerMaterial.objects.filter(reformer=instance).delete()
+        if materials:
+            materials_list = materials.split(',')
+            for material_name in materials_list:
+                ReformerMaterial.objects.create(reformer=instance, name=material_name.strip())
+
+        # 중첩된 데이터 업데이트 처리
+        self.update_nested_data(instance, education_data, certification_data, awards_data, career_data, freelancer_data)
+
+        return instance
+
+    def create_nested_data(self, profile, education_data, certification_data, awards_data, career_data,
+                           freelancer_data):
+        """Helper function to create nested data."""
+        for edu in education_data:
+            ReformerEducation.objects.create(reformer=profile, **edu)
+
+        for cert in certification_data:
+            ReformerCertification.objects.create(reformer=profile, **cert)
+
+        for award in awards_data:
+            ReformerAwards.objects.create(reformer=profile, **award)
+
+        for career in career_data:
+            ReformerCareer.objects.create(reformer=profile, **career)
+
+        for freelancer in freelancer_data:
+            Freelancer.objects.create(reformer=profile, **freelancer)
+
+    def update_nested_data(self, profile, education_data, certification_data, awards_data, career_data,
+                           freelancer_data):
+        """Helper function to update nested data."""
+        # 교육 업데이트 로직
+        ReformerEducation.objects.filter(reformer=profile).delete()
+        for edu in education_data:
+            ReformerEducation.objects.create(reformer=profile, **edu)
+
+        # 자격증 업데이트 로직
+        ReformerCertification.objects.filter(reformer=profile).delete()
+        for cert in certification_data:
+            ReformerCertification.objects.create(reformer=profile, **cert)
+
+        # 수상 내역 업데이트 로직
+        ReformerAwards.objects.filter(reformer=profile).delete()
+        for award in awards_data:
+            ReformerAwards.objects.create(reformer=profile, **award)
+
+        # 경력 업데이트 로직
+        ReformerCareer.objects.filter(reformer=profile).delete()
+        for career in career_data:
+            ReformerCareer.objects.create(reformer=profile, **career)
+
+        # 프리랜서 경력 업데이트 로직
+        Freelancer.objects.filter(reformer=profile).delete()
+        for freelancer in freelancer_data:
+            Freelancer.objects.create(reformer=profile, **freelancer)

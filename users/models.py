@@ -1,14 +1,30 @@
 import re
 
-from django.conf import settings
 from django.contrib.auth.models import (AbstractBaseUser, BaseUserManager,
                                         PermissionsMixin)
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models.signals import pre_save
-from django.dispatch import receiver
 
 from core.models import TimeStampedModel
+
+def get_certification_upload_path(instance, filename):
+    user_id = instance.reformer.user.id
+    return f"users/{user_id}/certifications/{filename}"
+
+def email_isvalid(value):
+    try:
+        validation = re.compile(
+            r'^[a-zA-Z0-9+-_.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$')
+        if not re.match(validation, value):
+            raise Exception('올바른 메일 형식이 아닙니다.')
+        return value
+    except Exception as e:
+        print('예외가 발생했습니다.', e)
+
+
+#ProfileImage파일 업로드 경로 설정
+def get_upload_path(instance, filename):
+    return 'users/profile/{}'.format(filename)
 
 
 class UserManager(BaseUserManager):
@@ -41,29 +57,14 @@ class UserManager(BaseUserManager):
         return self.create_user(email, password, **extra_fields)
 
 
-def email_isvalid(value):
-    try:
-        validation = re.compile(
-            r'^[a-zA-Z0-9+-_.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$')
-        if not re.match(validation, value):
-            raise Exception('올바른 메일 형식이 아닙니다.')
-        return value
-    except Exception as e:
-        print('예외가 발생했습니다.', e)
-
-
-#ProfileImage파일 업로드 경로 설정
-def get_upload_path(instance, filename):
-    return 'users/profile/{}'.format(filename)
-
-
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(max_length=64, unique=True)  # 이메일
     phone = models.CharField(max_length=15, null=True, blank=True)  # 휴대전화 번호, now allows blank
     nickname = models.CharField(max_length=20, null=True, blank=True)  # 사용자 닉네임, now allows blank
     agreement_terms = models.BooleanField(default=False)  # 약관 동의 여부
     address = models.CharField(max_length=255, null=True, blank=True)  # 사용자 기본 주소, ensure blank if optional
-    follows = models.ManyToManyField("users.User", related_name='followers', blank=True)
+    profile_image = models.URLField(null=True) # 프로필 이미지 URL 필드 (S3 URL)
+    introduce = models.TextField(null=True) # 사용자 소개글
     is_superuser = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     role = models.CharField(
@@ -93,12 +94,6 @@ class UserPreferStyle(models.Model):
     prefer_style = models.CharField(max_length=100)
 
 
-class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    profile_image = models.URLField(null=True)
-    introduce = models.TextField(null=True)
-
-
 class ReformerProfile(models.Model):
     # 리포머 기본 프로필 정보
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='reformer_profile')
@@ -114,7 +109,7 @@ class ReformerEducation(models.Model):
     school = models.CharField(max_length=100)
     major = models.CharField(max_length=100)
     academic_status = models.CharField(max_length=100)
-    proof_document = models.FileField(upload_to='education/', null=True, blank=True)  # S3에 저장되는 경로
+    proof_document = models.FileField(upload_to=get_certification_upload_path, null=True, blank=True)  # S3에 저장되는 경로
 
 
 #Portfolio photo 모델
@@ -148,7 +143,7 @@ class ReformerCertification(models.Model):
     name = models.CharField(max_length=100)
     issuing_authority = models.CharField(max_length=100)
     issue_date = models.DateField()
-    proof_document = models.FileField(upload_to='certifications/', null=True, blank=True)
+    proof_document = models.FileField(upload_to=get_certification_upload_path, null=True, blank=True)
 
 
 class ReformerAwards(models.Model):
@@ -157,7 +152,7 @@ class ReformerAwards(models.Model):
     name = models.CharField(max_length=100)
     organizer = models.CharField(max_length=100)
     award_date = models.DateField()
-    proof_document = models.FileField(upload_to='awards/', null=True, blank=True)
+    proof_document = models.FileField(upload_to=get_certification_upload_path, null=True, blank=True)
 
 
 class ReformerCareer(models.Model):
@@ -168,10 +163,10 @@ class ReformerCareer(models.Model):
     position = models.CharField(max_length=100,null=True,blank=True)
     start_date = models.DateField()
     end_date = models.DateField()
-    proof_document = models.FileField(upload_to='careers/', null=True, blank=True)
+    proof_document = models.FileField(upload_to=get_certification_upload_path, null=True, blank=True)
 
 
-class Freelancer(models.Model):
+class ReformerFreelancer(models.Model):
     # 리포머 프리랜서/외주 경력
     reformer = models.ForeignKey(ReformerProfile, on_delete=models.CASCADE, related_name='freelancer')
     project_name = models.CharField(max_length=100)
@@ -179,4 +174,4 @@ class Freelancer(models.Model):
     main_tasks = models.TextField()
     start_date = models.DateField()
     end_date = models.DateField()
-    proof_document = models.FileField(upload_to='freelancers/', null=True, blank=True)
+    proof_document = models.FileField(upload_to=get_certification_upload_path, null=True, blank=True)

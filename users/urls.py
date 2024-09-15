@@ -3,11 +3,13 @@ from django.urls import path
 from users.views.reformer_view import ReformerProfileView
 from users.views.token_view import *
 from users.views.user_auth_view import *
+from users.views.user_crud_view import *
 
 app_name = "users"
 
 urlpatterns =[
-    path('/signup', UserSignUpApi.as_view(), name='user_crud'),
+    path('', UserCrudApi.as_view(), name='user_crud'),
+    path('/signup', UserSignUpApi.as_view(), name='signup'),
     path('/login', UserLoginApi.as_view(), name='login'),
     path('/logout', UserLogoutApi.as_view(), name='logout'),
     path('/token/verify', UserTokenVerifyView.as_view(), name='token_verify'),

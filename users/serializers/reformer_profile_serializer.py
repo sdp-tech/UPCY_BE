@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from users.models import (
-    ReformerAwards, ReformerCareer, ReformerCertification, Freelancer,
+    ReformerAwards, ReformerCareer, ReformerCertification, ReformerFreelancer,
     ReformerMaterial, ReformerEducation, ReformerProfile, ReformerStyle
 )
 
@@ -25,7 +25,7 @@ class ReformerCareerSerializer(serializers.ModelSerializer):
 
 class ReformerFreelancerSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Freelancer
+        model = ReformerFreelancer
         fields = ['project_name', 'client', 'main_tasks', 'start_date', 'end_date', 'proof_document']
 
 
@@ -41,8 +41,8 @@ class ReformerProfileSerializer(serializers.ModelSerializer):
     awards = ReformerAwardSerializer(many=True, required=False)
     career = ReformerCareerSerializer(many=True, required=False)
     freelancer = ReformerFreelancerSerializer(many=True, required=False)
-    style = serializers.CharField(write_only=True)  # 문자열로 입력받음
-    material = serializers.CharField(write_only=True)  # 문자열로 입력받음
+    style = serializers.CharField()  # 문자열로 입력받음
+    material = serializers.CharField()  # 문자열로 입력받음
 
     class Meta:
         model = ReformerProfile
@@ -53,7 +53,6 @@ class ReformerProfileSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = self.context.get('request').user
-
         styles = validated_data.pop('style', '')
         materials = validated_data.pop('material', '')
 
@@ -81,6 +80,24 @@ class ReformerProfileSerializer(serializers.ModelSerializer):
         self.create_nested_data(profile, education_data, certification_data, awards_data, career_data, freelancer_data)
 
         return profile
+
+    def create_nested_data(self, profile, education_data, certification_data, awards_data, career_data,
+                           freelancer_data):
+        """Helper function to create nested data."""
+        for edu in education_data:
+            ReformerEducation.objects.create(reformer=profile, **edu)
+
+        for cert in certification_data:
+            ReformerCertification.objects.create(reformer=profile, **cert)
+
+        for award in awards_data:
+            ReformerAwards.objects.create(reformer=profile, **award)
+
+        for career in career_data:
+            ReformerCareer.objects.create(reformer=profile, **career)
+
+        for freelancer in freelancer_data:
+            ReformerFreelancer.objects.create(reformer=profile, **freelancer)
 
     def update(self, instance, validated_data):
         styles = validated_data.pop('style', '')
@@ -115,27 +132,8 @@ class ReformerProfileSerializer(serializers.ModelSerializer):
 
         return instance
 
-    def create_nested_data(self, profile, education_data, certification_data, awards_data, career_data,
-                           freelancer_data):
-        """Helper function to create nested data."""
-        for edu in education_data:
-            ReformerEducation.objects.create(reformer=profile, **edu)
-
-        for cert in certification_data:
-            ReformerCertification.objects.create(reformer=profile, **cert)
-
-        for award in awards_data:
-            ReformerAwards.objects.create(reformer=profile, **award)
-
-        for career in career_data:
-            ReformerCareer.objects.create(reformer=profile, **career)
-
-        for freelancer in freelancer_data:
-            Freelancer.objects.create(reformer=profile, **freelancer)
-
     def update_nested_data(self, profile, education_data, certification_data, awards_data, career_data,
                            freelancer_data):
-        """Helper function to update nested data."""
         # 교육 업데이트 로직
         ReformerEducation.objects.filter(reformer=profile).delete()
         for edu in education_data:
@@ -157,6 +155,6 @@ class ReformerProfileSerializer(serializers.ModelSerializer):
             ReformerCareer.objects.create(reformer=profile, **career)
 
         # 프리랜서 경력 업데이트 로직
-        Freelancer.objects.filter(reformer=profile).delete()
+        ReformerFreelancer.objects.filter(reformer=profile).delete()
         for freelancer in freelancer_data:
-            Freelancer.objects.create(reformer=profile, **freelancer)
+            ReformerFreelancer.objects.create(reformer=profile, **freelancer)

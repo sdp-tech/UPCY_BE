@@ -3,11 +3,7 @@ from rest_framework import serializers
 from users.models import User
 
 
-class UserSignUpSerializer(serializers.Serializer):
-    email = serializers.EmailField(write_only=True)
-    password = serializers.CharField(write_only=True)
-    agreement_terms = serializers.CharField(write_only=True)
-    address = serializers.CharField(write_only=True)
+class UserSignUpSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         if User.objects.filter(email=attrs["email"]).exists():
@@ -17,3 +13,7 @@ class UserSignUpSerializer(serializers.Serializer):
             raise serializers.ValidationError("Agreement terms must be accepted.")
 
         return attrs
+
+    class Meta:
+        model = User
+        fields = ['email', 'password', 'phone', 'nickname', 'agreement_terms', 'address']

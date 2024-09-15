@@ -1,8 +1,10 @@
 
 ## 
-from datetime import datetime
 from dataclasses import dataclass
-from django.db.models import Q, Case,Value, When, Exists, OuterRef
+from datetime import datetime
+
+from django.db.models import Case, Exists, OuterRef, Q, Value, When
+
 from services.models import Service
 from users.models import User
 

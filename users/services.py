@@ -1,26 +1,18 @@
-import os
-import string
-import random
 import datetime
-
-import io
-import time
-import uuid
 from typing import Dict
-from xmlrpc.client import APPLICATION_ERROR
 
 from django.conf import settings
-
-from rest_framework import exceptions
-from rest_framework.exceptions import ValidationError
-from rest_framework_simplejwt.tokens import RefreshToken
-# from rest_framework_jwt.settings import api_settings
 from django.core.files.images import ImageFile
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from users.models import User, ReformerProfile, Certification, Awards, Career, Freelancer, UserProfile
-from users.selectors import UserSelector
-from core.utils import s3_file_upload_by_file_data
+from rest_framework import exceptions
+from rest_framework.exceptions import ValidationError
+from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
+from rest_framework_simplejwt.tokens import RefreshToken
 
+from core.utils import s3_file_upload_by_file_data
+from users.models import (ReformerAwards, ReformerCareer, ReformerCertification, Freelancer,
+                          ReformerProfile, User, UserProfile)
+from users.selectors import UserSelector
 
 # JWT_PAYLOAD_HANDLER = api_settings.JWT_PAYLOAD_HANDLER
 # JWT_ENCODE_HANDLER = api_settings.JWT_ENCODE_HANDLER
@@ -75,7 +67,18 @@ class UserService:
         }
 
         return data
-    
+
+    @staticmethod
+    def logout(refresh_token: str) -> None:
+        try:
+            # refresh token 유효성 검사 및 블랙리스트 처리
+            token = RefreshToken(refresh_token)
+            token.blacklist()  # 블랙리스트에 추가하여 사용 불가 처리
+        except (TokenError, InvalidToken) as e:
+            raise e
+        except Exception as e:
+            raise e
+
     def user_profile_image_register(self, user: User, img: ImageFile) -> Dict:
         img_url=s3_file_upload_by_file_data(
             upload_file=img,
@@ -113,7 +116,7 @@ class UserService:
         )
 
         # Certification 인스턴스 생성 및 저장
-        certification = Certification(
+        certification = ReformerCertification(
             profile=profile,
             name=name,
             issuing_authority=issuing_authority,
@@ -131,7 +134,7 @@ class UserService:
             bucket_name=settings.AWS_STORAGE_BUCKET_NAME,
             bucket_path=f'profile/{profile.user.pk}/competition'
         )
-        award=Awards(
+        award=ReformerAwards(
             profile=profile,
             name=name,
             organizer=organizer,
@@ -149,7 +152,7 @@ class UserService:
             bucket_path=f'profile/{profile.user.pk}/intership'
         )        
         
-        career = Career(
+        career = ReformerCareer(
             profile=profile,company_name=company_name,department=department,position=position,start_date=start_date,end_date=end_date,
                     proof_document=file_url,
         )

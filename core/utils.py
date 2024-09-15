@@ -4,11 +4,13 @@ services>services.py>ServicePhotoApi 참고해서 작성하면 됨
 """
 
 import io
-import boto3
 import uuid
-from django.conf import settings
-from UpcyProject.settings import settings
 from datetime import datetime
+
+import boto3
+from django.conf import settings
+
+from UpcyProject.settings import settings
 
 
 def get_random_text(length):

@@ -1,12 +1,13 @@
-from django.db import models
+import re
 
 from django.conf import settings
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
-from django.contrib.auth.models import PermissionsMixin
+from django.contrib.auth.models import (AbstractBaseUser, BaseUserManager,
+                                        PermissionsMixin)
 from django.core.exceptions import ValidationError
+from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
-import re
+
 from core.models import TimeStampedModel
 
 
@@ -72,7 +73,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         default="customer"
     )  # 사용자 타입 (일반 사용자, 리포머, 관리자)
     # customer 가입시 사용하는 필드
-    prefer_style = models.ManyToManyField("users.Style", related_name='styled_consumers', blank=True)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
@@ -86,32 +86,41 @@ class User(AbstractBaseUser, PermissionsMixin):
         if not email_isvalid(self.email):
             raise ValidationError('메일 형식이 올바르지 않습니다.')
 
+
+class UserPreferStyle(models.Model):
+    # 사용자의 선호 스타일 저장 테이블
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    prefer_style = models.CharField(max_length=100)
+
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     profile_image = models.URLField(null=True)
-    introduce=models.TextField(null=True)
+    introduce = models.TextField(null=True)
 
-#Reformer profile 모델
+
 class ReformerProfile(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reformer_profile')
-    # 여기에 리폼러 기본 필드
-    nickname=models.CharField(max_length=50)
-    work_style = models.ManyToManyField("users.Style", related_name = 'styled_refomers', blank=True)
+    # 리포머 기본 프로필 정보
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='reformer_profile')
+    nickname = models.CharField(max_length=50)
     links = models.TextField(blank=True, null=True)
     market_name = models.CharField(max_length=50, blank=True, null=True)
     market_intro = models.TextField(blank=True, null=True)
-    special_material = models.ManyToManyField("users.Material", related_name = 'reformers', blank=True)
+
 
 class ReformerEducation(models.Model):
-    profile = models.ForeignKey(ReformerProfile, on_delete=models.CASCADE, related_name='education')
+    # 리포머 학력
+    reformer = models.ForeignKey(ReformerProfile, on_delete=models.CASCADE, related_name='education')
     school = models.CharField(max_length=100)
     major = models.CharField(max_length=100)
     academic_status = models.CharField(max_length=100)
-    proof_document = models.URLField(null=True)
+    proof_document = models.FileField(upload_to='education/', null=True, blank=True)  # S3에 저장되는 경로
+
 
 #Portfolio photo 모델
 def get_portfolio_photo_upload_path(instance, filename):
     return 'users/protfolio/{}'.format(filename)
+
 
 class PortfolioPhoto(TimeStampedModel):
     image = models.ImageField(
@@ -120,42 +129,54 @@ class PortfolioPhoto(TimeStampedModel):
         'users.User', related_name='portfolio_photos', on_delete=models.CASCADE, null=False, blank=False)
     introduction = models.TextField(null=True, blank=True)
 
-# Style 모델 만들기
-class Style(models.Model):
-    name = models.CharField(max_length=200) # 스타일 태그 명
 
-# 특수소재 모델
-class Material(models.Model):
-    name = models.CharField(max_length=200) # 특수소재 명
+class ReformerStyle(models.Model):
+    # 리포머 작업 스타일
+    reformer = models.ForeignKey(ReformerProfile, on_delete=models.CASCADE, related_name='style')
+    name = models.CharField(max_length=200)  # 스타일 태그 명
 
-class Certification(models.Model):
-    profile = models.ForeignKey(ReformerProfile, on_delete=models.CASCADE, related_name='certification')
+
+class ReformerMaterial(models.Model):
+    # 리포머 주요 사용 재료
+    reformer = models.ForeignKey(ReformerProfile, on_delete=models.CASCADE, related_name='material')
+    name = models.CharField(max_length=200)  # 특수소재 명
+
+
+class ReformerCertification(models.Model):
+    # 리포머 자격 사항
+    reformer = models.ForeignKey(ReformerProfile, on_delete=models.CASCADE, related_name='certification')
     name = models.CharField(max_length=100)
     issuing_authority = models.CharField(max_length=100)
     issue_date = models.DateField()
-    proof_document = models.URLField(null=True)
+    proof_document = models.FileField(upload_to='certifications/', null=True, blank=True)
 
-class Awards(models.Model):
-    profile = models.ForeignKey(ReformerProfile,on_delete=models.CASCADE, related_name='awards')
+
+class ReformerAwards(models.Model):
+    # 리포머 수상 내역
+    reformer = models.ForeignKey(ReformerProfile,on_delete=models.CASCADE, related_name='awards')
     name = models.CharField(max_length=100)
     organizer = models.CharField(max_length=100)
     award_date = models.DateField()
-    proof_document = models.URLField(null=True)
+    proof_document = models.FileField(upload_to='awards/', null=True, blank=True)
 
-class Career(models.Model):
-    profile = models.ForeignKey(ReformerProfile,on_delete=models.CASCADE, related_name='career')
+
+class ReformerCareer(models.Model):
+    # 리포머 경력
+    reformer = models.ForeignKey(ReformerProfile, on_delete=models.CASCADE, related_name='career')
     company_name = models.CharField(max_length=100)
     department = models.CharField(max_length=100,null=True,blank=True)
     position = models.CharField(max_length=100,null=True,blank=True)
     start_date = models.DateField()
     end_date = models.DateField()
-    proof_document = models.URLField(null=True)
+    proof_document = models.FileField(upload_to='careers/', null=True, blank=True)
+
 
 class Freelancer(models.Model):
-    profile = models.ForeignKey(ReformerProfile,on_delete=models.CASCADE, related_name='freelancer')
+    # 리포머 프리랜서/외주 경력
+    reformer = models.ForeignKey(ReformerProfile, on_delete=models.CASCADE, related_name='freelancer')
     project_name = models.CharField(max_length=100)
     client = models.CharField(max_length=100)
     main_tasks = models.TextField()
     start_date = models.DateField()
     end_date = models.DateField()
-    proof_document = models.URLField(null=True)
+    proof_document = models.FileField(upload_to='freelancers/', null=True, blank=True)

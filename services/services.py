@@ -1,17 +1,20 @@
-import uuid
-import boto3
 import io
-from django.shortcuts import get_list_or_404, get_object_or_404
-from django.db import transaction
+import uuid
+
+import boto3
+from django.conf import settings
 from django.core.files.images import ImageFile
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from django.conf import settings
+from django.db import transaction
+from django.shortcuts import get_list_or_404, get_object_or_404
 
-from services.models import Service, ServiceKeyword, ServicePhoto, Category, Style, Fit, Texture, Detail
-from .selectors import ServiceSelector
-from users.models import User
 from core.utils import s3_file_upload_by_file_data
+from services.models import (Category, Detail, Fit, Service, ServiceKeyword,
+                             ServicePhoto, Style, Texture)
 from UpcyProject.settings import settings
+from users.models import User
+
+from .selectors import ServiceSelector
 
 
 class ServiceCoordinatorService:

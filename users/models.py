@@ -7,9 +7,13 @@ from django.db import models
 
 from core.models import TimeStampedModel
 
-def get_certification_upload_path(instance, filename):
+def get_reformer_certification_upload_path(instance, filename):
     user_id = instance.reformer.user.id
     return f"users/{user_id}/certifications/{filename}"
+
+def get_user_profile_image_upload_path(instance, filename):
+    user_id = instance.id
+    return f"users/{user_id}/profile/{filename}"
 
 def email_isvalid(value):
     try:
@@ -20,11 +24,6 @@ def email_isvalid(value):
         return value
     except Exception as e:
         print('예외가 발생했습니다.', e)
-
-
-#ProfileImage파일 업로드 경로 설정
-def get_upload_path(instance, filename):
-    return 'users/profile/{}'.format(filename)
 
 
 class UserManager(BaseUserManager):
@@ -59,12 +58,12 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(max_length=64, unique=True)  # 이메일
-    phone = models.CharField(max_length=15, null=True, blank=True)  # 휴대전화 번호, now allows blank
-    nickname = models.CharField(max_length=20, null=True, blank=True)  # 사용자 닉네임, now allows blank
+    phone = models.CharField(max_length=15, null=True, blank=True)  # 휴대전화 번호
+    nickname = models.CharField(max_length=20, null=True, blank=True)  # 사용자 닉네임
     agreement_terms = models.BooleanField(default=False)  # 약관 동의 여부
-    address = models.CharField(max_length=255, null=True, blank=True)  # 사용자 기본 주소, ensure blank if optional
-    profile_image = models.URLField(null=True) # 프로필 이미지 URL 필드 (S3 URL)
-    introduce = models.TextField(null=True) # 사용자 소개글
+    address = models.CharField(max_length=255, null=True, blank=True)  # 사용자 기본 주소
+    profile_image = models.FileField(upload_to=get_user_profile_image_upload_path, null=True, blank=True) # 프로필 이미지 필드
+    introduce = models.TextField(null=True, blank=True) # 사용자 소개글
     is_superuser = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     role = models.CharField(
@@ -109,12 +108,12 @@ class ReformerEducation(models.Model):
     school = models.CharField(max_length=100)
     major = models.CharField(max_length=100)
     academic_status = models.CharField(max_length=100)
-    proof_document = models.FileField(upload_to=get_certification_upload_path, null=True, blank=True)  # S3에 저장되는 경로
+    proof_document = models.FileField(upload_to=get_reformer_certification_upload_path, null=True, blank=True)  # S3에 저장되는 경로
 
 
 #Portfolio photo 모델
 def get_portfolio_photo_upload_path(instance, filename):
-    return 'users/protfolio/{}'.format(filename)
+    return 'users/portfolio/{}'.format(filename)
 
 
 class PortfolioPhoto(TimeStampedModel):
@@ -143,7 +142,7 @@ class ReformerCertification(models.Model):
     name = models.CharField(max_length=100)
     issuing_authority = models.CharField(max_length=100)
     issue_date = models.DateField()
-    proof_document = models.FileField(upload_to=get_certification_upload_path, null=True, blank=True)
+    proof_document = models.FileField(upload_to=get_reformer_certification_upload_path, null=True, blank=True)
 
 
 class ReformerAwards(models.Model):
@@ -152,7 +151,7 @@ class ReformerAwards(models.Model):
     name = models.CharField(max_length=100)
     organizer = models.CharField(max_length=100)
     award_date = models.DateField()
-    proof_document = models.FileField(upload_to=get_certification_upload_path, null=True, blank=True)
+    proof_document = models.FileField(upload_to=get_reformer_certification_upload_path, null=True, blank=True)
 
 
 class ReformerCareer(models.Model):
@@ -163,7 +162,7 @@ class ReformerCareer(models.Model):
     position = models.CharField(max_length=100,null=True,blank=True)
     start_date = models.DateField()
     end_date = models.DateField()
-    proof_document = models.FileField(upload_to=get_certification_upload_path, null=True, blank=True)
+    proof_document = models.FileField(upload_to=get_reformer_certification_upload_path, null=True, blank=True)
 
 
 class ReformerFreelancer(models.Model):
@@ -174,4 +173,4 @@ class ReformerFreelancer(models.Model):
     main_tasks = models.TextField()
     start_date = models.DateField()
     end_date = models.DateField()
-    proof_document = models.FileField(upload_to=get_certification_upload_path, null=True, blank=True)
+    proof_document = models.FileField(upload_to=get_reformer_certification_upload_path, null=True, blank=True)

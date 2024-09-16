@@ -15,4 +15,5 @@ urlpatterns =[
     path('/token/verify', UserTokenVerifyView.as_view(), name='token_verify'),
     path('/token/refresh', UserTokenRefreshView.as_view(), name='token_refresh'),
     path('/reformer', ReformerProfileView.as_view(), name='reformer'),
+    path('/profile-image', UserImageUploadView.as_view(), name='upload_profile_image'),
 ]

@@ -1,34 +1,29 @@
-from django.shortcuts import render
-from django.shortcuts import get_object_or_404
-
-from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from django.shortcuts import get_object_or_404, render
 from rest_framework import serializers, status
-from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from core.views import get_paginated_response
 from users.models import User
 
-from .models import Service, Category, Style, Fit, Texture, Detail
-from .services import ServiceCoordinatorService, ServiceService, ServicePhotoService, ServiceKeywordService
+from .models import Category, Detail, Fit, Service, Style, Texture
 from .selectors import ServiceSelector
+from .services import (ServiceCoordinatorService, ServiceKeywordService,
+                       ServicePhotoService, ServiceService)
 
-from drf_yasg import openapi
-from drf_yasg.utils import swagger_auto_schema
 
-# Create your views here.
 class ServiceCreateApi(APIView):
     permission_classes=(AllowAny,)
     
     class ServiceCreateInputSerializer(serializers.Serializer):
-        name= serializers.CharField()
-        
-        category=serializers.CharField()
-        style=serializers.ListField(required=False)
-        fit=serializers.ListField(required=False)
-        texture=serializers.ListField(required=False)
-        detail=serializers.ListField(required=False)
+        name = serializers.CharField()
+        category = serializers.CharField()
+        style = serializers.ListField(required=False)
+        fit = serializers.ListField(required=False)
+        texture = serializers.ListField(required=False)
+        detail = serializers.ListField(required=False)
         keywords = serializers.ListField(required=False)
 
         basic_price = serializers.CharField()
@@ -42,41 +37,7 @@ class ServiceCreateApi(APIView):
         transaction_package = serializers.BooleanField()
         refund = serializers.CharField()
     
-    @swagger_auto_schema(
-        request_body=ServiceCreateInputSerializer,
-        security=[],
-        operation_id='서비스 생성 API',
-        operation_description="서비스를 생성하는 API입니다.",
-        responses={
-            "200":openapi.Response(
-                description="OK",
-                examples={
-                    "application/json":{
-                        "name":"서비스 이름",
-                        "category":"1",
-                        "style":[1,2],
-                        "fit":[1],
-                        "texture":[1],
-                        "detail":[],
-                        "keywords":[],
-                        "basic_price":'8000',
-                        "max_price":'12000',
-                        "option":'단추',
-                        "service_photos":'~~~.img',
-                        "info":"서비스 정보",
-                        "notice":'서비스 관련 공지사항',
-                        "period":"3",
-                        "trasaction_direct":"true",
-                        "trasaction_package":'true',
-                        "refund":"환불 관련 정보",
-                    }
-                }
-            ),
-            "400":openapi.Response(
-                description="Bad Request",
-            )
-        }
-    )
+
     def post(self,request):
         serializers = self.ServiceCreateInputSerializer(data=request.data)
         serializers.is_valid(raise_exception=True)
@@ -122,26 +83,7 @@ class ServicePhotoCreateApi(APIView):
     class ServicePhotoCreateInputSerializer(serializers.Serializer):
         image = serializers.ImageField()
         
-    @swagger_auto_schema(
-        request_body=ServicePhotoCreateInputSerializer,
-        security=[],
-        operation_id='서비스 사진 등록 API',
-        operation_description="서비스 사진을 등록하는 API 입니다.",
-        responses={
-            "200":openapi.Response(
-                description="OK",
-                examples={
-                    "application/json":{
-                        "status":"success",
-                    }
-                }
-            ),
-            "400":openapi.Response(
-                description="Bad Request",
-            ),
-        }
-    )
-    
+
     def post(self, request):
         serializers = self.ServicePhotoCreateInputSerializer(data=request.data)
         serializers.is_valid(raise_exception=True)
@@ -191,46 +133,7 @@ class ServiceDetailApi(APIView):
 
         transaction_direct=serializers.BooleanField()
         transaction_package=serializers.BooleanField()
-        
-    @swagger_auto_schema(
-        security=[],
-        operation_id='서비스 글 조회 API',    
-        operation_description='''
-            전달된 id에 해당하는 서비스 글 디테일을 조회합니다.<br/>
-            photos 배열 중 0번째 원소가 대표 이미지(rep_pic)입니다.<br/>
-        ''',
-        responses={ 
-            "200":openapi.Response(
-                description="OK",
-                examples={
-                    "application/json":{
-                        "name":'services_test_240106',
-                        "category":'1',
-                        "style":[1,2],
-                        "fit":[1],
-                        "texture":[1,2,3],
-                        "detail":[],
-                        "keywords":['후드티','후드'],
-                        "basic_price":1000,
-                        "info":'product no 1',
-                        "notice":'noticesssss',
-                        "option":'긴팔',
-                        "period":3,
-                        "transaction_direct":'true',
-                        "transaction_package":'true',
-                        "refund":'환불정책',
-                        "reformer":"sdptech@gmail.com",
-                        "likeuserset":['user1@gmail.com','user2@gmail.com',],
-                        'likecnt':2,
-                    }
-                }
-            ),
-            "400":openapi.Response(
-                description="Bad Request",
-            ),
-        }
-    )
-      
+
     def get(self,request,service_id):
         service=ServiceSelector.detail(service_id=service_id, user=request.user)
         serializer=self.ServiceDetailOuputSerialier(service)
@@ -270,65 +173,6 @@ class ServiceListApi(APIView):
         fit=serializers.ListField(child=serializers.DictField())
         detail=serializers.ListField(child=serializers.DictField())
 
-    @swagger_auto_schema(
-        security=[],
-        operation_id='서비스 목록 조회 API',
-        operation_description='''
-            전달된 쿼리 파라미터에 부합하는 서비스 글 리스트를 반환합니다.<br/>
-            photos 배열 중 0번째 원소가 대표 이미지(rep_pic)입니다.<br/>
-            <br/>
-            search : name, info 내 검색어<br/>
-            order : 정렬 기준(latest, hot)<br/>
-            category_filter: 카테고리 id <br/>
-            style_filter: 스타일 id <br/>
-            fit_filter: 핏 id <br/>
-            texture_filter : 텍스쳐 id <br/>
-            detail_filter: 디테일 id <br/>
-        ''',
-        responses={ 
-            "200":openapi.Response(
-                description="OK",
-                examples={
-                    "application/json": {
-                    "status": "success",
-                    "data": {
-                        "count": 1,
-                        "next": None,
-                        "previous": None,
-                        "results": [
-                            {
-                                "id": 1,
-                                "name":'services_test_240106',
-                                "category":'1',
-                                "style":[1,2],
-                                "fit":[1],
-                                "texture":[1,2,3],
-                                "detail":[],
-                                "keywords":['후드티','후드'],
-                                "basic_price":1000,
-                                "info":'product no 1',
-                                "notice":'noticesssss',
-                                "option":'긴팔',
-                                "period":3,
-                                "transaction_direct":'true',
-                                "transaction_package":'true',
-                                "refund":'환불정책',
-                                "reformer":"sdptech@gmail.com",
-                                "likeuserset":['user1@gmail.com','user2@gmail.com',],
-                                'likecnt':2,                   
-                                },
-                            ]
-                        }
-                    }
-                }
-            ),
-            
-            "400":openapi.Response(
-                description="Bad Request",
-            ),
-        }    
-    )
-    
     def get(self,request):
         filters_serializer=self.ServiceListFilterSerializer(
             data=request.query_params)
@@ -357,28 +201,6 @@ class ServiceListApi(APIView):
 class ServiceLikeApi(APIView):
     permission_classes=(IsAuthenticated, )
 
-    @swagger_auto_schema(
-        operation_id='서비스 좋아요 또는 좋아요 취소',
-        operation_description='''
-            입력한 id를 가지는 서비스에 대한 사용자의 좋아요/좋아요 취소를 수행합니다.<br/>
-            결과로 좋아요 상태(TRUE:좋아요, FALSE:좋아요X)가 반환됩니다.
-        ''',
-        responses={
-            "200": openapi.Response(
-                description="OK",
-                examples={
-                    "application/json": {
-                        "status": "success",
-                        "data": {"likes": True}
-                    }
-                }
-            ),
-            "400": openapi.Response(
-                description="Bad Request",
-            ),
-        },
-    )
-    
     def post(self, request, service_id):
         likes=ServiceService.like_or_dislike(
             service=get_object_or_404(Service,pk=service_id),
@@ -415,42 +237,6 @@ class ServiceUpdateApi(APIView):
             self.service = kwargs.pop('service', None)
             super().__init__(*args, **kwargs)
 
-    @swagger_auto_schema(
-        request_body=ServiceUpdateInputSerializer,
-        security=[],
-        operation_id='서비스 업데이트 API',
-        operation_description="서비스를 업데이트하는 API입니다.",
-        responses={
-            "200": openapi.Response(
-                description="OK",
-                examples={
-                    "application/json": {
-                        "name": "서비스 이름",
-                        "category": "1",
-                        "style": [1, 2],
-                        "fit": [1],
-                        "texture": [1],
-                        "detail": [],
-                        "keywords": [],
-                        "basic_price": '8000',
-                        "max_price": '12000',
-                        "option": '단추',
-                        "service_photos": '~~~.img',
-                        "info": "서비스 정보",
-                        "notice": '서비스 관련 공지사항',
-                        "period": "3",
-                        "transaction_direct": "true",
-                        "transaction_package": 'true',
-                        "refund": "환불 관련 정보",
-                    }
-                }
-            ),
-            "400": openapi.Response(
-                description="Bad Request",
-            )
-        }
-    )
-    
     def patch(self,request,service_id):
         try:
             service=Service.objects.get(pk=service_id)
@@ -487,54 +273,7 @@ class ReformerServiceListApi(APIView):
         style=serializers.ListField(child=StyleSerializer())
         basic_price=serializers.CharField()
         user_likes=serializers.BooleanField()
-    
-    @swagger_auto_schema(
-        query_serializer=ReformerServiceListFilterSerializer,
-        security=[],
-        operation_id='특정 리포머의 서비스 목록 조회 API',
-        operation_description='''
-            쿼리 파라미터로 전달된 특정 리포머(리포머아이디)에 부합하는 서비스 글 리스트를 반환합니다.<br/>
-            <br/>
-            reformer_filter : 리포머 id <br/>
-        ''',
-        responses={ 
-            "200":openapi.Response(
-                description="OK",
-                examples={
-                    "application/json": {
-                    "status": "success",
-                    "data": [
-                        {
-                        "id": 1,
-                        "name": "service_test1",
-                        "style": [
-                            {
-                                "name": "스포티"
-                            }
-                        ],
-                        "basic_price": "13000",
-                        "user_likes": "false"
-                        },
-                        {
-                        "id": 2,
-                        "name": "service2",
-                        "style": [
-                            {
-                                "name": "캐주얼"
-                            }
-                        ],
-                        "basic_price": "15000",
-                        "user_likes": "true"
-                        }
-                    ]
-                }}
-            ),
-            
-            "400":openapi.Response(
-                description="Bad Request",
-            ),
-        }    
-    )    
+
     def get(self, request):
         reformer_id=request.query_params.get('reformer_filter')
         print(reformer_id)

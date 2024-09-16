@@ -1,7 +1,10 @@
+from datetime import datetime  # s3를 이용한 이미지 업로드용
+
+from django.conf import settings  # s3를 이용한 이미지 업로드용
 from django.db import models
+
 from core.models import TimeStampedModel
-from django.conf import settings # s3를 이용한 이미지 업로드용
-from datetime import datetime # s3를 이용한 이미지 업로드용
+
 
 # Create your models here.
 class Category(models.Model):

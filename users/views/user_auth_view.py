@@ -1,4 +1,5 @@
 from rest_framework import status
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -13,21 +14,31 @@ class UserSignUpApi(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        requested_data = UserSignUpSerializer(data=request.data)
-        if requested_data.is_valid(raise_exception=True):
-            data = requested_data.validated_data
+        try:
+            requested_data = UserSignUpSerializer(data=request.data)
+            if requested_data.is_valid(raise_exception=True):
+                data = requested_data.validated_data
 
-            UserService.user_sign_up(
-                email=data.get('email'),
-                password=data.get('password'),
-                agreement_terms=bool(data.get('agreement_terms')),
-                address=data.get('address'),
-            )
+                UserService.user_sign_up(data)
+                return Response(
+                    {
+                        'message': 'success',
+                    },
+                    status=status.HTTP_201_CREATED
+                )
+        except ValidationError as e:
             return Response(
-                {
-                    'message': 'success',
+                data={
+                    'message': str(e)
                 },
-                status=status.HTTP_201_CREATED
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                data={
+                    'message': str(e)
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
 

@@ -26,7 +26,6 @@ DEBUG = os.getenv('DJANGO_DEBUG_MODE') == True
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.ngrok-free.app']
 
 # Application definition
-
 DJANGO_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -64,12 +63,14 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware'
 ]
 
+# CORS / CSRF 설정
 CORS_ORIGIN_ALLOW_ALL = True
 CSRF_COOKIE_SECURE = False  # 개발 중일 때는 False로 설정
 CSRF_TRUSTED_ORIGINS = [
     "https://3d49-165-132-5-152.ngrok-free.app",
 ]
 
+# 기본 인증 모델
 AUTH_USER_MODEL = "users.User"
 
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
@@ -77,6 +78,7 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 
+# REST API 사용 시 인증 관련 설정
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated", ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
@@ -86,20 +88,23 @@ REST_FRAMEWORK = {
 
 REST_USE_JWT = True
 
+# Json web token 설정
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=14),
     'ROTATE_REFRESH_TOKENS': True,
-    'BLACKLIST_AFTER_ROTATION': True,  # 로그아웃 시 블랙리스트 처리
+    'BLACKLIST_AFTER_ROTATION': True,  # 로그아웃, Token rotate 시 블랙리스트 처리
     'ALGORITHM': 'HS256',
     'SIGNING_KEY': os.getenv("UPCY_SECRET_KEY"),
     'AUTH_HEADER_TYPES': ('Bearer',),
-    "USER_ID_FIELD": "id",
+    "USER_ID_FIELD": "id", # payload에 user id가 들어있으므로, 사용자 정보는 token에서 획득 가능함
     "USER_ID_CLAIM": "user_id",
 }
 
+# 최상위 urls.py 위치 지정
 ROOT_URLCONF = 'UpcyProject.urls'
 
+# API 호출 시 맨 뒤에 붙는 슬래시 기능 사용X
 APPEND_SLASH = False
 
 TEMPLATES = [
@@ -120,8 +125,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'UpcyProject.wsgi.application'
 
-
-# Database
+# Database 설정
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -145,24 +149,27 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# Internationalization
+# 언어 및 시간 환경 설정
 LANGUAGE_CODE = 'ko-kr'
 TIME_ZONE = 'Asia/Seoul'
 USE_I18N = True
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
+# 정적파일 저장 위치
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# S3 설정 및 업로드된 파일 관련 설정
+# S3 설정
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
 AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME')
+AWS_S3_SIGNATURE_VERSION = os.getenv('AWS_S3_SIGNATURE_VERSION')
+AWS_DEFAULT_ACL = os.getenv('AWS_S3_DEFAULT_ACL')
 
+# 업로드 파일 저장 위치 설정
 MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com/'
 STORAGES = {
     "default": {
@@ -182,9 +189,9 @@ STORAGES = {
         },
     },
 }
-FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 최대 파일 업로드 크기 10MB 제한
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 최대 파일 업로드 크기 10MB 제한
 
-
+# 로깅 설정
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

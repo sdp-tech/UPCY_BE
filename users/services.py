@@ -114,4 +114,3 @@ class UserService:
             raise ValidationError(f"Validation Error: {str(e)}")
         except Exception as e:
             raise e
-

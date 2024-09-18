@@ -7,6 +7,10 @@ from django.db import models
 
 from core.models import TimeStampedModel
 
+#Portfolio photo 모델
+def get_portfolio_photo_upload_path(instance, filename):
+    return 'users/portfolio/{}'.format(filename)
+
 def get_reformer_certification_upload_path(instance, filename):
     user_id = instance.reformer.user.id
     return f"users/{user_id}/certifications/{filename}"
@@ -95,11 +99,10 @@ class UserPreferStyle(models.Model):
 
 class ReformerProfile(models.Model):
     # 리포머 기본 프로필 정보
+    # 닉네임, 소개글은 User 테이블에 있는 필드 사용 -> 리포머 생성 요청 시 필요
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='reformer_profile')
-    nickname = models.CharField(max_length=50)
-    links = models.TextField(blank=True, null=True)
-    market_name = models.CharField(max_length=50, blank=True, null=True)
-    market_intro = models.TextField(blank=True, null=True)
+    reformer_link = models.TextField(blank=True, null=True) # 리포머 웹페이지 링크 (아마 오픈카톡 링크..?)
+    reformer_area = models.CharField(max_length=100, null=True) # 리포머 활동 지역
 
 
 class ReformerEducation(models.Model):
@@ -109,11 +112,6 @@ class ReformerEducation(models.Model):
     major = models.CharField(max_length=100)
     academic_status = models.CharField(max_length=100)
     proof_document = models.FileField(upload_to=get_reformer_certification_upload_path, null=True, blank=True)  # S3에 저장되는 경로
-
-
-#Portfolio photo 모델
-def get_portfolio_photo_upload_path(instance, filename):
-    return 'users/portfolio/{}'.format(filename)
 
 
 class PortfolioPhoto(TimeStampedModel):

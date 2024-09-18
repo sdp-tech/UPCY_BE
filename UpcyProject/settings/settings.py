@@ -38,8 +38,8 @@ DJANGO_APPS = [
 PROJECT_APPS = [
     "users.apps.UsersConfig",
     "core.apps.CoreConfig",
-    "products.apps.ProductsConfig",
-    "services.apps.ServicesConfig",
+    "market.apps.MarketConfig",
+    "order.apps.OrderConfig",
 ]
 
 LIBS = [

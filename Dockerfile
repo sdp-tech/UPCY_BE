@@ -38,10 +38,9 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 RUN adduser --disabled-password --no-create-home --uid 1000 django-user && \
     chown -R django-user:django-user /app
 
-
-# 미디어 파일 저장 경로 생성 및 권한 설정 \
-RUN mkdir -p /app/media && \
-    chown -R django-user:django-user /app/media
+# 로그 디렉토리 설정
+RUN mkdir -p /app/logs && \
+    chown -R django-user:django-user /app/logs
 
 # 포트 노출
 EXPOSE 8000
@@ -52,4 +51,5 @@ USER django-user
 # Django 프로젝트 실행
 # Dockerfile을 사용하는 경우 = Production level
 # 개발시에는 그냥 터미널 열고 python manage.py runserver로 실행해주세용
-CMD ["sh", "-c", "python manage.py makemigrations && python manage.py migrate && gunicorn --workers 3 --bind 0.0.0.0:8000 config.wsgi:application"]
+# CMD ["sh", "-c", "python manage.py makemigrations && python manage.py migrate && gunicorn --workers 3 --bind 0.0.0.0:8000 config.wsgi:application"]
+CMD ["sh", "-c", "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]

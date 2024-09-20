@@ -1,6 +1,6 @@
 from .settings import *
 
-ALLOWED_HOSTS = ['.upcy.co.kr']
+ALLOWED_HOSTS = ['*']
 ROOT_URLCONF = 'config.urls'
 LOGGING = {
     'version': 1,
@@ -9,7 +9,7 @@ LOGGING = {
         'file': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename':'/home/ubuntu/UPCY_BE/logs/debug.log',
+            'filename': '/app/logs/debug.log',
         },
     },
     'loggers': {

@@ -1,6 +1,5 @@
 from rest_framework import serializers
-
-from users.selectors import UserSelector
+from users.models.user import User
 
 
 class UserLoginSerializer(serializers.Serializer):
@@ -21,7 +20,7 @@ class UserLoginSerializer(serializers.Serializer):
             raise serializers.ValidationError("Both email and password are required.")
 
         # 사용자가 존재하는지 확인
-        user = UserSelector.get_user_by_email(email=email)
+        user = User.objects.filter(email=email).first()
         if not user:
             raise serializers.ValidationError("No user found with this email address.")
 

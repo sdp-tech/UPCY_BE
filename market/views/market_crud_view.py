@@ -1,28 +1,33 @@
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework import status
 from core.permissions import IsReformer
 from market.models import Market
 from market.serializers.market_serializer import MarketSerializer
-from users.models import ReformerProfile
-from rest_framework import status
+from market.serializers.market_update_serializer import MarketUpdateSerializer
 
 
 class MarketCrudView(APIView):
-    permission_classes = [IsReformer] # Reformer의 경우에만 해당 API 사용 가능
+    permission_classes = [IsReformer]
 
-    def get(self, request):
+    def get(self, request, **kwargs) -> Response:
         try:
-            market = Market.objects.filter(reformer__user=request.user).select_related('reformer').first()
+            market = Market.objects.filter(
+                reformer__user=request.user,
+                market_uuid=kwargs.get('market_uuid')
+            ).select_related('reformer').first()
             if not market:
-                return Response(
-                    data={'message': 'market not found'},
-                    status=status.HTTP_404_NOT_FOUND
-                )
+                raise Market.DoesNotExist
+
             serialized = MarketSerializer(instance=market)
             return Response(
                 data=serialized.data,
                 status=status.HTTP_200_OK
+            )
+        except Market.DoesNotExist:
+            return Response(
+                data={'message': 'market not found'},
+                status=status.HTTP_404_NOT_FOUND
             )
         except Exception as e:
             return Response(
@@ -30,28 +35,54 @@ class MarketCrudView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
+    def put(self, request) -> Response:
+        try:
+            market = Market.objects.filter(
+                reformer__user=request.user,
+                market_uuid=request.data.get('market_uuid')
+            ).select_related('reformer').first()
+            if not market:
+                raise Market.DoesNotExist
 
-    def post(self, request):
-        # 리포머 프로필이 존재하는지 확인
-        reformer = ReformerProfile.objects.filter(user=request.user).first()
-        if not reformer:
+            serialized = MarketUpdateSerializer(instance=market, data=request.data)
+            if serialized.is_valid(raise_exception=True):
+                serialized.save()
+                return Response(
+                    data={'message': 'market updated'},
+                    status=status.HTTP_200_OK
+                )
+        except Market.DoesNotExist:
             return Response(
-                data={'message': 'reformer not found'},
+                data={'message': 'market not found'},
                 status=status.HTTP_404_NOT_FOUND
             )
-
-        # 이미 마켓이 존재하는지 검증
-        market = Market.objects.filter(reformer=reformer).first()
-        if market:
+        except Exception as e:
             return Response(
-                data={'message': 'market already exists'},
-                status=status.HTTP_409_CONFLICT
+                data={'message': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-        serialized = MarketSerializer(data=request.data, context={'reformer': reformer})
-        serialized.is_valid(raise_exception=True)
-        serialized.save()
-        return Response(
-            data=serialized.data,
-            status=status.HTTP_201_CREATED
-        )
+    def delete(self, request):
+        try:
+            market = Market.objects.filter(
+                reformer__user=request.user,
+                market_uuid=request.data.get('market_uuid')
+            ).select_related('reformer').first()
+            if not market:
+                raise Market.DoesNotExist
+
+            market.delete()
+            return Response(
+                data={'message': 'market deleted'},
+                status=status.HTTP_204_NO_CONTENT
+            )
+        except Market.DoesNotExist:
+            return Response(
+                data={'message': 'market not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                data={'message': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

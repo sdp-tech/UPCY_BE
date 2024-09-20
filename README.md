@@ -1,3 +1,14 @@
+# 프로젝트 아키텍쳐
+
+다시 그릴 예정..
+
+# 사용 기술
+- Django
+- Gunicorn
+- DRF
+- Docker
+- PostgreSQL
+
 # UPCY 백엔드 환경 구성 방법
    
 ## 1. poetry 설치
@@ -32,4 +43,8 @@ python manage.py migrate
 python manage.py runserver
 ```
 
-![image](https://github.com/user-attachments/assets/ad611fe7-06ef-4acf-9cea-547c04a3b413)
+## Production (Test)
+```shell
+# 아직 gunicorn 적용 안하고, django 내장 wsgi 사용했습니다. 1차 배포 끝나고 천천히 구성해 보겠습니다.
+sudo docker run -d --name upcy-be-container -p 8000:8000 sullungim/upcy-be:latest
+```

@@ -16,7 +16,10 @@ class UserCrudApi(APIView):
 
     def get(self, request) -> Response:
         try:
-            serializer = UserInformationSerializer(instance=request.user, context={"request": request})
+            serializer = UserInformationSerializer(
+                instance=request.user,
+                context={"request": request}
+            )
             return Response(
                 data=serializer.data,
                 status=status.HTTP_200_OK
@@ -57,7 +60,6 @@ class UserCrudApi(APIView):
                 data={"message": "Refresh token is required."},
                 status=status.HTTP_400_BAD_REQUEST
             )
-
         try:
             self.service.logout(refresh_token=refresh_token) # Refresh Token 만료 처리
             self.service.delete_user(user) # 사용자 삭제
@@ -85,7 +87,6 @@ class UserImageUploadView(APIView):
     def post(self, request) -> Response:
         user = request.user
         image_file = request.FILES.get("profile_image") # 이미지 파일 request body에서 획득
-
         if not image_file:
             return Response(
                 data={

@@ -1,7 +1,7 @@
 from rest_framework import serializers
-from users.models import (
+from users.models.reformer import (
     ReformerAwards, ReformerCareer, ReformerCertification, ReformerFreelancer,
-    ReformerMaterial, ReformerEducation, ReformerProfile, ReformerStyle, User
+    ReformerMaterial, ReformerEducation, Reformer, ReformerStyle
 )
 
 
@@ -10,24 +10,20 @@ class ReformerCertificationSerializer(serializers.ModelSerializer):
         model = ReformerCertification
         fields = ['name', 'issuing_authority', 'issue_date']
 
-
 class ReformerAwardSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReformerAwards
         fields = ['name', 'organizer', 'award_date']
-
 
 class ReformerCareerSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReformerCareer
         fields = ['company_name', 'department', 'position', 'start_date', 'end_date']
 
-
 class ReformerFreelancerSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReformerFreelancer
         fields = ['project_name', 'client', 'main_tasks', 'start_date', 'end_date']
-
 
 class ReformerEducationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -44,32 +40,35 @@ class ReformerStyleSerializer(serializers.ModelSerializer):
         model = ReformerStyle
         fields = ['name']
 
-class ReformerProfileSerializer(serializers.ModelSerializer):
-    # 입력을 위한 필드
+class ReformerProfileSerializer(serializers.Serializer):
     education = ReformerEducationSerializer(many=True, required=False)
     certification = ReformerCertificationSerializer(many=True, required=False)
     awards = ReformerAwardSerializer(many=True, required=False)
     career = ReformerCareerSerializer(many=True, required=False)
     freelancer = ReformerFreelancerSerializer(many=True, required=False)
-    style = ReformerStyleSerializer(many=True, required=True)
-    material = ReformerMaterialSerializer(many=True, required=True)
+    reformer_style = ReformerStyleSerializer(many=True, required=True)
+    reformer_material = ReformerMaterialSerializer(many=True, required=True)
+    reformer_link = serializers.CharField(required=True)
+    reformer_area = serializers.CharField(required=True)
 
-    class Meta:
-        model = ReformerProfile
-        fields = [
-            'reformer_link', 'reformer_area', 'style', 'material',
-            'education', 'certification', 'awards', 'career',
-            'freelancer',
-        ]
-        extra_kwargs = {
-            'reformer_link': {'required': True},
-            'reformer_area': {'required': True},
-        }
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+
+        representation['reformer_style'] = ReformerStyleSerializer(instance.reformer_style.all(), many=True).data
+        representation['reformer_material'] = ReformerMaterialSerializer(instance.reformer_material.all(), many=True).data
+        representation['education'] = ReformerEducationSerializer(instance.reformer_education.all(), many=True).data
+        representation['certification'] = ReformerCertificationSerializer(instance.reformer_certification.all(),
+                                                                          many=True).data
+        representation['awards'] = ReformerAwardSerializer(instance.reformer_awards.all(), many=True).data
+        representation['career'] = ReformerCareerSerializer(instance.reformer_career.all(), many=True).data
+        representation['freelancer'] = ReformerFreelancerSerializer(instance.reformer_freelancer.all(), many=True).data
+
+        return representation
 
     def create(self, validated_data):
         user = self.context.get('request').user
-        style_data = validated_data.pop('style', '')
-        material_data = validated_data.pop('material', '')
+        style_data = validated_data.pop('reformer_style', '')
+        material_data = validated_data.pop('reformer_material', '')
 
         education_data = validated_data.pop('education', [])
         certification_data = validated_data.pop('certification', [])
@@ -78,7 +77,7 @@ class ReformerProfileSerializer(serializers.ModelSerializer):
         freelancer_data = validated_data.pop('freelancer', [])
 
         # 리포머 프로필 생성
-        profile = ReformerProfile.objects.create(
+        profile = Reformer.objects.create(
             user=user,
             reformer_area=validated_data['reformer_area'],
             reformer_link=validated_data['reformer_link'],
@@ -122,9 +121,8 @@ class ReformerProfileSerializer(serializers.ModelSerializer):
             ReformerFreelancer.objects.create(reformer=profile, **freelancer)
 
     def update(self, instance, validated_data):
-        style_data = validated_data.pop('style', '')
-        material_data = validated_data.pop('material', '')
-
+        style_data = validated_data.pop('reformer_style', '')
+        material_data = validated_data.pop('reformer_material', '')
         education_data = validated_data.pop('education', [])
         certification_data = validated_data.pop('certification', [])
         awards_data = validated_data.pop('awards', [])
@@ -135,9 +133,6 @@ class ReformerProfileSerializer(serializers.ModelSerializer):
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
-
-        # 기존 스타일 및 재료 삭제 후 업데이트
-        ReformerStyle.objects.filter(reformer=instance).delete()
 
         # 중첩된 데이터 업데이트 처리
         self.update_nested_data(

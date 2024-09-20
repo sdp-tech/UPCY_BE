@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from users.models import User
+from users.models.user import User
 
 class UserUpdateSerializer(serializers.ModelSerializer):
 
@@ -26,6 +26,9 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         return super().validate(attrs)
 
     def to_internal_value(self, data):
+        """
+        User 테이블의 Attribute 중, 업데이트 할 수 있는 필드를 제한하기 위해 사용하는 함수
+        """
         known_fields = set(self.fields.keys()) # Meta class에 정의한 fields key list
         incoming_fields = set(data.keys()) # request body에서 들어온 data의 key list
 

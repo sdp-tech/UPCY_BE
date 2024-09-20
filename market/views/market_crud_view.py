@@ -1,3 +1,4 @@
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -5,10 +6,17 @@ from core.permissions import IsReformer
 from market.models import Market
 from market.serializers.market_serializer import MarketSerializer
 from market.serializers.market_update_serializer import MarketUpdateSerializer
+from market.services import MarketImageUploadService
 
 
 class MarketCrudView(APIView):
-    permission_classes = [IsReformer]
+
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [IsAuthenticated()]
+        elif self.request.method in ['POST', 'PUT', 'DELETE']:
+            return [IsReformer()]
+        return super().get_permissions()
 
     def get(self, request, **kwargs) -> Response:
         try:
@@ -35,11 +43,11 @@ class MarketCrudView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-    def put(self, request) -> Response:
+    def put(self, request, **kwargs) -> Response:
         try:
             market = Market.objects.filter(
                 reformer__user=request.user,
-                market_uuid=request.data.get('market_uuid')
+                market_uuid=kwargs.get('market_uuid')
             ).select_related('reformer').first()
             if not market:
                 raise Market.DoesNotExist
@@ -62,11 +70,11 @@ class MarketCrudView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-    def delete(self, request):
+    def delete(self, request, **kwargs):
         try:
             market = Market.objects.filter(
                 reformer__user=request.user,
-                market_uuid=request.data.get('market_uuid')
+                market_uuid=kwargs.get('market_uuid')
             ).select_related('reformer').first()
             if not market:
                 raise Market.DoesNotExist

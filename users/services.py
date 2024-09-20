@@ -1,13 +1,11 @@
 from typing import Dict
 
-from rest_framework import exceptions
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.db import transaction
 
-from users.models import User
-from users.selectors import UserSelector
+from users.models.user import User
 
 
 class UserService:
@@ -44,12 +42,13 @@ class UserService:
         """
         사용자 로그인 함수 -> 로그인 성공 시 AccessToken, RefreshToken 발급
         """
-        selector = UserSelector()
-        user = selector.get_user_by_email(email)
+        user = User.objects.filter(email=email).first()
+        if not user:
+            raise User.DoesNotExist
 
-        if not selector.check_password(user, password):
-            raise exceptions.ValidationError("아이디나 비밀번호가 올바르지 않습니다.")
-        
+        if not user.check_password(password):
+            raise ValidationError("아이디나 비밀번호가 올바르지 않습니다.")
+
         token = RefreshToken.for_user(user=user)
 
         data={

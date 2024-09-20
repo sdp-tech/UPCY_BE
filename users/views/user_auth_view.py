@@ -8,6 +8,7 @@ from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from users.serializers.user_login_serializer import UserLoginSerializer
 from users.serializers.user_signup_serializer import UserSignUpSerializer
 from users.services import UserService
+from users.models.user import User
 
 
 class UserSignUpApi(APIView):
@@ -46,11 +47,11 @@ class UserLoginApi(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        requested_data = UserLoginSerializer(data=request.data)
-        if requested_data.is_valid(raise_exception=True):
-            data = requested_data.validated_data
-            service = UserService()
-            try:
+        try:
+            requested_data = UserLoginSerializer(data=request.data)
+            if requested_data.is_valid(raise_exception=True):
+                data = requested_data.validated_data
+                service = UserService()
                 login_data = service.login(
                     email=data.get('email'),
                     password=data.get('password'),
@@ -59,19 +60,23 @@ class UserLoginApi(APIView):
                     data=login_data,
                     status=status.HTTP_200_OK
                 )
-            except Exception as e:
-                return Response(
-                    data={
-                        'message': str(e)
-                    },
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                )
-        return Response(
-            data={
-                'message': 'Invalid input data. check API documentation'
-            },
-            status=status.HTTP_400_BAD_REQUEST
-        )
+            return Response(
+                data={'message': 'Invalid input data. check API documentation'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except User.DoesNotExist:
+            return Response(
+                data={'message': 'User does not exist'},
+            )
+        except ValidationError as e:
+            return Response(
+                data={'message': str(e)},
+            )
+        except Exception as e:
+            return Response(
+                data={'message': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class UserLogoutApi(APIView):

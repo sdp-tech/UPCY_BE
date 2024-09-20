@@ -4,16 +4,20 @@ from django.db import models
 
 from core.models import TimeStampedModel
 
+def get_market_thumbnail_upload_path(instance, filename):
+    user_id = instance.reformer.user.id
+    market_uuid = instance.market_uuid
+    return f"users/{user_id}/market/{market_uuid}/thumbnail/{filename}"
 
 class Market(TimeStampedModel):
     # 리포머의 마켓 정보
-    reformer = models.OneToOneField('users.ReformerProfile', on_delete=models.CASCADE, related_name='market')
+    reformer = models.OneToOneField('users.Reformer', on_delete=models.CASCADE, related_name='market')
 
     market_uuid = models.UUIDField(null=False, unique=True, default=uuid.uuid4) # 마켓 UUID
     market_name = models.CharField(max_length=50, null=False) # 마켓 이름
     market_introduce = models.TextField(null=False) # 마켓 소개
     market_address = models.CharField(max_length=50, null=False) # 마켓 주소
-    market_thumbnail = models.FileField(upload_to='market_thumbnail', null=False) # 수정 필요
+    market_thumbnail = models.FileField(upload_to=get_market_thumbnail_upload_path, null=False) # 마켓 썸네일
     # market_rate = models.DecimalField(max_digits=2, decimal_places=1, default=0.0) # 마켓 평점 -> 추후 리뷰기능 개발 시 추가
 
     class Meta:
@@ -41,7 +45,7 @@ class ServiceMaterial(TimeStampedModel):
     material_name = models.CharField(max_length=50, null=False)
 
     class Meta:
-        db_table = 'service_material'
+        db_table = 'market_service_material'
 
 class ServiceStyle(TimeStampedModel):
     # 해당 서비스가 제공하는 스타일
@@ -49,7 +53,7 @@ class ServiceStyle(TimeStampedModel):
     style_name = models.CharField(max_length=50, null=False)
 
     class Meta:
-        db_table = 'service_style'
+        db_table = 'market_service_style'
 
 class ServiceOption(TimeStampedModel):
     # 서비스 작성 시 추가하는 옵션에 대한 테이블
@@ -59,4 +63,4 @@ class ServiceOption(TimeStampedModel):
     option_price = models.IntegerField(null=False) # 옵션 요금
 
     class Meta:
-        db_table = 'service_option'
+        db_table = 'market_service_option'

@@ -6,12 +6,18 @@ from core.models import TimeStampedModel
 
 def get_market_thumbnail_upload_path(instance, filename):
     user_id = instance.reformer.user.id
-    market_uuid = instance.market_uuid
-    return f"users/{user_id}/market/{market_uuid}/thumbnail/{filename}"
+    market_name = instance.market_name
+    return f"users/{user_id}/market/{market_name}/thumbnail/{filename}"
+
+def get_service_image_upload_path(instance, filename):
+    user_id = instance.market_service.market.reformer.user.id
+    market_name = instance.market_service.market.market_name
+    service_title = instance.market_service.service_title
+    return f"users/{user_id}/market/{market_name}/service/{service_title}/image/{filename}"
 
 class Market(TimeStampedModel):
     # 리포머의 마켓 정보
-    reformer = models.OneToOneField('users.Reformer', on_delete=models.CASCADE, related_name='market')
+    reformer = models.ForeignKey('users.Reformer', on_delete=models.CASCADE, related_name='market') # 리포머 한명은 여러개의 마켓을 소유할 수 있음
 
     market_uuid = models.UUIDField(null=False, unique=True, default=uuid.uuid4) # 마켓 UUID
     market_name = models.CharField(max_length=50, null=False) # 마켓 이름
@@ -40,8 +46,10 @@ class MarketService(TimeStampedModel):
         db_table = 'market_service'
 
 class ServiceMaterial(TimeStampedModel):
-    # 해당 서비스에서 사용하는 재료
+    # 해당 서비스에서 사용하는 재료 ( 작업 가능한 소재 )
     market_service = models.ForeignKey('market.MarketService', on_delete=models.CASCADE, related_name='service_material')
+
+    material_uuid = models.UUIDField(null=False, unique=True, default=uuid.uuid4)
     material_name = models.CharField(max_length=50, null=False)
 
     class Meta:
@@ -50,6 +58,8 @@ class ServiceMaterial(TimeStampedModel):
 class ServiceStyle(TimeStampedModel):
     # 해당 서비스가 제공하는 스타일
     market_service = models.ForeignKey('market.MarketService', on_delete=models.CASCADE, related_name='service_style')
+
+    style_uuid = models.UUIDField(null=False, unique=True, default=uuid.uuid4)
     style_name = models.CharField(max_length=50, null=False)
 
     class Meta:
@@ -58,9 +68,19 @@ class ServiceStyle(TimeStampedModel):
 class ServiceOption(TimeStampedModel):
     # 서비스 작성 시 추가하는 옵션에 대한 테이블
     market_service = models.ForeignKey('market.MarketService', on_delete=models.CASCADE, related_name='service_option')
+
+    option_uuid = models.UUIDField(null=False, unique=True, default=uuid.uuid4)
     option_name = models.CharField(max_length=50, null=False) # 옵션 이름
     option_content = models.TextField(null=False) # 옵션 상세 설명
     option_price = models.IntegerField(null=False) # 옵션 요금
 
     class Meta:
         db_table = 'market_service_option'
+
+class ServiceImage(TimeStampedModel):
+    # 서비스 소개 이미지 관리 테이블
+    market_service = models.ForeignKey('market.MarketService', on_delete=models.CASCADE, related_name='service_image')
+    image = models.FileField(upload_to=get_service_image_upload_path, null=False)
+
+    class Meta:
+        db_table = 'market_service_image'

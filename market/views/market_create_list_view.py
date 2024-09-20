@@ -1,4 +1,5 @@
 from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from core.permissions import IsReformer
@@ -9,11 +10,17 @@ from rest_framework import status
 
 
 class MarketCreateListView(APIView):
-    permission_classes = [IsReformer] # Reformer의 경우에만 해당 API 사용 가능
+
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [IsAuthenticated()]
+        elif self.request.method == 'POST':
+            return [IsReformer()]
+        return super().get_permissions()
 
     def get(self, request) -> Response:
         try:
-            market = Market.objects.filter(reformer__user=request.user).select_related('reformer').first()
+            market = Market.objects.filter(reformer__user=request.user).select_related('reformer')
             if not market: # 마켓이 존재하지 않으면, 에러처리
                 raise Market.DoesNotExist
 

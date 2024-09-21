@@ -4,7 +4,7 @@ from core.models import TimeStampedModel
 
 
 class Order(TimeStampedModel):
-    service = models.ForeignKey('market.MarketService', on_delete=models.SET_NULL, related_name='service_order', null=True) # 어떤 서비스에 대한 주문인지?
+    service = models.ForeignKey('market.Service', on_delete=models.SET_NULL, related_name='service_order', null=True) # 어떤 서비스에 대한 주문인지?
     request_user = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='request_user_order') # 주문한 사람
     request_detail = models.TextField(null=False) # 기본 요구 사항
     delivery_address = models.TextField(null=False) # 결과물 배송지

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from market.models import MarketService, ServiceOption, ServiceMaterial, ServiceStyle, ServiceImage
+from market.models import Service, ServiceOption, ServiceMaterial, ServiceStyle, ServiceImage
 
 
 class ServiceStyleSerializer(serializers.ModelSerializer):
@@ -23,13 +23,13 @@ class ServiceImageSerializer(serializers.ModelSerializer):
         model = ServiceImage
         fields = ['image']
 
-class MarketServiceCreateSerializer(serializers.ModelSerializer):
+class ServiceCreateSerializer(serializers.ModelSerializer):
     service_option = ServiceOptionSerializer(many=True)
     service_style = ServiceStyleSerializer(many=True)
     service_material = ServiceMaterialSerializer(many=True)
 
     class Meta:
-        model = MarketService
+        model = Service
         fields = ['service_title', 'service_content', 'service_category', 'service_style',
                   'service_period', 'basic_price', 'max_price', 'service_option',
                   'service_material']
@@ -40,7 +40,7 @@ class MarketServiceCreateSerializer(serializers.ModelSerializer):
         service_material = validated_data.pop('service_material')
 
         market = self.context.get('market')
-        market_service = MarketService.objects.create(
+        market_service = Service.objects.create(
             market=market,
             **validated_data
         )
@@ -69,13 +69,13 @@ class MarketServiceCreateSerializer(serializers.ModelSerializer):
 
         return market_service
 
-class MarketServiceRetrieveSerializer(serializers.ModelSerializer):
+class ServiceRetrieveSerializer(serializers.ModelSerializer):
     service_option = ServiceOptionSerializer(many=True)
     service_style = ServiceStyleSerializer(many=True)
     service_material = ServiceMaterialSerializer(many=True)
     service_image = ServiceImageSerializer(many=True)
 
     class Meta:
-        model = MarketService
+        model = Service
         fields = ['service_uuid', 'service_title', 'service_content', 'service_category', 'service_style',
                   'service_period', 'basic_price', 'max_price', 'service_option', 'service_material', 'service_image']

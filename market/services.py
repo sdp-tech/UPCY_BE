@@ -1,5 +1,5 @@
 from django.db import transaction
-from market.models import ServiceImage, MarketService, Market
+from market.models import ServiceImage, Service, Market
 from django.core.exceptions import ValidationError
 
 class MarketImageUploadService:
@@ -29,7 +29,7 @@ class MarketImageUploadService:
 
     @staticmethod
     @transaction.atomic
-    def upload_service_image(market_service: MarketService, image_file) -> None:
+    def upload_service_image(market_service: Service, image_file) -> None:
         """
         서비스 소개 이미지를 S3에 업로드 및 데이터베이스에 저장하는 함수
         """
@@ -50,7 +50,7 @@ class MarketImageUploadService:
 
     @staticmethod
     @transaction.atomic
-    def upload_service_option_image(market_service: MarketService, image_file) -> None:
+    def upload_service_option_image(market_service: Service, image_file) -> None:
         """
         서비스 소개 이미지를 S3에 업로드 및 데이터베이스에 저장하는 함수
         """

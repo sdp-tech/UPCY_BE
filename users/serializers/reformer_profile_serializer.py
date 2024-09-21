@@ -18,7 +18,7 @@ class ReformerAwardSerializer(serializers.ModelSerializer):
 class ReformerCareerSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReformerCareer
-        fields = ['company_name', 'department', 'position', 'start_date', 'end_date']
+        fields = ['company_name', 'department', 'period']
 
 class ReformerFreelancerSerializer(serializers.ModelSerializer):
     class Meta:

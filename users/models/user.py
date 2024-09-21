@@ -5,8 +5,8 @@ from django.db import models
 
 
 def get_user_profile_image_upload_path(instance, filename):
-    user_id = instance.id
-    return f"users/{user_id}/profile-image/{filename}"
+    email_name = instance.email.split("@")[0]
+    return f"users/{email_name}/profile-image/{filename}"
 
 class UserManager(BaseUserManager):
     def create_user(self, email, password, **extra_fields):

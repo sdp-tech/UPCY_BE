@@ -3,12 +3,12 @@ from users.models.user import User
 from core.models import TimeStampedModel
 
 def get_reformer_certification_upload_path(instance, filename):
-    user_id = instance.reformer.user.id
-    return f"users/{user_id}/certifications/{filename}"
+    email_name = instance.reformer.user.email.split("@")[0]
+    return f"users/{email_name}/reformer/certifications/{filename}"
 
 def get_portfolio_upload_path(instance, filename):
-    user_id = instance.user.id
-    return f"users/{user_id}/portfolio/{filename}"
+    email_name = instance.reformer.user.email.split("@")[0]
+    return f"users/{email_name}/reformer/portfolio/{filename}"
 
 class Reformer(models.Model):
     # 리포머 기본 프로필 정보
@@ -82,11 +82,9 @@ class ReformerAwards(models.Model):
 class ReformerCareer(models.Model):
     # 리포머 경력
     reformer = models.ForeignKey('users.Reformer', on_delete=models.CASCADE, related_name='reformer_career')
-    company_name = models.CharField(max_length=100)
-    department = models.CharField(max_length=100,null=True,blank=True)
-    position = models.CharField(max_length=100,null=True,blank=True)
-    start_date = models.DateField()
-    end_date = models.DateField()
+    company_name = models.CharField(max_length=100) # 근무 회사
+    department = models.CharField(max_length=100,null=True, blank=True) # 근무 부서
+    period = models.CharField(max_length=30) # 경력 기간 (O년, O개월, .. 이런식으로 입력한다고 하네요)
     proof_document = models.FileField(upload_to=get_reformer_certification_upload_path, null=True, blank=True)
 
     class Meta:

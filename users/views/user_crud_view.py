@@ -63,10 +63,9 @@ class UserCrudApi(APIView):
         try:
             self.service.logout(refresh_token=refresh_token) # Refresh Token 만료 처리
             self.service.delete_user(user) # 사용자 삭제
-
             return Response(
                 data={"message": "Successfully deleted user"},
-                status=status.HTTP_204_NO_CONTENT
+                status=status.HTTP_200_OK
             )
         except (TokenError, InvalidToken) as e:
             return Response(

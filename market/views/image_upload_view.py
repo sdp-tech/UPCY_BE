@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from core.permissions import IsReformer
-from market.models import Market, MarketService
+from market.models import Market, Service
 from market.services import MarketImageUploadService
 
 
@@ -52,12 +52,12 @@ class MarketServiceImageUploadView(APIView):
 
     def post(self, request, **kwargs):
         try:
-            market_service = MarketService.objects.filter(
+            market_service = Service.objects.filter(
                 market__market_uuid=kwargs.get('market_uuid'),
                 service_uuid=kwargs.get('service_uuid')
             ).select_related('market').first()
             if not market_service:
-                raise MarketService.DoesNotExist
+                raise Service.DoesNotExist
 
             image_file = request.FILES.get("service_image")  # 이미지 파일 request body에서 획득
             if not image_file:
@@ -72,7 +72,7 @@ class MarketServiceImageUploadView(APIView):
                 data={'message': str(e)},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        except MarketService.DoesNotExist:
+        except Service.DoesNotExist:
             return Response(
                 data={'message': 'market service not found'},
                 status=status.HTTP_404_NOT_FOUND

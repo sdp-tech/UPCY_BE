@@ -4,7 +4,7 @@ from users.models.user import User
 
 
 class UserSignUpSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, required=True)
+    password = serializers.CharField(write_only=True)
 
     def validate(self, attrs):
         if User.objects.filter(email=attrs["email"]).exists():
@@ -17,11 +17,12 @@ class UserSignUpSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['email', 'password', 'phone', 'nickname', 'agreement_terms']
+        fields = ['email', 'password', 'phone', 'nickname', 'agreement_terms', 'address']
         extra_kwargs = {
             'email': {'required': True},
             'password': {'required': True},
             'phone': {'required': True},
             'nickname': {'required': True},
             'agreement_terms': {'required': True},
+            'address': {'required': True},
         }

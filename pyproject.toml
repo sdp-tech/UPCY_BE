@@ -18,6 +18,7 @@ boto3 = "^1.35.19"
 django-cors-headers = "^4.4.0"
 python-dotenv = "^1.0.1"
 django-storages = {extras = ["s3"], version = "^1.14.4"}
+psycopg2-binary = "^2.9.9"
 
 [tool.poetry.group.dev.dependencies]
 flake8 = "^7.1.1"

@@ -106,5 +106,4 @@ class ServiceMaterialView(APIView):
         pass
 
     def delete(self, request, **kwargs):
-
         pass

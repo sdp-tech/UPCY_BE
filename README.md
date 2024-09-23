@@ -45,6 +45,7 @@ python manage.py runserver
 
 ## Production (Test)
 ```shell
-# 아직 gunicorn 적용 안하고, django 내장 wsgi 사용했습니다. 1차 배포 끝나고 천천히 구성해 보겠습니다.
-sudo docker run -d --name upcy-be-container -p 8000:8000 sullungim/upcy-be:latest
+sudo docker run -d --name upcy-be-container -p 8000:8000 sullungim/upcy-be:latest # EC2에서 실행
+sudo docker container ls # 실행중인 컨테이너 리스트 확인
+sudo docker logs -f {container_id} # 콘솔 로그 보는 방법
 ```

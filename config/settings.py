@@ -5,12 +5,12 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(dotenv_path=BASE_DIR / '.env') # 환경변수 파일 로드
 
 SECRET_KEY = os.getenv('UPCY_SECRET_KEY')
 
-DEBUG = os.getenv('DJANGO_DEBUG_MODE') == True
+DEBUG = os.getenv("DJANGO_DEBUG_MODE", "False").lower() in ("true", "1")
 ALLOWED_HOSTS = ['*']
 
 # Application definition
@@ -48,7 +48,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware'
+    'corsheaders.middleware.CorsMiddleware',
+    'config.middleware.request_logging_middleware.RequestLoggingMiddleware',
 ]
 
 # CORS / CSRF 설정
@@ -56,6 +57,7 @@ CORS_ORIGIN_ALLOW_ALL = True
 CSRF_COOKIE_SECURE = False  # 개발 중일 때는 False로 설정
 CSRF_TRUSTED_ORIGINS = [
     "https://3d49-165-132-5-152.ngrok-free.app",
+    "https://upcy.co.kr",
 ]
 
 # 기본 인증 모델
@@ -117,12 +119,24 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 # Database 설정
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+if DEBUG:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('POSTGRES_DB_NAME'),
+            'USER': os.getenv('POSTGRES_DB_USER'),
+            'PASSWORD': os.getenv('POSTGRES_DB_PASSWORD'),
+            'HOST': os.getenv('POSTGRES_DB_HOST'),
+            'PORT': os.getenv('POSTGRES_DB_PORT'),
+        }
+    }
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -204,5 +218,24 @@ LOGGING = {
             'handlers': ['console'],
             'level': 'INFO',
         },
+        'django.request': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'django.db.backends': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'django': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        }
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'DEBUG',
     },
 }

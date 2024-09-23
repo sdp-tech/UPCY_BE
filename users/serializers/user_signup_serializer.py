@@ -17,11 +17,11 @@ class UserSignUpSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['email', 'password', 'phone', 'nickname', 'agreement_terms', 'address']
+        fields = ['email', 'password', 'phone', 'nickname', 'agreement_terms']
         extra_kwargs = {
             'email': {'required': True},
+            'password': {'required': True},
             'phone': {'required': True},
             'nickname': {'required': True},
             'agreement_terms': {'required': True},
-            'address': {'required': True},
         }

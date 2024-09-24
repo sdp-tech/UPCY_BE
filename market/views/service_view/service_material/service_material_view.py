@@ -1,5 +1,5 @@
 from typing import List
-
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.views import APIView
 from rest_framework import status
@@ -8,9 +8,10 @@ from core.permissions import IsReformer
 from market.models import Service, ServiceMaterial
 from rest_framework.response import Response
 
-from market.serializers.service_serializers.service_material_create_serializer import ServiceMaterialCreateSerializer
-from market.serializers.service_serializers.service_material_retrieve_serializer import \
+from market.serializers.service_serializers.service_material.service_material_create_serializer import ServiceMaterialCreateSerializer
+from market.serializers.service_serializers.service_material.service_material_retrieve_serializer import \
     ServiceMaterialRetrieveSerializer
+from market.serializers.service_serializers.service_material.service_material_update_serializer import ServiceMaterialUpdateSerializer
 
 
 class ServiceMaterialCreateListView(APIView):
@@ -87,7 +88,7 @@ class ServiceMaterialView(APIView):
         try:
             service_material : ServiceMaterial = ServiceMaterial.objects.filter(
                 material_uuid=kwargs.get('material_uuid')
-            ).select_related('market_service__market').first()
+            ).first()
             if not service_material:
                 raise ServiceMaterial.DoesNotExist
 
@@ -96,6 +97,11 @@ class ServiceMaterialView(APIView):
                 data=serializer.data,
                 status=status.HTTP_200_OK
             )
+        except ServiceMaterial.DoesNotExist:
+            return Response(
+                data={'message': 'service material not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
         except Exception as e:
             return Response(
                 data={'message': str(e)},
@@ -103,7 +109,58 @@ class ServiceMaterialView(APIView):
             )
 
     def put(self, request, **kwargs):
-        pass
+        try:
+            serivce_material : ServiceMaterial = ServiceMaterial.objects.filter(
+                material_uuid=kwargs.get('material_uuid')
+            ).first()
+            if not serivce_material:
+                raise ServiceMaterial.DoesNotExist
+
+            serializer = ServiceMaterialUpdateSerializer(instance=serivce_material, data=request.data, partial=True)
+            if serializer.is_valid(raise_exception=True):
+                serializer.save()
+                return Response(
+                    data={'message':"successfully updated"},
+                    status=status.HTTP_200_OK
+                )
+        except ValidationError as e:
+            return Response(
+                data={'message': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except ServiceMaterial.DoesNotExist:
+            return Response(
+                data={'message': 'service material not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                data={'message': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
     def delete(self, request, **kwargs):
-        pass
+        # service material 삭제 view
+        try:
+            service_material = ServiceMaterial.objects.filter(
+                material_uuid=kwargs.get('material_uuid')
+            ).first()
+            if not service_material:
+                raise ServiceMaterial.DoesNotExist
+
+            service_material.delete()
+            return Response(
+                data={'message': 'service material deleted'},
+                status=status.HTTP_200_OK
+            )
+        except ServiceMaterial.DoesNotExist:
+            return Response(
+                data={'message': 'service material not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                data={'message': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+

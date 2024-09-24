@@ -73,7 +73,7 @@ class ServiceOption(TimeStampedModel):
     option_uuid = models.UUIDField(null=False, unique=True, default=uuid.uuid4)
     option_name = models.CharField(max_length=50, null=False) # 옵션 이름
     option_content = models.TextField(null=False) # 옵션 상세 설명
-    option_price = models.IntegerField(null=False) # 옵션 요금
+    option_price = models.PositiveIntegerField(null=False) # 옵션 요금
 
     class Meta:
         db_table = 'market_service_option'

@@ -197,45 +197,46 @@ STORAGES = {
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 최대 파일 업로드 크기 10MB 제한
 
 # 로깅 설정
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
+if not DEBUG:
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'handlers': {
+            'console': {
+                'class': 'logging.StreamHandler',
+            },
         },
-    },
-    'loggers': {
-        'boto3': {
-            'handlers': ['console'],
-            'level': 'INFO',
+        'loggers': {
+            'boto3': {
+                'handlers': ['console'],
+                'level': 'INFO',
+            },
+            'botocore': {
+                'handlers': ['console'],
+                'level': 'INFO',
+            },
+            'django_storages': {
+                'handlers': ['console'],
+                'level': 'INFO',
+            },
+            'django.request': {
+                'handlers': ['console'],
+                'level': 'INFO',
+                'propagate': False,
+            },
+            'django.db.backends': {
+                'handlers': ['console'],
+                'level': 'INFO',
+                'propagate': False,
+            },
+            'django': {
+                'handlers': ['console'],
+                'level': 'DEBUG',
+                'propagate': True,
+            }
         },
-        'botocore': {
-            'handlers': ['console'],
-            'level': 'INFO',
-        },
-        'django_storages': {
-            'handlers': ['console'],
-            'level': 'INFO',
-        },
-        'django.request': {
-            'handlers': ['console'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        'django.db.backends': {
-            'handlers': ['console'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        'django': {
+        'root': {
             'handlers': ['console'],
             'level': 'DEBUG',
-            'propagate': True,
-        }
-    },
-    'root': {
-        'handlers': ['console'],
-        'level': 'DEBUG',
-    },
-}
+        },
+    }

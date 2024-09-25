@@ -13,9 +13,6 @@ class UserSignUpSerializer(serializers.ModelSerializer):
         if attrs["password"] is None or attrs["password"] == '':
             raise serializers.ValidationError("Password is required.")
 
-        if not attrs["agreement_terms"]:
-            raise serializers.ValidationError("Agreement terms must be accepted.")
-
         return attrs
 
     class Meta:
@@ -24,7 +21,7 @@ class UserSignUpSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'email': {'required': True},
             'password': {'required': True},
-            'nickname': {'required': True},
             'agreement_terms': {'required': True},
+            'nickname': {'required': False},
             'introduce': {'required': False}
         }

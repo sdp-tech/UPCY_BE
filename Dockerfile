@@ -31,6 +31,9 @@ RUN poetry install --no-root --no-interaction
 # 프로젝트 파일 복사
 COPY . .
 
+# Production level에서는 DEBUG_MODE를 false로 설정
+ENV DJANGO_DEBUG_MODE=false
+
 # 시간대 설정
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
@@ -52,4 +55,3 @@ USER django-user
 # Dockerfile을 사용하는 경우 = Production level
 # 개발시에는 그냥 터미널 열고 python manage.py runserver로 실행해주세용
 CMD ["sh", "-c", "python manage.py makemigrations && python manage.py migrate && gunicorn --workers 3 --bind 0.0.0.0:8000 config.wsgi:application"]
-# CMD ["sh", "-c", "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]

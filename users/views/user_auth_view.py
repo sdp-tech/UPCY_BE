@@ -21,6 +21,7 @@ class UserSignUpApi(APIView):
                 data = requested_data.validated_data
 
                 UserService.user_sign_up(data)
+
                 return Response(
                     {
                         'message': 'success',

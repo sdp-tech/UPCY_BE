@@ -10,6 +10,9 @@ class UserSignUpSerializer(serializers.ModelSerializer):
         if User.objects.filter(email=attrs["email"]).exists():
             raise serializers.ValidationError("User that using this email already exists.")
 
+        if attrs["password"] is None or attrs["password"] == '':
+            raise serializers.ValidationError("Password is required.")
+
         if not attrs["agreement_terms"]:
             raise serializers.ValidationError("Agreement terms must be accepted.")
 
@@ -17,12 +20,11 @@ class UserSignUpSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['email', 'password', 'phone', 'nickname', 'agreement_terms', 'address']
+        fields = ['email', 'password', 'nickname', 'agreement_terms', 'introduce']
         extra_kwargs = {
             'email': {'required': True},
             'password': {'required': True},
-            'phone': {'required': True},
             'nickname': {'required': True},
             'agreement_terms': {'required': True},
-            'address': {'required': True},
+            'introduce': {'required': False}
         }

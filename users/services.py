@@ -20,16 +20,8 @@ class UserService:
         try:
             if User.objects.filter(email=user_data["email"]).exists(): # email에 해당하는 사용자가 이미 존재하는지 확인
                 raise ValidationError('A user with this email already exists.')
-
             # 없으면 생성
-            user = User.objects.create_user(
-                email=user_data["email"],
-                password=user_data["password"],
-                agreement_terms=user_data["agreement_terms"],
-                address=user_data["address"],
-                nickname=user_data["nickname"],
-                phone=user_data["phone"]
-            )
+            user = User.objects.create_user(**user_data)
             user.save()
 
         except ValidationError as e:

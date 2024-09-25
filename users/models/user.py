@@ -41,7 +41,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(max_length=64, unique=True)  # 이메일
     phone = models.CharField(max_length=15, null=True, blank=True)  # 휴대전화 번호
     nickname = models.CharField(max_length=20, null=True, blank=True)  # 사용자 닉네임
-    agreement_terms = models.BooleanField(default=False)  # 약관 동의 여부
+    agreement_terms = models.BooleanField(default=False)  # 선택 약관 동의 여부 -> 필수 약관은 프론트에서 알아서 처리한다고 합니다
     address = models.CharField(max_length=255, null=True, blank=True)  # 사용자 기본 주소
     profile_image = models.FileField(upload_to=get_user_profile_image_upload_path, null=True, blank=True) # 프로필 이미지 필드
     introduce = models.TextField(null=True, blank=True) # 사용자 소개글

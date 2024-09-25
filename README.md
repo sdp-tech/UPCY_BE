@@ -15,6 +15,7 @@
 
 ### 우분투의 경우,
 ```shell
+git clone -b upcy-14th-backend-dev https://github.com/sdp-tech/UPCY_BE.git
 sudo apt update
 sudo apt install poetry
 ```

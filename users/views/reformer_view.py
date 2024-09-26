@@ -13,7 +13,7 @@ class ReformerProfileView(APIView):
     permission_classes = [IsAuthenticated]
     user_service = UserService()
 
-    def get(self, request):
+    def get(self, request) -> Response:
         user = request.user
         try:
             reformer_profile = Reformer.objects.filter(user=user).first()
@@ -33,7 +33,7 @@ class ReformerProfileView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-    def post(self, request):
+    def post(self, request) -> Response:
         user = request.user
         try:
             serializer = ReformerProfileSerializer(
@@ -42,12 +42,14 @@ class ReformerProfileView(APIView):
             )
             if serializer.is_valid():
                 serializer.save()
-                self.user_service.update_user_role(user=user, role="reformer")  # Reformer 프로필 등록 -> user role 변경 필요
+                self.user_service.update_user_role(user=user, role="reformer")  # Reformer 프로필 등록 -> user role 변경
                 return Response(
                     data={'message':'successfully created'},
                     status=status.HTTP_201_CREATED
                 )
-        except AttributeError as e:
+            else:
+                raise ValueError(f"serializer error: {serializer.errors}")
+        except (AttributeError, ValueError) as e:
             return Response(
                 data={'message': str(e)},
                 status=status.HTTP_400_BAD_REQUEST

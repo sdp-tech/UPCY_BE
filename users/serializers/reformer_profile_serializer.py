@@ -1,19 +1,19 @@
 from rest_framework import serializers
 from users.models.reformer import (
     ReformerAwards, ReformerCareer, ReformerCertification, ReformerFreelancer,
-    ReformerMaterial, ReformerEducation, Reformer, ReformerStyle
+    ReformerEducation, Reformer
 )
 
 
 class ReformerCertificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReformerCertification
-        fields = ['name', 'issuing_authority', 'issue_date']
+        fields = ['name', 'issuing_authority']
 
 class ReformerAwardSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReformerAwards
-        fields = ['name', 'organizer', 'award_date']
+        fields = ['competition', 'prize']
 
 class ReformerCareerSerializer(serializers.ModelSerializer):
     class Meta:
@@ -23,22 +23,12 @@ class ReformerCareerSerializer(serializers.ModelSerializer):
 class ReformerFreelancerSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReformerFreelancer
-        fields = ['project_name', 'client', 'main_tasks', 'start_date', 'end_date']
+        fields = ['project_name', 'description']
 
 class ReformerEducationSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReformerEducation
         fields = ['school', 'major', 'academic_status']
-
-class ReformerMaterialSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ReformerMaterial
-        fields = ['name']
-
-class ReformerStyleSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ReformerStyle
-        fields = ['name']
 
 class ReformerProfileSerializer(serializers.Serializer):
     education = ReformerEducationSerializer(many=True, required=False)
@@ -46,19 +36,14 @@ class ReformerProfileSerializer(serializers.Serializer):
     awards = ReformerAwardSerializer(many=True, required=False)
     career = ReformerCareerSerializer(many=True, required=False)
     freelancer = ReformerFreelancerSerializer(many=True, required=False)
-    reformer_style = ReformerStyleSerializer(many=True, required=True)
-    reformer_material = ReformerMaterialSerializer(many=True, required=True)
     reformer_link = serializers.CharField(required=True)
     reformer_area = serializers.CharField(required=True)
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
 
-        representation['reformer_style'] = ReformerStyleSerializer(instance.reformer_style.all(), many=True).data
-        representation['reformer_material'] = ReformerMaterialSerializer(instance.reformer_material.all(), many=True).data
         representation['education'] = ReformerEducationSerializer(instance.reformer_education.all(), many=True).data
-        representation['certification'] = ReformerCertificationSerializer(instance.reformer_certification.all(),
-                                                                          many=True).data
+        representation['certification'] = ReformerCertificationSerializer(instance.reformer_certification.all(), many=True).data
         representation['awards'] = ReformerAwardSerializer(instance.reformer_awards.all(), many=True).data
         representation['career'] = ReformerCareerSerializer(instance.reformer_career.all(), many=True).data
         representation['freelancer'] = ReformerFreelancerSerializer(instance.reformer_freelancer.all(), many=True).data
@@ -67,8 +52,6 @@ class ReformerProfileSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         user = self.context.get('request').user
-        style_data = validated_data.pop('reformer_style', '')
-        material_data = validated_data.pop('reformer_material', '')
 
         education_data = validated_data.pop('education', [])
         certification_data = validated_data.pop('certification', [])
@@ -86,8 +69,6 @@ class ReformerProfileSerializer(serializers.Serializer):
         # 중첩된 데이터 생성
         self.create_nested_data(
             profile=profile,
-            reformer_style=style_data,
-            reformer_material=material_data,
             education_data=education_data,
             certification_data=certification_data,
             awards_data=awards_data,
@@ -98,12 +79,7 @@ class ReformerProfileSerializer(serializers.Serializer):
         return profile
 
     def create_nested_data(self, profile, education_data, certification_data,
-                           awards_data, career_data, freelancer_data, reformer_style, reformer_material):
-        for style in reformer_style:
-            ReformerStyle.objects.create(reformer=profile, **style)
-
-        for material in reformer_material:
-            ReformerMaterial.objects.create(reformer=profile, **material)
+                           awards_data, career_data, freelancer_data):
 
         for edu in education_data:
             ReformerEducation.objects.create(reformer=profile, **edu)
@@ -121,8 +97,6 @@ class ReformerProfileSerializer(serializers.Serializer):
             ReformerFreelancer.objects.create(reformer=profile, **freelancer)
 
     def update(self, instance, validated_data):
-        style_data = validated_data.pop('reformer_style', '')
-        material_data = validated_data.pop('reformer_material', '')
         education_data = validated_data.pop('education', [])
         certification_data = validated_data.pop('certification', [])
         awards_data = validated_data.pop('awards', [])
@@ -142,22 +116,12 @@ class ReformerProfileSerializer(serializers.Serializer):
             awards_data=awards_data,
             career_data=career_data,
             freelancer_data=freelancer_data,
-            reformer_style=style_data,
-            reformer_material=material_data
         )
 
         return instance
 
     def update_nested_data(self, profile, education_data, certification_data, awards_data, career_data,
-                           freelancer_data, reformer_material, reformer_style):
-
-        ReformerStyleSerializer.objects.filter(reformer=profile).delete()
-        for style in reformer_style:
-            ReformerStyle.objects.create(reformer=profile, **style)
-
-        ReformerMaterialSerializer.objects.filter(reformer=profile).delete()
-        for material in reformer_material:
-            ReformerMaterial.objects.create(reformer=profile, **material)
+                           freelancer_data):
 
         ReformerEducation.objects.filter(reformer=profile).delete()
         for edu in education_data:

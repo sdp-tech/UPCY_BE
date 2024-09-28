@@ -5,9 +5,9 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 
-from users.serializers.user_update_serializer import UserUpdateSerializer
+from users.serializers.user_serializer.user_update_serializer import UserUpdateSerializer
 from users.services import UserService
-from users.serializers.user_information_serializer import UserInformationSerializer
+from users.serializers.user_serializer.user_information_serializer import UserInformationSerializer
 
 
 class UserCrudApi(APIView):

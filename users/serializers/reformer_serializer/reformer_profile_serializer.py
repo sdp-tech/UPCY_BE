@@ -10,25 +10,46 @@ class ReformerCertificationSerializer(serializers.ModelSerializer):
         model = ReformerCertification
         fields = ['name', 'issuing_authority']
 
+
 class ReformerAwardSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReformerAwards
         fields = ['competition', 'prize']
+
 
 class ReformerCareerSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReformerCareer
         fields = ['company_name', 'department', 'period']
 
+
 class ReformerFreelancerSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReformerFreelancer
         fields = ['project_name', 'description']
 
+
 class ReformerEducationSerializer(serializers.ModelSerializer):
+    education_uuid = serializers.UUIDField(read_only=True)
+    proof_document = serializers.FileField(read_only=True)
+
     class Meta:
         model = ReformerEducation
-        fields = ['school', 'major', 'academic_status']
+        fields = ['education_uuid', 'school', 'major', 'academic_status', 'proof_document']
+
+    def create(self, validated_data):
+        new_education = ReformerEducation.objects.create(
+            reformer=self.context.get('reformer'),
+            **validated_data
+        )
+        return new_education
+
+    def update(self, instance, validated_data):
+        for key, value in validated_data.items():
+            setattr(instance, key, value)
+        instance.save()
+        return instance
+
 
 class ReformerProfileSerializer(serializers.Serializer):
     education = ReformerEducationSerializer(many=True, required=False)

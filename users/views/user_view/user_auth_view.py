@@ -5,8 +5,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 
-from users.serializers.user_login_serializer import UserLoginSerializer
-from users.serializers.user_signup_serializer import UserSignUpSerializer
+from users.serializers.user_serializer.user_login_serializer import UserLoginSerializer
+from users.serializers.user_serializer.user_signup_serializer import UserSignUpSerializer
 from users.services import UserService
 from users.models.user import User
 

@@ -38,34 +38,27 @@ class OrderImage(TimeStampedModel):
     class Meta:
         db_table = "order_image"
 
-
 class AdditionalImage(TimeStampedModel):
-    # 추가 요청사항 이미지를 관리하는 테이블
+    #추가 요청사항 이미지를 관리하는 테이블
     order = models.ForeignKey(
         "order.Order", on_delete=models.CASCADE, related_name="additional_image"
     )
-    image = models.FileField(upload_to="additional_image")  # 수정 필요
+    image = models.FileField(upload_to="additional_image") # 수정 필요
 
     class Meta:
         db_table = "additional_image"
 
 
 class OrderState(TimeStampedModel):
-    # 주문 상태를 관리하는 테이블
+    #주문 상태를 관리하는 테이블
     order = models.ForeignKey(
         "order.Order", on_delete=models.CASCADE, related_name="order_state"
     )
     reformer_status = models.CharField(
         max_length=10,
-        choices=[
-            ("accepted", "수락"),
-            ("rejected", "거절"),
-            ("pending", "대기"),
-            ("received", "재료 수령"),
-            ("produced", "제작완료"),
-            ("deliver", "배송중"),
-            ("end", "거래 완료"),
-        ],
+        choices=[("accepted", "수락"), ("rejected", "거절"), ("pending", "대기")
+            , ("received", "재료 수령"), ("produced", "제작완료"),("deliver","배송중")
+                 ,("end","거래 완료")],
         default="pending",
     )
 
@@ -74,7 +67,7 @@ class OrderState(TimeStampedModel):
 
 
 class TransactionOption(TimeStampedModel):
-    # 거래방식 정보를 관리하는 테이블
+    #거래방식 정보를 관리하는 테이블
     order = models.ForeignKey(
         "order.Order", on_delete=models.CASCADE, related_name="transaction_option"
     )
@@ -82,15 +75,15 @@ class TransactionOption(TimeStampedModel):
         max_length=50, null=False, choices=[("pickup", "대면"), ("delivery", "택배")]
     )  # 거래 방식 (택배 or 대면)
     delivery_address = models.TextField(null=False)  # 결과물 배송지
-    delivery_name = models.TextField(null=False)  # 배송 받을 이름
-    delivery_phone_number = models.TextField(null=False)  # 배송 받을 전화번호
+    delivery_name = models.TextField(null=False) #배송 받을 이름
+    delivery_phone_number= models.TextField(null=False) #배송 받을 전화번호
 
     class Meta:
         db_table = "transaction_option"
 
 
 class DeliveryInformation(TimeStampedModel):
-    # 택배 정보를 관리하는 테이블
+    #택배 정보를 관리하는 테이블
     order = models.ForeignKey(
         "order.Order", on_delete=models.CASCADE, related_name="delivery_information"
     )
@@ -101,6 +94,7 @@ class DeliveryInformation(TimeStampedModel):
 
     class Meta:
         db_table = "delivery_information"
+
 
 
 class OptionCategory(TimeStampedModel):
@@ -123,6 +117,7 @@ class OrderReformTexture(TimeStampedModel):
 
     class Meta:
         db_table = "order_reform_texture"
+
 
 
 # 리뷰 관련된 내용은 2차 개발 기간에..

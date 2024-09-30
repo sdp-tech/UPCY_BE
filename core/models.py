@@ -9,4 +9,4 @@ class TimeStampedModel(models.Model):
     updated = models.DateTimeField(auto_now=True)
 
     class Meta:
-        abstract = True #admin에서 안보이게
+        abstract = True  # admin에서 안보이게

@@ -7,4 +7,8 @@ class IsReformer(BasePermission):
     """
 
     def has_permission(self, request, view):
-        return bool(request.user and request.user.is_authenticated and request.user.role == "reformer")
+        return bool(
+            request.user
+            and request.user.is_authenticated
+            and request.user.role == "reformer"
+        )

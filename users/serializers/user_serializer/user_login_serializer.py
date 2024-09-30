@@ -1,4 +1,5 @@
 from rest_framework import serializers
+
 from users.models.user import User
 
 
@@ -31,4 +32,3 @@ class UserLoginSerializer(serializers.Serializer):
         # 검증이 성공적으로 완료된 경우 사용자 객체 반환
         attrs["user"] = user
         return attrs
-    

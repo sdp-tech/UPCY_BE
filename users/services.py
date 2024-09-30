@@ -1,9 +1,13 @@
+import os
+from datetime import tzinfo
 from typing import Dict
 
+from boto3 import client
+from django.db import transaction
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.db import transaction
+from django.utils import timezone
 
 from users.models.user import User
 
@@ -18,8 +22,10 @@ class UserService:
         사용자 회원가입 함수
         """
         try:
-            if User.objects.filter(email=user_data["email"]).exists(): # email에 해당하는 사용자가 이미 존재하는지 확인
-                raise ValidationError('A user with this email already exists.')
+            if User.objects.filter(
+                email=user_data["email"]
+            ).exists():  # email에 해당하는 사용자가 이미 존재하는지 확인
+                raise ValidationError("A user with this email already exists.")
             # 없으면 생성
             user = User.objects.create_user(**user_data)
             user.save()
@@ -41,12 +47,11 @@ class UserService:
         if not user.check_password(password):
             raise ValidationError("아이디나 비밀번호가 올바르지 않습니다.")
 
+        user.last_login = timezone.now()
+        user.save()
         token = RefreshToken.for_user(user=user)
 
-        data={
-            "access": str(token.access_token),
-            "refresh": str(token)
-        }
+        data = {"access": str(token.access_token), "refresh": str(token)}
 
         return data
 
@@ -65,12 +70,19 @@ class UserService:
             raise e
 
     @staticmethod
-    def delete_user(user: User) -> None:
+    def delete_user(user: User) -> bool:
         """
         사용자 삭제하는 함수 (회원탈퇴 시 사용함)
         """
         try:
-            user.delete()
+            with transaction.atomic():
+                s3 = client("s3")
+                s3.delete_object(
+                    Bucket=os.getenv("AWS_STORAGE_BUCKET_NAME"),
+                    Key=user.profile_image.name,
+                )
+                user.delete()
+                return True
         except Exception as e:
             raise e
 
@@ -92,10 +104,10 @@ class UserService:
         사용자 프로필 이미지를 S3에 업로드하는 함수
         """
         try:
-            if image_file.size > 10 * 1024 * 1024: # 10MB 이상의 프로필 이미지는 안됨!
+            if image_file.size > 10 * 1024 * 1024:  # 10MB 이상의 프로필 이미지는 안됨!
                 raise ValidationError("Image file size must be less than 10MB")
 
-            if user.profile_image: # 기존 프로필 이미지 제거 후 교체해줘야 함
+            if user.profile_image:  # 기존 프로필 이미지 제거 후 교체해줘야 함
                 user.profile_image.delete(save=False)
 
             user.profile_image = image_file

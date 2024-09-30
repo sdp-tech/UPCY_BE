@@ -8,20 +8,22 @@ class UserSignUpSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         if User.objects.filter(email=attrs["email"]).exists():
-            raise serializers.ValidationError("User that using this email already exists.")
+            raise serializers.ValidationError(
+                "User that using this email already exists."
+            )
 
-        if attrs["password"] is None or attrs["password"] == '':
+        if attrs["password"] is None or attrs["password"] == "":
             raise serializers.ValidationError("Password is required.")
 
         return attrs
 
     class Meta:
         model = User
-        fields = ['email', 'password', 'nickname', 'agreement_terms', 'introduce']
+        fields = ["email", "password", "nickname", "agreement_terms", "introduce"]
         extra_kwargs = {
-            'email': {'required': True},
-            'password': {'required': True},
-            'agreement_terms': {'required': True},
-            'nickname': {'required': False},
-            'introduce': {'required': False}
+            "email": {"required": True},
+            "password": {"required": True},
+            "agreement_terms": {"required": True},
+            "nickname": {"required": False},
+            "introduce": {"required": False},
         }

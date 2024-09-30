@@ -1,5 +1,8 @@
+import os
 from typing import List
 
+from boto3 import client
+from django.db import transaction
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import BasePermission, IsAuthenticated
@@ -14,9 +17,7 @@ from market.serializers.service_serializers.service_option.service_option_retrie
     ServiceOptionRetrieveSerializer
 from market.serializers.service_serializers.service_option.service_option_update_serializer import \
     ServiceOptionUpdateSerializer
-from boto3 import client
-from django.db import transaction
-import os
+
 
 class ServiceOptionCreateListView(APIView):
 
@@ -157,14 +158,21 @@ class ServiceOptionView(APIView):
 
             with transaction.atomic():
                 s3 = client("s3")
-                service_option_images = ServiceOptionImage.objects.filter(service_option=service_option)
+                service_option_images = ServiceOptionImage.objects.filter(
+                    service_option=service_option
+                )
 
                 s3.delete_objects(
                     Bucket=os.getenv("AWS_STORAGE_BUCKET_NAME"),
-                    Delete={"Objects": [{"Key": service_option_image.image.name} for service_option_image in service_option_images]}
+                    Delete={
+                        "Objects": [
+                            {"Key": service_option_image.image.name}
+                            for service_option_image in service_option_images
+                        ]
+                    },
                 )
-                service_option_images.delete() # 연관된 이미지 먼저 삭제
-                service_option.delete() # Service option 삭제
+                service_option_images.delete()  # 연관된 이미지 먼저 삭제
+                service_option.delete()  # Service option 삭제
 
             return Response(
                 data={"message": "service option deleted"}, status=status.HTTP_200_OK

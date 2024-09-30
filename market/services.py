@@ -1,13 +1,12 @@
+import os
 from typing import Any, List
 
+from boto3 import client
 from django.core.exceptions import ValidationError
 from django.db import transaction
 
 from market.models import (Market, Service, ServiceImage, ServiceOption,
                            ServiceOptionImage)
-
-from boto3 import client
-import os
 
 
 def validate_image_files(image_files: List) -> None:
@@ -36,7 +35,7 @@ class MarketImageUploadService:
                     s3 = client("s3")
                     s3.delete_object(
                         Bucket=os.getenv("AWS_STORAGE_BUCKET_NAME"),
-                        Key=market.market_thumbnail.name
+                        Key=market.market_thumbnail.name,
                     )
                     market.market_thumbnail.delete()
 

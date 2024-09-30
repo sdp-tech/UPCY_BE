@@ -1,5 +1,7 @@
 import os
 
+from boto3 import client
+from django.db import transaction
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
@@ -12,8 +14,6 @@ from market.serializers.service_serializers.service_create_retrieve_serializer i
     ServiceRetrieveSerializer
 from market.serializers.service_serializers.service_update_serializer import \
     ServiceUpdateSerializer
-from django.db import transaction
-from boto3 import client
 
 
 class MarketServiceCrudView(APIView):
@@ -98,13 +98,20 @@ class MarketServiceCrudView(APIView):
             if not market_service:
                 raise Service.DoesNotExist
 
-            market_service_images = ServiceImage.objects.filter(market_service=market_service)
+            market_service_images = ServiceImage.objects.filter(
+                market_service=market_service
+            )
             with transaction.atomic():
                 s3 = client("s3")
                 if market_service_images:
                     s3.delete_objects(
                         Bucket=os.getenv("AWS_STORAGE_BUCKET_NAME"),
-                        Delete={"Objects": [{"Key": service_image.image.name} for service_image in market_service_images]}
+                        Delete={
+                            "Objects": [
+                                {"Key": service_image.image.name}
+                                for service_image in market_service_images
+                            ]
+                        },
                     )
                 market_service.delete()
             return Response(

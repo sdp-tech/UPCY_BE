@@ -14,14 +14,18 @@ def get_market_thumbnail_upload_path(instance, filename):
 
 
 def get_service_image_upload_path(instance, filename):
-    email_name = instance.market_service.market.reformer.user.email.split("@")[0]  # market을 통해 reformer에 접근
+    email_name = instance.market_service.market.reformer.user.email.split("@")[
+        0
+    ]  # market을 통해 reformer에 접근
     market_uuid = instance.market_service.market.market_name
     service_uuid = instance.market_service.service_uuid
     return f"users/{email_name}/market/{market_uuid}/service/{service_uuid}/{filename}"
 
 
 def get_service_option_image_upload_path(instance, filename):
-    email_name = instance.service_option.market_service.market.reformer.user.email.split("@")[0]  # market을 통해 reformer에 접근
+    email_name = (
+        instance.service_option.market_service.market.reformer.user.email.split("@")[0]
+    )  # market을 통해 reformer에 접근
     market_uuid = instance.service_option.market_service.market.market_name
     service_uuid = instance.service_option.market_service.service_uuid
     option_uuid = instance.service_option.option_uuid
@@ -115,8 +119,12 @@ class ServiceOption(TimeStampedModel):
 
 class ServiceImage(TimeStampedModel):
     # 서비스 소개 이미지 관리 테이블
-    market_service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name="service_image")
-    image = models.FileField(upload_to=get_service_image_upload_path, null=False, max_length=255)
+    market_service = models.ForeignKey(
+        Service, on_delete=models.CASCADE, related_name="service_image"
+    )
+    image = models.FileField(
+        upload_to=get_service_image_upload_path, null=False, max_length=255
+    )
 
     class Meta:
         db_table = "market_service_image"
@@ -129,7 +137,9 @@ class ServiceOptionImage(TimeStampedModel):
         on_delete=models.CASCADE,
         related_name="service_option_image",
     )
-    image = models.FileField(upload_to=get_service_option_image_upload_path, null=False, max_length=255)
+    image = models.FileField(
+        upload_to=get_service_option_image_upload_path, null=False, max_length=255
+    )
 
     class Meta:
         db_table = "market_service_option_image"

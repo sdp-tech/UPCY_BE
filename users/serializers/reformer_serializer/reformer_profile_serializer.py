@@ -1,32 +1,32 @@
 from rest_framework import serializers
-from users.models.reformer import (
-    ReformerAwards, ReformerCareer, ReformerCertification, ReformerFreelancer,
-    ReformerEducation, Reformer
-)
+
+from users.models.reformer import (Reformer, ReformerAwards, ReformerCareer,
+                                   ReformerCertification, ReformerEducation,
+                                   ReformerFreelancer)
 
 
 class ReformerCertificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReformerCertification
-        fields = ['name', 'issuing_authority']
+        fields = ["name", "issuing_authority"]
 
 
 class ReformerAwardSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReformerAwards
-        fields = ['competition', 'prize']
+        fields = ["competition", "prize"]
 
 
 class ReformerCareerSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReformerCareer
-        fields = ['company_name', 'department', 'period']
+        fields = ["company_name", "department", "period"]
 
 
 class ReformerFreelancerSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReformerFreelancer
-        fields = ['project_name', 'description']
+        fields = ["project_name", "description"]
 
 
 class ReformerEducationSerializer(serializers.ModelSerializer):
@@ -35,12 +35,17 @@ class ReformerEducationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ReformerEducation
-        fields = ['education_uuid', 'school', 'major', 'academic_status', 'proof_document']
+        fields = [
+            "education_uuid",
+            "school",
+            "major",
+            "academic_status",
+            "proof_document",
+        ]
 
     def create(self, validated_data):
         new_education = ReformerEducation.objects.create(
-            reformer=self.context.get('reformer'),
-            **validated_data
+            reformer=self.context.get("reformer"), **validated_data
         )
         return new_education
 
@@ -63,28 +68,38 @@ class ReformerProfileSerializer(serializers.Serializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
 
-        representation['education'] = ReformerEducationSerializer(instance.reformer_education.all(), many=True).data
-        representation['certification'] = ReformerCertificationSerializer(instance.reformer_certification.all(), many=True).data
-        representation['awards'] = ReformerAwardSerializer(instance.reformer_awards.all(), many=True).data
-        representation['career'] = ReformerCareerSerializer(instance.reformer_career.all(), many=True).data
-        representation['freelancer'] = ReformerFreelancerSerializer(instance.reformer_freelancer.all(), many=True).data
+        representation["education"] = ReformerEducationSerializer(
+            instance.reformer_education.all(), many=True
+        ).data
+        representation["certification"] = ReformerCertificationSerializer(
+            instance.reformer_certification.all(), many=True
+        ).data
+        representation["awards"] = ReformerAwardSerializer(
+            instance.reformer_awards.all(), many=True
+        ).data
+        representation["career"] = ReformerCareerSerializer(
+            instance.reformer_career.all(), many=True
+        ).data
+        representation["freelancer"] = ReformerFreelancerSerializer(
+            instance.reformer_freelancer.all(), many=True
+        ).data
 
         return representation
 
     def create(self, validated_data):
-        user = self.context.get('request').user
+        user = self.context.get("request").user
 
-        education_data = validated_data.pop('education', [])
-        certification_data = validated_data.pop('certification', [])
-        awards_data = validated_data.pop('awards', [])
-        career_data = validated_data.pop('career', [])
-        freelancer_data = validated_data.pop('freelancer', [])
+        education_data = validated_data.pop("education", [])
+        certification_data = validated_data.pop("certification", [])
+        awards_data = validated_data.pop("awards", [])
+        career_data = validated_data.pop("career", [])
+        freelancer_data = validated_data.pop("freelancer", [])
 
         # 리포머 프로필 생성
         profile = Reformer.objects.create(
             user=user,
-            reformer_area=validated_data['reformer_area'],
-            reformer_link=validated_data['reformer_link'],
+            reformer_area=validated_data["reformer_area"],
+            reformer_link=validated_data["reformer_link"],
         )
 
         # 중첩된 데이터 생성
@@ -94,13 +109,20 @@ class ReformerProfileSerializer(serializers.Serializer):
             certification_data=certification_data,
             awards_data=awards_data,
             career_data=career_data,
-            freelancer_data=freelancer_data
+            freelancer_data=freelancer_data,
         )
 
         return profile
 
-    def create_nested_data(self, profile, education_data, certification_data,
-                           awards_data, career_data, freelancer_data):
+    def create_nested_data(
+        self,
+        profile,
+        education_data,
+        certification_data,
+        awards_data,
+        career_data,
+        freelancer_data,
+    ):
 
         for edu in education_data:
             ReformerEducation.objects.create(reformer=profile, **edu)
@@ -118,11 +140,11 @@ class ReformerProfileSerializer(serializers.Serializer):
             ReformerFreelancer.objects.create(reformer=profile, **freelancer)
 
     def update(self, instance, validated_data):
-        education_data = validated_data.pop('education', [])
-        certification_data = validated_data.pop('certification', [])
-        awards_data = validated_data.pop('awards', [])
-        career_data = validated_data.pop('career', [])
-        freelancer_data = validated_data.pop('freelancer', [])
+        education_data = validated_data.pop("education", [])
+        certification_data = validated_data.pop("certification", [])
+        awards_data = validated_data.pop("awards", [])
+        career_data = validated_data.pop("career", [])
+        freelancer_data = validated_data.pop("freelancer", [])
 
         # 기본 프로필 데이터 업데이트
         for attr, value in validated_data.items():
@@ -141,8 +163,15 @@ class ReformerProfileSerializer(serializers.Serializer):
 
         return instance
 
-    def update_nested_data(self, profile, education_data, certification_data, awards_data, career_data,
-                           freelancer_data):
+    def update_nested_data(
+        self,
+        profile,
+        education_data,
+        certification_data,
+        awards_data,
+        career_data,
+        freelancer_data,
+    ):
 
         ReformerEducation.objects.filter(reformer=profile).delete()
         for edu in education_data:

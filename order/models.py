@@ -105,7 +105,7 @@ class OptionCategory(TimeStampedModel):
     option_category = models.CharField(max_length=50, null=False)  # 옵션 카테고리
 
     class Meta:
-        db_table = "order_category"
+        db_table = "option_category"
 
 
 class OrderReformTexture(TimeStampedModel):

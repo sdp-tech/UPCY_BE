@@ -33,7 +33,7 @@ class OrderImage(TimeStampedModel):
     order = models.ForeignKey(
         "order.Order", on_delete=models.CASCADE, related_name="order_image"
     )
-    image = models.FileField(upload_to="order_image")  # 수정 필요
+    image = models.FileField(upload_to="order_image")
 
     class Meta:
         db_table = "order_image"

@@ -2,6 +2,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from market.services import temporary_status_check
 
 from core.permissions import IsReformer
 from market.models import Market, Service
@@ -9,7 +10,7 @@ from market.serializers.service_serializers.service_create_retrieve_serializer i
     ServiceCreateSerializer, ServiceRetrieveSerializer)
 
 
-class MarketServiceView(APIView):
+class MarketServiceCreateListView(APIView):
 
     def get_permissions(self):
         if self.request.method == "GET":
@@ -20,14 +21,21 @@ class MarketServiceView(APIView):
 
     def get(self, request, **kwargs):
         try:
+            temporary_status = temporary_status_check(request)
             market_service = Service.objects.filter(
-                market__market_uuid=kwargs.get("market_uuid")
+                market__market_uuid=kwargs.get("market_uuid"),
+                temporary=temporary_status,
             ).select_related("market")
             if not market_service:
                 raise Service.DoesNotExist
 
             serialized = ServiceRetrieveSerializer(market_service, many=True)
             return Response(data=serialized.data, status=status.HTTP_200_OK)
+        except ValueError as e:
+            return Response(
+                data={"message": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         except Service.DoesNotExist:
             return Response(
                 data={"message": "There are no services in your market"},

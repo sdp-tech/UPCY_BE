@@ -98,4 +98,5 @@ class ServiceRetrieveSerializer(serializers.ModelSerializer):
             "service_option",
             "service_material",
             "service_image",
+            "temporary",
         ]

@@ -71,6 +71,8 @@ class Service(TimeStampedModel):
     max_price = models.PositiveIntegerField(null=False, default=0)  # 서비스 최대 요금
     # service_request_count = models.IntegerField(null=False, default=0) # 서비스 이용 수 -> 추후 개발
 
+    temporary = models.BooleanField(default=False) # 임시 저장 상태 변수 (프론트 요청)
+
     class Meta:
         db_table = "market_service"
 

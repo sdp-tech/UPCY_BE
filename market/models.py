@@ -54,7 +54,7 @@ class Service(TimeStampedModel):
     basic_price = models.PositiveIntegerField(null=False, default=0)  # 서비스 기본 요금
     max_price = models.PositiveIntegerField(null=False, default=0)  # 서비스 최대 요금
 
-    temporary = models.BooleanField(default=False) # 임시 저장 상태 변수 (프론트 요청)
+    temporary = models.BooleanField(default=False) # 임시 저장 상태 변수 (프론트 요청) True인 경우, 임시 저장한 서비스라는 뜻입니다.
 
     class Meta:
         db_table = "market_service"

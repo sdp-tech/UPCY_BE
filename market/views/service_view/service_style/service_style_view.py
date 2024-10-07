@@ -22,7 +22,6 @@ class ServiceStyleView(APIView):
         return super().get_permissions()
 
     def get(self, request, **kwargs) -> Response:
-
         try:
             service = Service.objects.filter(
                 market__market_uuid=kwargs.get('market_uuid'),
@@ -34,7 +33,6 @@ class ServiceStyleView(APIView):
                     data={"message": "Market service not found"},
                     status=status.HTTP_404_NOT_FOUND
                 )
-
 
             serializer = ServiceStyleRetrieveSerializer(
                 instance=service.service_style, many=True

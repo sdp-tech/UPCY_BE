@@ -15,6 +15,20 @@ def validate_image_files(image_files: List) -> None:
         if image_file.size > 10 * 1024 * 1024:  # 10MB 이상의 이미지는 허용되지 않음
             raise ValidationError("Image file size must be less than 10MB")
 
+def temporary_status_check(request) -> bool:
+    # 쿼리 파라미터로 temporary 변수를 문자열로 받아옴
+    temporary_status = request.GET.get("temporary", "false").lower()
+
+    # 'true' 또는 'false'만을 허용하고, bool 값으로 변환
+    if temporary_status == "true":
+        temporary_status = True
+    elif temporary_status == "false":
+        temporary_status = False
+    else:
+        raise ValueError("temporary는 true와 false값만 사용할 수 있습니다")
+
+    return temporary_status
+
 
 class MarketImageUploadService:
     def __init__(self):

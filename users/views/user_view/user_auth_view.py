@@ -53,7 +53,10 @@ class UserLoginApi(APIView):
                     email=data.get("email"),
                     password=data.get("password"),
                 )
-                return Response(data=login_data, status=status.HTTP_200_OK)
+                return Response(
+                    data=login_data,
+                    status=status.HTTP_200_OK
+                )
             return Response(
                 data={"message": "Invalid input data. check API documentation"},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -89,7 +92,7 @@ class UserLogoutApi(APIView):
             self.service.logout(refresh_token=refresh_token)
             return Response(
                 {"message": "Successfully logged out."},
-                status=status.HTTP_205_RESET_CONTENT,
+                status=status.HTTP_200_OK,
             )
         except (TokenError, InvalidToken):
             return Response(

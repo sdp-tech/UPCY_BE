@@ -45,6 +45,7 @@ class ServiceCreateSerializer(serializers.ModelSerializer):
             "max_price",
             "service_option",
             "service_material",
+            "temporary",
         ]
 
     def create(self, validated_data):
@@ -97,4 +98,5 @@ class ServiceRetrieveSerializer(serializers.ModelSerializer):
             "service_option",
             "service_material",
             "service_image",
+            "temporary",
         ]

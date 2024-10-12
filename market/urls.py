@@ -13,12 +13,7 @@ from market.views.service_view.service_material.service_material_view import (
     ServiceMaterialCreateListView, ServiceMaterialView)
 from market.views.service_view.service_option.service_option_view import (
     ServiceOptionCreateListView, ServiceOptionView)
-from market.views.service_view.service_style.service_style_view import ServiceStyleView
-
-
-class ServiceStyleCreateListView:
-    pass
-
+from market.views.service_view.service_style.service_style_view import ServiceStyleCreateListView, ServiceStyleView
 
 urlpatterns = [
     path("", MarketCreateListView.as_view(), name="market_create_list"),
@@ -53,16 +48,16 @@ urlpatterns = [
         ServiceMaterialView.as_view(),
         name="service_material_view",
     ),
-    # path(
-    #     "/<uuid:market_uuid>/service/<uuid:service_uuid>/style",
-    #     ServiceStyleView.as_view(),
-    #     name="service_style_create_list_view",
-    # ),
-    # path(
-    #     "/<uuid:market_uuid>/service/<uuid:service_uuid>/style/<uuid:style_uuid>",
-    #     ServiceStyleView.as_view(),
-    #     name="service_style_view",
-    # ),
+    path(
+        "/<uuid:market_uuid>/service/<uuid:service_uuid>/style",
+        ServiceStyleCreateListView.as_view(),
+        name="service_style_create_list_view",
+    ),
+    path(
+        "/<uuid:market_uuid>/service/<uuid:service_uuid>/style/<uuid:style_uuid>",
+        ServiceStyleView.as_view(),
+        name="service_style_view",
+    ),
     path(
         "/<uuid:market_uuid>/service/<uuid:service_uuid>/option/<uuid:option_uuid>",
         ServiceOptionView.as_view(),

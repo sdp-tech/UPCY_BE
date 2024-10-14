@@ -24,6 +24,9 @@ vim ~/.bashrc
 ```
 
 - bashrc 최하단에 사진과 같이 기입 후 저장
+
+![image](https://github.com/user-attachments/assets/d9e08953-87ba-4876-9036-5a375b1cd994)
+
 ```text
 export PATH="$HOME/.local/bin:$PATH"
 ```

@@ -12,9 +12,13 @@ class TransactionOptionUpdateSerializer(serializers.ModelSerializer):
             "delivery_phone_number",
         ]
 
-    # 전화번호 유효성 검사
+    # 전화번호 유효성 검사 및 대면 비대면 여부에 따른 추가 정보 제한
     def validate(self, value):
-        if not value.isdigit():
+        if value.get("transaction_option") == "pickup":
+            value["delivery_address"] = ""
+            value["delivery_name"] = ""
+            value["delivery_phone_number"] = ""
+        if not value.get("delivery_phone_number").isdigit():
             raise serializers.ValidationError("Phone numbers must contain only numbers.")
         return value
 

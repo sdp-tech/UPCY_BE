@@ -52,6 +52,15 @@ class Order(TimeStampedModel):
     class Meta:
         db_table = "order"
 
+    def save(self, *args, **kwargs):
+        # Order 객체가 처음 생성될 때만 실행
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+
+        # 신규 Order일 경우 OrderState 생성
+        if is_new:
+            OrderState.objects.create(service_order=self)
+
 
 class OrderImage(TimeStampedModel):
     # 리폼할 의류 이미지를 관리하는 테이블
@@ -110,6 +119,14 @@ class TransactionOption(TimeStampedModel):
     class Meta:
         db_table = "transaction_option"
 
+    def save(self, *args, **kwargs):
+        # transaction_option 값이 "delivery"일 때만 DeliveryInformation 생성
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+
+        if is_new and self.transaction_option == "delivery":
+            DeliveryInformation.objects.create(service_order=self.service_order)
+
 
 class DeliveryInformation(TimeStampedModel):
     #택배 정보를 관리하는 테이블
@@ -124,6 +141,8 @@ class DeliveryInformation(TimeStampedModel):
 
     class Meta:
         db_table = "delivery_information"
+
+
 
 
 

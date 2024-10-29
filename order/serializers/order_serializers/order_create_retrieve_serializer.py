@@ -105,7 +105,6 @@ class OrderRetrieveSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = [
-            "order_uuid",
             "material_name",
             "extra_material_name",
             "additional_option",

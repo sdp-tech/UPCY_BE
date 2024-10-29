@@ -25,23 +25,23 @@ class Order(TimeStampedModel):
         related_name="service_order",
         null=True,
     )  # 어떤 서비스에 대한 주문인지
-    request_user = models.ForeignKey(
-        "users.User", on_delete=models.CASCADE, related_name="request_user_order"
+    customer = models.ForeignKey(
+        "users.User", on_delete=models.CASCADE, related_name="customer"
     )  # 주문한 사람
     order_number = models.CharField(max_length=20, unique=True, null=False)  # 주문을 구분할 수 있는 숫자. 나중에 랜덤으로 설정될 수 있도록 수정 예정
     order_uuid = models.UUIDField(null=False, unique=True, default=uuid.uuid4)
 
     material_name = models.ManyToManyField(
         "market.ServiceMaterial",
-        related_name="order_texture_name",
+        related_name="order_material_name",
         blank=True,
-    ) # 소재 선택
+    ) # 소재 선택(다중선택)
     extra_material_name = models.CharField(max_length=50, null=True)  # 기타 소재
     additional_option = models.ManyToManyField(
         "market.ServiceOption",
-        related_name="additional_option_order",
+        related_name="order_additional_option",
         blank=True,
-    ) # 옵션 선택
+    ) # 옵션 선택(다중선택)
     additional_request = models.TextField(null=True)  # 추가 요청 사항
     order_service_price = models.PositiveIntegerField(null=True) # 서비스 금액
     order_option_price = models.PositiveIntegerField(null=True) # 옵션 추가 금액
@@ -50,7 +50,7 @@ class Order(TimeStampedModel):
     kakaotalk_openchat_link = models.TextField(null=True)  # 카톡 오픈채팅 링크
 
     class Meta:
-        db_table = "order"
+        db_table = "service_order"
 
     def save(self, *args, **kwargs):
         # Order 객체가 처음 생성될 때만 실행
@@ -76,7 +76,7 @@ class OrderImage(TimeStampedModel):
 class AdditionalImage(TimeStampedModel):
     #추가 요청사항 이미지를 관리하는 테이블
     service_order = models.ForeignKey(
-        "order.Order", on_delete=models.CASCADE, related_name="additional_image"
+        "order.Order", on_delete=models.CASCADE, related_name="order_additional_image"
     )
     additional_uuid = models.UUIDField(null=False, unique=True, default=uuid.uuid4)
     image = models.FileField(upload_to=get_order_additional_image_upload_path, null=True, max_length=255) # 수정 필요
@@ -91,7 +91,7 @@ class OrderState(TimeStampedModel):
         "order.Order", on_delete=models.CASCADE, related_name="order_state"
     )
     order_state_uuid = models.UUIDField(null=False, unique=True, default=uuid.uuid4)
-    reformer_status = models.CharField(
+    order_status = models.CharField(
         max_length=10,
         choices=[("accepted", "수락"), ("rejected", "거절"), ("pending", "대기")
             , ("received", "재료 수령"), ("produced", "제작 완료"),("deliver","배송중")
@@ -106,7 +106,7 @@ class OrderState(TimeStampedModel):
 class TransactionOption(TimeStampedModel):
     #거래방식 정보를 관리하는 테이블
     service_order = models.ForeignKey(
-        "order.Order", on_delete=models.CASCADE, related_name="transaction_option"
+        "order.Order", on_delete=models.CASCADE, related_name="order_transaction_option"
     )
     transaction_uuid = models.UUIDField(null=False, unique=True, default=uuid.uuid4)
     transaction_option = models.CharField(
@@ -117,7 +117,7 @@ class TransactionOption(TimeStampedModel):
     delivery_phone_number= models.TextField(null=False) #배송 받을 전화번호
 
     class Meta:
-        db_table = "transaction_option"
+        db_table = "order_transaction_option"
 
     def save(self, *args, **kwargs):
         # transaction_option 값이 "delivery"일 때만 DeliveryInformation 생성
@@ -131,7 +131,7 @@ class TransactionOption(TimeStampedModel):
 class DeliveryInformation(TimeStampedModel):
     #택배 정보를 관리하는 테이블
     service_order = models.ForeignKey(
-        "order.Order", on_delete=models.CASCADE, related_name="delivery_information"
+        "order.Order", on_delete=models.CASCADE, related_name="order_delivery_information"
     )
     delivery_uuid = models.UUIDField(null=False, unique=True, default=uuid.uuid4)
     delivery_company = models.CharField(max_length=50, null=True)  # 택배 회사
@@ -140,7 +140,7 @@ class DeliveryInformation(TimeStampedModel):
     )  # 택배 송장 번호
 
     class Meta:
-        db_table = "delivery_information"
+        db_table = "order_delivery_information"
 
 
 

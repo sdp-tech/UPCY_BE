@@ -7,7 +7,7 @@ class OrderStateCreateSerializer(serializers.ModelSerializer):
         model = OrderState
         fields = [
             "order_state_uuid",
-            "reformer_status",
+            "order_status",
         ]
 
     def validate(self, value):

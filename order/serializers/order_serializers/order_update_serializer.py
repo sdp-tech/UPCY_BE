@@ -13,7 +13,6 @@ class OrderUpdateSerializer(serializers.ModelSerializer):
             "order_service_price",
             "order_option_price",
             "total_price",
-            "request_date",
             "kakaotalk_openchat_link",
         ]
         extra_kwargs = {
@@ -24,7 +23,6 @@ class OrderUpdateSerializer(serializers.ModelSerializer):
             "order_service_price": {"required": False},
             "order_option_price": {"required": False},
             "total_price": {"required": False},
-            "request_date": {"required": False},
             "kakaotalk_openchat_link": {"required": False},
         }
 
@@ -42,7 +40,6 @@ class OrderUpdateSerializer(serializers.ModelSerializer):
         instance.order_service_price = order_service_price
         instance.order_option_price = order_option_price
         instance.total_price = total_price
-        instance.request_date = validated_data.get("request_date", instance.request_date)
         instance.kakaotalk_openchat_link = validated_data.get("kakaotalk_openchat_link",
                                                               instance.kakaotalk_openchat_link)
 

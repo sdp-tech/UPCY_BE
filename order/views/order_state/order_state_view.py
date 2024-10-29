@@ -96,7 +96,7 @@ class OrderStateView(APIView):
     def get(self, request, **kwargs) -> Response:
         try:
             order_state : OrderState = OrderState.objects.filter(
-                orderState_uuid = kwargs.get("orderState_uuid")
+                order_state_uuid = kwargs.get("order_state_uuid")
             ).first()
             if not order_state:
                 raise OrderState.DoesNotExist
@@ -116,7 +116,7 @@ class OrderStateView(APIView):
     def put(self, request, **kwargs) -> Response:
         try:
             order_state : OrderState = OrderState.objects.filter(
-                orderState_uuid = kwargs.get("orderState_uuid")
+                order_state_uuid = kwargs.get("order_state_uuid")
             ).first()
             if not order_state:
                 raise OrderState.DoesNotExist

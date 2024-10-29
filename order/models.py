@@ -90,7 +90,7 @@ class OrderState(TimeStampedModel):
     service_order = models.ForeignKey(
         "order.Order", on_delete=models.CASCADE, related_name="order_state"
     )
-    orderState_uuid = models.UUIDField(null=False, unique=True, default=uuid.uuid4)
+    order_state_uuid = models.UUIDField(null=False, unique=True, default=uuid.uuid4)
     reformer_status = models.CharField(
         max_length=10,
         choices=[("accepted", "수락"), ("rejected", "거절"), ("pending", "대기")

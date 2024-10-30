@@ -1,4 +1,6 @@
+from django.db.models import QuerySet
 from rest_framework import status
+from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -74,67 +76,40 @@ class MarketServiceCreateListView(APIView):
             )
 
 
-class GetAllServiceView(APIView):
+class GetAllServiceView(ListAPIView):
+    """
+    데이터베이스에 존재하는 모든 서비스에 정보를 반환하는 View
+    추후, 검색 기능 추가 시 이 클래스를 수정해주면 될 것 같습니다.
+    기존 APIView 클래스를 상속받았던것과 달리,
+    generics.ListAPIView를 활용해서 더 쉽게 API 구성이 가능합니다.
+    """
     permission_classes = [IsAuthenticated]
-    pagination_class = ServiceListPagination
+    serializer_class = ServiceRetrieveSerializer # 시리얼라이저 지정
+    pagination_class = ServiceListPagination # 페이지네이션 클래스 지정
 
-    @property
-    def paginator(self):
-        """
-        페이지네이터 인스턴스를 가져오거나 생성
-        """
-        if not hasattr(self, '_paginator'): # 이 객체에 paginator 멤버가 존재하지 않으면,
-            if self.pagination_class is None: # pagination_class 초깃값이 정해져있지 않으면 None으로 초기화
-                self._paginator = None
-            else:
-                self._paginator = self.pagination_class()
-        return self._paginator
-
-    def paginate_queryset(self, queryset):
-        """
-        쿼리셋에 페이지네이션 적용
-        """
-        if self.paginator is None:
-            return None
-        return self.paginator.paginate_queryset(queryset, self.request, view=self)
-
-    def get_paginated_response(self, data):
-        """
-        페이지네이션이 적용된 응답 반환
-        """
-        assert self.paginator is not None
-        return self.paginator.get_paginated_response(data)
-
+    def get_queryset(self):
+        # 쿼리셋을 select_related를 사용해 최적화하여 반환
+        return Service.objects.select_related('market').all()
 
     def get(self, request, **kwargs):
         try:
-            service_list = Service.objects.all()
-            if not service_list.exists():
+            queryset: QuerySet = self.get_queryset()
+            if not queryset.exists():  # 서비스가 하나도 존재하지 않으면 404 코드 반환
                 return Response(
                     data={"message": "There are no services in our database"},
                     status=status.HTTP_404_NOT_FOUND,
                 )
 
             # 페이지네이션 적용
-            page = self.paginate_queryset(service_list)
+            page = self.paginate_queryset(queryset)
             if page is not None:
-                serializer = ServiceRetrieveSerializer(page, many=True)
+                serializer = self.get_serializer(page, many=True)
                 return self.get_paginated_response(serializer.data)
 
             # 페이지네이션이 없는 경우 전체 데이터 반환
-            serializer = ServiceRetrieveSerializer(service_list, many=True)
+            serializer = self.get_serializer(queryset, many=True)
             return Response(data=serializer.data, status=status.HTTP_200_OK)
 
-        except ValueError as e:
-            return Response(
-                data={"message": str(e)},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        except Service.DoesNotExist:
-            return Response(
-                data={"message": "There are no services in our database"},
-                status=status.HTTP_404_NOT_FOUND,
-            )
         except Exception as e:
             return Response(
                 data={"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR

@@ -76,11 +76,12 @@ class UserService:
         """
         try:
             with transaction.atomic():
-                s3 = client("s3")
-                s3.delete_object(
-                    Bucket=os.getenv("AWS_STORAGE_BUCKET_NAME"),
-                    Key=user.profile_image.name,
-                )
+                if user.profile_image: # 만약 프로필 이미지가 등록되어 있다면
+                    s3 = client("s3")
+                    s3.delete_object(
+                        Bucket=os.getenv("AWS_STORAGE_BUCKET_NAME"),
+                        Key=user.profile_image.name,
+                    )
                 user.delete()
                 return True
         except Exception as e:

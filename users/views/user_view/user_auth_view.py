@@ -26,7 +26,7 @@ class UserSignUpApi(APIView):
 
                 return Response(
                     {
-                        "message": "success",
+                        "message": "Success",
                     },
                     status=status.HTTP_201_CREATED,
                 )

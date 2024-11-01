@@ -40,7 +40,10 @@ class UserCrudApi(APIView):
                     status=status.HTTP_200_OK,
                 )
         except ValidationError as e:
-            return Response(data=e.detail, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                data={"message": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         except Exception as e:
             return Response(
                 data={"message": f"{str(e)}"},

@@ -9,7 +9,6 @@ from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from django.contrib.auth.hashers import check_password
 from users.models.user import User
 
 
@@ -71,22 +70,20 @@ class UserService:
             raise e
 
     @staticmethod
-    def delete_user(user: User,password: str) -> bool:
+    def delete_user(user: User) -> bool:
         """
         사용자 삭제하는 함수 (회원탈퇴 시 사용함)
         """
         try:
-            if password=="":
-                raise ValidationError("비밀번호 필드에 공백이 입력되었습니다.")
-            if check_password(password,user.password):
-                with transaction.atomic():
+            with transaction.atomic():
+                if user.profile_image: # 만약 프로필 이미지가 등록되어 있다면
                     s3 = client("s3")
                     s3.delete_object(
                         Bucket=os.getenv("AWS_STORAGE_BUCKET_NAME"),
                         Key=user.profile_image.name,
                     )
-                    user.delete()
-                    return True
+                user.delete()
+                return True
         except Exception as e:
             raise e
 

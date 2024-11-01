@@ -2,6 +2,7 @@ from django.contrib.auth.models import (AbstractBaseUser, BaseUserManager,
                                         PermissionsMixin)
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import QuerySet
 
 
 def get_user_profile_image_upload_path(instance, filename):
@@ -37,6 +38,10 @@ class UserManager(BaseUserManager):
         if extra_fields.get("is_superuser") is not True:
             raise ValueError("Superuser must have is_superuser=True.")
         return self.create_user(email, password, **extra_fields)
+
+    def get_user_by_email(self, email: str) -> QuerySet:
+        # 이메일을 사용하여 사용자 정보 쿼리셋을 생성하는 함수
+        return self.model.objects.filter(email=email)
 
 
 class User(AbstractBaseUser, PermissionsMixin):

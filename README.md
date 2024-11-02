@@ -1,5 +1,6 @@
 # 프로젝트 아키텍쳐
 
+![image](https://github.com/user-attachments/assets/9386b6fe-a1d6-4c04-b5a0-c44a882bf8ee)
 
 # 사용 기술
 - Django

@@ -25,7 +25,7 @@ class ReformerProfileView(APIView):
             if not reformer_profile:
                 raise Reformer.DoesNotExist
 
-            serializer = ReformerProfileSerializer(instance=reformer_profile)
+            serializer = ReformerProfileSerializer(instance=reformer_profile, context={'request': request})
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Reformer.DoesNotExist:
             return Response(
@@ -110,7 +110,7 @@ class ReformerProfileView(APIView):
         try:
             reformer_profile = Reformer.objects.filter(user=user).first()
             if not reformer_profile:
-                raise Reformer.DoesNotExist
+                raise Reformer.DoesNotExist("리포머 프로필이 등록되어 있지 않습니다.")
 
             with transaction.atomic():
                 reformer_profile.delete()
@@ -120,11 +120,9 @@ class ReformerProfileView(APIView):
                 return Response(
                     data={"message": "successfully deleted"}, status=status.HTTP_200_OK
                 )
-        except Reformer.DoesNotExist:
+        except Reformer.DoesNotExist as e:
             return Response(
-                data={
-                    "message": "Cannot find reformer profile that belongs to the user"
-                },
+                data={"message": str(e)},
                 status=status.HTTP_404_NOT_FOUND,
             )
         except Exception as e:

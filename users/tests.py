@@ -205,3 +205,32 @@ class UserTestCase(APITestCase):
         user_count = User.objects.filter(email=self.login_request_data["email"]).count()
         self.assertEqual(user_count, 0)
 
+
+class ReformerTestCase(APITestCase):
+
+    def setUp(self):
+        self.client = APIClient()
+        self.test_user = User.objects.create_user(
+            email='test@test.com',
+            password='123123',
+            phone='01012341234',
+            nickname='nickname',
+            introduce='hello, django',
+        )
+        self.login_request_data = {
+            "email": "test@test.com",
+            "password": "123123"
+        }
+
+    def test_reformer_create(self):
+        pass
+
+    def test_reformer_get_list(self):
+        pass
+
+    def test_reformer_update(self):
+        pass
+
+    def test_reformer_delete(self):
+        pass
+

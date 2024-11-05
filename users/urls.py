@@ -11,6 +11,12 @@ from users.views.token_view.token_view import (UserTokenRefreshView,
                                                UserTokenVerifyView)
 from users.views.user_view.user_auth_view import *
 from users.views.user_view.user_crud_view import *
+from django.urls import path
+from .views.account_views import delete_account
+
+urlpatterns = [
+    path('delete_account/', delete_account, name='delete_account'),
+]
 
 app_name = "users"
 

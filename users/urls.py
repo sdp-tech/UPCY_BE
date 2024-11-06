@@ -12,6 +12,8 @@ from users.views.token_view.token_view import (UserTokenRefreshView,
 from users.views.user_view.user_auth_view import *
 from users.views.user_view.user_crud_view import *
 
+
+
 app_name = "users"
 
 urlpatterns = [

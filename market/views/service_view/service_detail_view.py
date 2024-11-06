@@ -14,6 +14,7 @@ from market.serializers.service_serializers.service_create_retrieve_serializer i
     ServiceRetrieveSerializer
 from market.serializers.service_serializers.service_update_serializer import \
     ServiceUpdateSerializer
+from market.services import temporary_status_check
 
 
 class MarketServiceCrudView(APIView):
@@ -26,22 +27,20 @@ class MarketServiceCrudView(APIView):
 
     def get(self, request, **kwargs) -> Response:
         try:
-            market_service = (
-                Service.objects.filter(
-                    market__market_uuid=kwargs.get("market_uuid"),
-                    service_uuid=kwargs.get("service_uuid"),
-                )
-                .select_related("market")
-                .first()
-            )
+            temporary_status = temporary_status_check(request)
+            market_service = Service.objects.filter(
+                market__market_uuid=kwargs.get("market_uuid"),
+                service_uuid=kwargs.get("service_uuid"),
+                temporary=temporary_status,
+            ).select_related("market").first()
             if not market_service:
-                raise Service.DoesNotExist
+                raise Service.DoesNotExist("해당 조건과 UUID에 해당하는 서비스가 존재하지 않습니다.")
 
             serializer = ServiceRetrieveSerializer(instance=market_service)
             return Response(data=serializer.data, status=status.HTTP_200_OK)
-        except Service.DoesNotExist:
+        except Service.DoesNotExist as e:
             return Response(
-                data={"message": "market service not found"},
+                data={"message": str(e)},
                 status=status.HTTP_404_NOT_FOUND,
             )
         except Exception as e:

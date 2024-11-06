@@ -6,22 +6,18 @@ from market.views.image_upload_view import (MarketImageUploadView,
 from market.views.market_view.market_create_list_view import \
     MarketCreateListView
 from market.views.market_view.market_crud_view import MarketCrudView
-from market.views.service_view.service_create_retrieve_view import \
-    MarketServiceView
+from market.views.service_view.service_create_list_view import \
+    MarketServiceCreateListView, GetAllServiceView
 from market.views.service_view.service_detail_view import MarketServiceCrudView
 from market.views.service_view.service_material.service_material_view import (
     ServiceMaterialCreateListView, ServiceMaterialView)
 from market.views.service_view.service_option.service_option_view import (
     ServiceOptionCreateListView, ServiceOptionView)
-from market.views.service_view.service_style.service_style_view import ServiceStyleView
-
-
-class ServiceStyleCreateListView:
-    pass
-
+from market.views.service_view.service_style.service_style_view import ServiceStyleCreateListView, ServiceStyleView
 
 urlpatterns = [
     path("", MarketCreateListView.as_view(), name="market_create_list"),
+    path("/service", GetAllServiceView.as_view(), name="service_list_without_market_uuid"),
     path("/<uuid:market_uuid>", MarketCrudView.as_view(), name="market_crud"),
     path(
         "/<uuid:market_uuid>/image",
@@ -30,7 +26,7 @@ urlpatterns = [
     ),
     path(
         "/<uuid:market_uuid>/service",
-        MarketServiceView.as_view(),
+        MarketServiceCreateListView.as_view(),
         name="market_service",
     ),
     path(
@@ -55,11 +51,11 @@ urlpatterns = [
     ),
     path(
         "/<uuid:market_uuid>/service/<uuid:service_uuid>/style",
-        ServiceStyleView.as_view(),
+        ServiceStyleCreateListView.as_view(),
         name="service_style_create_list_view",
     ),
     path(
-        "/<uuid:market_uuid>/service/<uuid:service_uuid>/style/<uuid:option_uuid>",
+        "/<uuid:market_uuid>/service/<uuid:service_uuid>/style/<uuid:style_uuid>",
         ServiceStyleView.as_view(),
         name="service_style_view",
     ),

@@ -63,10 +63,11 @@ class ServiceMaterialCreateListView(APIView):
                 .first()
             )
             if not service:
-                raise Service.DoesNotExist
+                raise Service.DoesNotExist("해당 uuid에 해당하는 service가 존재하지 않습니다.")
 
             serializer = ServiceMaterialCreateSerializer(
-                data=request.data, context={"service": service}
+                data=request.data,
+                context={"service": service}
             )
             if serializer.is_valid(raise_exception=True):
                 serializer.save()
@@ -74,9 +75,13 @@ class ServiceMaterialCreateListView(APIView):
                     data={"message": "successfully created"},
                     status=status.HTTP_201_CREATED,
                 )
-        except Service.DoesNotExist:
+        except ValidationError as e:
             return Response(
-                data={"message": "market service not found"},
+                data={"message": str(e)}, status=status.HTTP_400_BAD_REQUEST
+            )
+        except Service.DoesNotExist as e:
+            return Response(
+                data={"message": str(e)},
                 status=status.HTTP_404_NOT_FOUND,
             )
         except Exception as e:

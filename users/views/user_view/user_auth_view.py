@@ -25,7 +25,7 @@ class UserSignUpApi(APIView):
 
                 return Response(
                     {
-                        "message": "success",
+                        "message": "Success",
                     },
                     status=status.HTTP_201_CREATED,
                 )
@@ -44,15 +44,18 @@ class UserLoginApi(APIView):
 
     def post(self, request):
         try:
-            requested_data = UserLoginSerializer(data=request.data)
-            if requested_data.is_valid(raise_exception=True):
-                data = requested_data.validated_data
+            serializer = UserLoginSerializer(data=request.data)
+            if serializer.is_valid(raise_exception=True):
+                data = serializer.validated_data
                 service = UserService()
                 login_data = service.login(
                     email=data.get("email"),
                     password=data.get("password"),
                 )
-                return Response(data=login_data, status=status.HTTP_200_OK)
+                return Response(
+                    data=login_data,
+                    status=status.HTTP_200_OK
+                )
             return Response(
                 data={"message": "Invalid input data. check API documentation"},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -88,7 +91,7 @@ class UserLogoutApi(APIView):
             self.service.logout(refresh_token=refresh_token)
             return Response(
                 {"message": "Successfully logged out."},
-                status=status.HTTP_205_RESET_CONTENT,
+                status=status.HTTP_200_OK,
             )
         except (TokenError, InvalidToken):
             return Response(

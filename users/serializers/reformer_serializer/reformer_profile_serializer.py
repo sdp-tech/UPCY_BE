@@ -57,6 +57,7 @@ class ReformerEducationSerializer(serializers.ModelSerializer):
 
 
 class ReformerProfileSerializer(serializers.Serializer):
+    nickname = serializers.SerializerMethodField()
     education = ReformerEducationSerializer(many=True, required=False)
     certification = ReformerCertificationSerializer(many=True, required=False)
     awards = ReformerAwardSerializer(many=True, required=False)
@@ -64,6 +65,26 @@ class ReformerProfileSerializer(serializers.Serializer):
     freelancer = ReformerFreelancerSerializer(many=True, required=False)
     reformer_link = serializers.CharField(required=True)
     reformer_area = serializers.CharField(required=True)
+
+    def get_nickname(self, obj):
+        # Reformer에서 user 객체에 존재하는 nickname 가져오기 위한 함수
+        # SerializerMethodField가 사용한다.
+        return obj.user.nickname
+
+    def validate(self, attrs):
+        # 1. 요청한 user가 이미 reformer 프로필을 생성했는가?
+        request = self.context.get('request')
+        if Reformer.objects.filter(user=request.user).exists():
+            raise serializers.ValidationError(
+                "해당 사용자는 이미 Reformer 프로필을 등록하였습니다."
+            )
+
+        # 2. reformer link가 http 또는 https로 시작하는가?
+        if "reformer_link" in attrs:
+            if not (attrs["reformer_link"].startswith("http://") or attrs["reformer_link"].startswith("https://")):
+                raise serializers.ValidationError("Reformer link는 http 또는 https로 시작해야 합니다.")
+
+        return attrs
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)

@@ -45,6 +45,7 @@ class ServiceCreateSerializer(serializers.ModelSerializer):
             "max_price",
             "service_option",
             "service_material",
+            "temporary",
         ]
 
     def create(self, validated_data):
@@ -82,10 +83,12 @@ class ServiceRetrieveSerializer(serializers.ModelSerializer):
     service_style = ServiceStyleSerializer(many=True)
     service_material = ServiceMaterialSerializer(many=True)
     service_image = ServiceImageSerializer(many=True)
+    market_uuid = serializers.ReadOnlyField(source="market.market_uuid") # https://www.django-rest-framework.org/api-guide/fields/#readonlyfield
 
     class Meta:
         model = Service
         fields = [
+            "market_uuid",
             "service_uuid",
             "service_title",
             "service_content",
@@ -97,4 +100,5 @@ class ServiceRetrieveSerializer(serializers.ModelSerializer):
             "service_option",
             "service_material",
             "service_image",
+            "temporary",
         ]

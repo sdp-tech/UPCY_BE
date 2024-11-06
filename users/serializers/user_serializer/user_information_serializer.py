@@ -11,6 +11,7 @@ class UserInformationSerializer(serializers.ModelSerializer):
         fields = [
             "email",
             "phone",
+            "full_name",
             "nickname",
             "agreement_terms",
             "address",

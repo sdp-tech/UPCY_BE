@@ -6,11 +6,6 @@ from users.models.user import User
 class UserLoginSerializer(serializers.Serializer):
     email = serializers.CharField(write_only=True)  # 요청시에만 사용하는 필드
     password = serializers.CharField(write_only=True)  # 요청시에만 사용하는 필드
-    refresh = serializers.CharField(read_only=True)
-    access = serializers.CharField(read_only=True)
-    nickname = serializers.CharField(read_only=True)
-    is_reformer = serializers.BooleanField(read_only=True)
-    is_consumer = serializers.BooleanField(read_only=True)
 
     def validate(self, attrs):
         email = attrs.get("email")

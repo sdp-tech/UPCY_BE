@@ -51,8 +51,9 @@ class UserCrudApi(APIView):
             )
 
     def delete(self, request) -> Response:
-        user = request.user
+        user = request.user #사용자 정보를 request에서 가져옴
         refresh_token = request.data.get("refresh")
+        password = request.data.get("password")
         if not refresh_token:
             return Response(
                 data={"message": "Refresh token is required."},
@@ -60,7 +61,7 @@ class UserCrudApi(APIView):
             )
         try:
             self.service.logout(refresh_token=refresh_token)  # Refresh Token 만료 처리
-            if self.service.delete_user(user):  # 사용자 삭제
+            if self.service.delete_user(user, password):  # 사용자 삭제
                 return Response(
                     data={"message": "Successfully deleted user"},
                     status=status.HTTP_200_OK,

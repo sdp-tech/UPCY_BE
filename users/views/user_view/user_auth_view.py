@@ -44,9 +44,9 @@ class UserLoginApi(APIView):
 
     def post(self, request):
         try:
-            requested_data = UserLoginSerializer(data=request.data)
-            if requested_data.is_valid(raise_exception=True):
-                data = requested_data.validated_data
+            serializer = UserLoginSerializer(data=request.data)
+            if serializer.is_valid(raise_exception=True):
+                data = serializer.validated_data
                 service = UserService()
                 login_data = service.login(
                     email=data.get("email"),

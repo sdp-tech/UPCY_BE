@@ -1,6 +1,8 @@
 from telnetlib import AUTHENTICATION
 
 from rest_framework.test import APITestCase, APIClient
+from rest_framework_simplejwt.tokens import RefreshToken
+
 from users.models.user import User
 
 class UserTestCase(APITestCase):
@@ -210,6 +212,8 @@ class ReformerTestCase(APITestCase):
 
     def setUp(self):
         self.client = APIClient()
+
+        # 모든 API 요청은 사용자가 로그인 된 상태로 진행
         self.test_user = User.objects.create_user(
             email='test@test.com',
             password='123123',
@@ -217,10 +221,8 @@ class ReformerTestCase(APITestCase):
             nickname='nickname',
             introduce='hello, django',
         )
-        self.login_request_data = {
-            "email": "test@test.com",
-            "password": "123123"
-        }
+        self.tokens = RefreshToken.for_user(self.test_user)
+        self.access_token = self.tokens["access"]
 
     def test_reformer_create(self):
         pass

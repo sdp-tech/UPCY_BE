@@ -1,4 +1,10 @@
 from django.urls import path
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
+from django.contrib.auth import authenticate
 
 from users.views.reformer_view.reformer_education_view.reformer_education_create_list_view import \
     ReformerEducationCreateListView
@@ -11,12 +17,86 @@ from users.views.token_view.token_view import (UserTokenRefreshView,
                                                UserTokenVerifyView)
 from users.views.user_view.user_auth_view import *
 from users.views.user_view.user_crud_view import *
-from django.urls import path
-from .views.account_views import delete_account
+from users.services import UserService
 
-urlpatterns = [
-    path('delete_account/', delete_account, name='delete_account'),
-]
+class UserCrudApi(APIView):
+    permission_classes = [IsAuthenticated]
+    service = UserService()
+
+    def get(self, request) -> Response:
+        try:
+            serializer = UserInformationSerializer(
+                instance=request.user, context={"request": request}
+            )
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                data={"message": f"{str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+    def put(self, request):
+        serializer = UserUpdateSerializer(
+            data=request.data, instance=request.user, partial=True
+        )
+        try:
+            if serializer.is_valid(raise_exception=True):
+                serializer.save()
+                return Response(
+                    data={"message": "Successfully updated user information"},
+                    status=status.HTTP_200_OK,
+                )
+        except ValidationError as e:
+            return Response(data=e.detail, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(
+                data={"message": f"{str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+    def delete(self, request) -> Response:
+        user = request.user
+        refresh_token = request.data.get("refresh")
+        password = request.data.get("password")
+
+        if not refresh_token:
+            return Response(
+                data={"message": "Refresh token is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not password:
+            return Response(
+                data={"message": "Password is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not authenticate(username=user.username, password=password):
+            return Response(
+                data={"message": "Invalid password."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            self.service.logout(refresh_token=refresh_token)
+            if self.service.delete_user(user):
+                return Response(
+                    data={"message": "Successfully deleted user"},
+                    status=status.HTTP_200_OK,
+                )
+            else:
+                raise Exception("Failed to delete user.")
+        except (TokenError, InvalidToken) as e:
+            return Response(
+                data={"message": f"{str(e)}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except Exception as e:
+            return Response(
+                data={"message": f"{str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
 
 app_name = "users"
 

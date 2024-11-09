@@ -66,7 +66,7 @@ class UserCrudApi(APIView):
                     status=status.HTTP_200_OK,
                 )
             else:
-                raise Exception
+                raise Exception("Failed to delete user")
         except (TokenError, InvalidToken) as e:
             return Response(
                 data={"message": f"{str(e)}"}, status=status.HTTP_400_BAD_REQUEST

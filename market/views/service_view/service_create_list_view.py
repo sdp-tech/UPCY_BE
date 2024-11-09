@@ -1,17 +1,16 @@
 from django.db.models import QuerySet
 from rest_framework import status
 from rest_framework.generics import ListAPIView
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from market.pagination import ServiceListPagination
-from market.services import temporary_status_check
-
 from core.permissions import IsReformer
 from market.models import Market, Service
+from market.pagination import ServiceListPagination
 from market.serializers.service_serializers.service_create_retrieve_serializer import (
     ServiceCreateSerializer, ServiceRetrieveSerializer)
+from market.services import temporary_status_check
 
 
 class MarketServiceCreateListView(APIView):
@@ -37,8 +36,7 @@ class MarketServiceCreateListView(APIView):
             return Response(data=serialized.data, status=status.HTTP_200_OK)
         except ValueError as e:
             return Response(
-                data={"message": str(e)},
-                status=status.HTTP_400_BAD_REQUEST
+                data={"message": str(e)}, status=status.HTTP_400_BAD_REQUEST
             )
         except Service.DoesNotExist:
             return Response(
@@ -83,13 +81,14 @@ class GetAllServiceView(ListAPIView):
     기존 APIView 클래스를 상속받았던것과 달리,
     generics.ListAPIView를 활용해서 더 쉽게 API 구성이 가능합니다.
     """
+
     permission_classes = [AllowAny]
-    serializer_class = ServiceRetrieveSerializer # 시리얼라이저 지정
-    pagination_class = ServiceListPagination # 페이지네이션 클래스 지정
+    serializer_class = ServiceRetrieveSerializer  # 시리얼라이저 지정
+    pagination_class = ServiceListPagination  # 페이지네이션 클래스 지정
 
     def get_queryset(self):
         # 쿼리셋을 select_related를 사용해 최적화하여 반환
-        return Service.objects.select_related('market').all()
+        return Service.objects.select_related("market").all()
 
     def get(self, request, **kwargs):
         try:

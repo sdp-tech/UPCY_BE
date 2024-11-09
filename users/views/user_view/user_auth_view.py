@@ -53,10 +53,7 @@ class UserLoginApi(APIView):
                     email=data.get("email"),
                     password=data.get("password"),
                 )
-                return Response(
-                    data=login_data,
-                    status=status.HTTP_200_OK
-                )
+                return Response(data=login_data, status=status.HTTP_200_OK)
             return Response(
                 data={"message": "Invalid input data. check API documentation"},
                 status=status.HTTP_400_BAD_REQUEST,

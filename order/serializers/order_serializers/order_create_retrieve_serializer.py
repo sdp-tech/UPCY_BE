@@ -1,36 +1,44 @@
 from rest_framework import serializers
-from order.models import (Order, OrderImage, AdditionalImage, OrderState, TransactionOption, DeliveryInformation)
+
+from order.models import (AdditionalImage, DeliveryInformation, Order,
+                          OrderImage, OrderState, TransactionOption)
+
 
 class OrderImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderImage
         fields = ["image"]
 
+
 class AdditionalImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = AdditionalImage
         fields = ["image"]
+
 
 class OrderStateSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderState
         fields = ["orderState_uuid", "reformer_status"]
 
+
 class TransactionOptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = TransactionOption
-        fields = ["transaction_uuid",
-                  "transaction_option",
-                  "delivery_address",
-                  "delivery_name",
-                  "delivery_phone_number"]
+        fields = [
+            "transaction_uuid",
+            "transaction_option",
+            "delivery_address",
+            "delivery_name",
+            "delivery_phone_number",
+        ]
+
 
 class DeliveryInformationSerializer(serializers.ModelSerializer):
     class Meta:
         model = DeliveryInformation
-        fields = ["delivery_uuid",
-                  "delivery_company",
-                  "delivery_tracking_number"]
+        fields = ["delivery_uuid", "delivery_company", "delivery_tracking_number"]
+
 
 class OrderCreateSerializer(serializers.ModelSerializer):
     order_uuid = serializers.UUIDField(read_only=True)
@@ -71,28 +79,36 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         order = Order.objects.create(service_order=service_order, **validated_data)
         order.save()
 
-
         for image_data in order_images_data:
             order_images_data = OrderImage.objects.create(order=order, **image_data)
             order_images_data.save()
 
         for image_data in additional_images_data:
-            additional_images_data = AdditionalImage.objects.create(order=order, **image_data)
+            additional_images_data = AdditionalImage.objects.create(
+                order=order, **image_data
+            )
             additional_images_data.save()
 
         if order_state_data:
-            order_state_data = OrderState.objects.create(order=order, **order_state_data)
+            order_state_data = OrderState.objects.create(
+                order=order, **order_state_data
+            )
             order_state_data.save()
 
         if transaction_option_data:
-            transaction_option_data =TransactionOption.objects.create(order=order, **transaction_option_data)
+            transaction_option_data = TransactionOption.objects.create(
+                order=order, **transaction_option_data
+            )
             transaction_option_data.save()
 
         if delivery_information_data:
-            delivery_information_data = DeliveryInformation.objects.create(order=order, **delivery_information_data)
+            delivery_information_data = DeliveryInformation.objects.create(
+                order=order, **delivery_information_data
+            )
             delivery_information_data.save()
 
         return order
+
 
 class OrderRetrieveSerializer(serializers.ModelSerializer):
     order_uuid = serializers.UUIDField(read_only=True)

@@ -13,6 +13,7 @@ class IsReformer(BasePermission):
             and request.user.role == "reformer"
         )
 
+
 class IsCustomer(BasePermission):
     """
     Allows access only authenticate and "Customer" users.

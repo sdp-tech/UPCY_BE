@@ -1,6 +1,5 @@
-from telnetlib import AUTHENTICATION
-
-from rest_framework.test import APIClient, APITestCase
+from rest_framework.test import APITestCase, APIClient
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from users.models.user import User
 
@@ -23,6 +22,7 @@ class UserTestCase(APITestCase):
         request_data = {
             "email": "user@test.com",
             "password": "123123",
+            "full_name": "hello",
             "agreement_terms": True,
         }
         response = self.client.post(
@@ -40,6 +40,7 @@ class UserTestCase(APITestCase):
         request_data = {
             "email": "user@test.com",
             "password": "123123",
+            "full_name": "hello",
             "agreement_terms": True,
             "nickname": "testuser",
             "introduce": "Hello world",
@@ -160,10 +161,33 @@ class UserTestCase(APITestCase):
 
         # 3. 회원 탈퇴
         response = self.client.delete(
-            path="/api/user", data={"refresh": refresh_token}, format="json"
+            path="/api/user",
+            data={
+                "refresh": refresh_token,
+                "password": self.login_request_data.get("password")
+            },
+            format="json"
         )
         self.assertEqual(response.status_code, 200)
 
         # 4. 디비에 사용자가 남아있는지 확인
         user_count = User.objects.filter(email=self.login_request_data["email"]).count()
         self.assertEqual(user_count, 0)
+
+
+class ReformerTestCase(APITestCase):
+
+    def setUp(self):
+        self.client = APIClient()
+
+    def test_reformer_create(self):
+        pass
+
+    def test_reformer_get_list(self):
+        pass
+
+    def test_reformer_update(self):
+        pass
+
+    def test_reformer_delete(self):
+        pass

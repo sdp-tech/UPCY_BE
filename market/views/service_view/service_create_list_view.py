@@ -1,7 +1,7 @@
 from django.db.models import QuerySet
 from rest_framework import status
 from rest_framework.generics import ListAPIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -83,7 +83,7 @@ class GetAllServiceView(ListAPIView):
     기존 APIView 클래스를 상속받았던것과 달리,
     generics.ListAPIView를 활용해서 더 쉽게 API 구성이 가능합니다.
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     serializer_class = ServiceRetrieveSerializer # 시리얼라이저 지정
     pagination_class = ServiceListPagination # 페이지네이션 클래스 지정
 

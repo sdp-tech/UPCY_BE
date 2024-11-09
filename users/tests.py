@@ -1,6 +1,5 @@
-from telnetlib import AUTHENTICATION
-
-from rest_framework.test import APIClient, APITestCase
+from rest_framework.test import APITestCase, APIClient
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from users.models.user import User
 
@@ -167,3 +166,32 @@ class UserTestCase(APITestCase):
         # 4. 디비에 사용자가 남아있는지 확인
         user_count = User.objects.filter(email=self.login_request_data["email"]).count()
         self.assertEqual(user_count, 0)
+
+
+class ReformerTestCase(APITestCase):
+
+    def setUp(self):
+        self.client = APIClient()
+
+        # 모든 API 요청은 사용자가 로그인 된 상태로 진행
+        self.test_user = User.objects.create_user(
+            email='test@test.com',
+            password='123123',
+            phone='01012341234',
+            nickname='nickname',
+            introduce='hello, django',
+        )
+        self.tokens = RefreshToken.for_user(self.test_user)
+        self.access_token = self.tokens["access"]
+
+    def test_reformer_create(self):
+        pass
+
+    def test_reformer_get_list(self):
+        pass
+
+    def test_reformer_update(self):
+        pass
+
+    def test_reformer_delete(self):
+        pass

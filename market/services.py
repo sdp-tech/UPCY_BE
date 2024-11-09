@@ -15,6 +15,7 @@ def validate_image_files(image_files: List) -> None:
         if image_file.size > 10 * 1024 * 1024:  # 10MB 이상의 이미지는 허용되지 않음
             raise ValidationError("Image file size must be less than 10MB")
 
+
 def temporary_status_check(request) -> bool:
     # 쿼리 파라미터로 temporary 변수를 문자열로 받아옴
     temporary_status = request.GET.get("temporary", "false").lower()

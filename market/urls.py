@@ -1,25 +1,36 @@
 from django.urls import path
 
-from market.views.image_upload_view import (MarketImageUploadView,
-                                            MarketServiceImageUploadView,
-                                            ServiceOptionImageUploadView)
-from market.views.market_view.market_create_list_view import \
-    MarketCreateListView
+from market.views.image_upload_view import (
+    MarketImageUploadView,
+    MarketServiceImageUploadView,
+    ServiceOptionImageUploadView,
+)
+from market.views.market_view.market_create_list_view import MarketCreateListView
 from market.views.market_view.market_crud_view import MarketCrudView
 from market.views.service_view.service_create_list_view import (
-    GetAllServiceView, MarketServiceCreateListView)
+    GetAllServiceView,
+    MarketServiceCreateListView,
+)
 from market.views.service_view.service_detail_view import MarketServiceCrudView
 from market.views.service_view.service_material.service_material_view import (
-    ServiceMaterialCreateListView, ServiceMaterialView)
+    ServiceMaterialCreateListView,
+    ServiceMaterialView,
+)
 from market.views.service_view.service_option.service_option_view import (
-    ServiceOptionCreateListView, ServiceOptionView)
+    ServiceOptionCreateListView,
+    ServiceOptionView,
+)
 from market.views.service_view.service_style.service_style_view import (
-    ServiceStyleCreateListView, ServiceStyleView)
+    ServiceStyleCreateListView,
+    ServiceStyleView,
+)
 
 urlpatterns = [
     path("", MarketCreateListView.as_view(), name="market_create_list"),
     path(
-        "/service", GetAllServiceView.as_view(), name="service_list_without_market_uuid"
+        "/services",
+        GetAllServiceView.as_view(),
+        name="service_list_without_market_uuid",
     ),
     path("/<uuid:market_uuid>", MarketCrudView.as_view(), name="market_crud"),
     path(

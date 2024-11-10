@@ -3,13 +3,13 @@ from datetime import tzinfo
 from typing import Dict
 
 from boto3 import client
+from django.contrib.auth.hashers import check_password
 from django.db import transaction
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from django.contrib.auth.hashers import check_password
 from users.models.user import User
 
 

@@ -18,7 +18,7 @@ class UserLoginSerializer(serializers.Serializer):
         # 사용자가 존재하는지 확인
         user = User.objects.filter(email=email).first()
         if not user:
-            raise serializers.ValidationError("No user found with this email address.")
+            raise User.DoesNotExist("No user found with this email address.")
 
         # 비밀번호 확인
         if not user.check_password(password):

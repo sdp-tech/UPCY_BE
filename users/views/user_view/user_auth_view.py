@@ -1,14 +1,16 @@
+from django.contrib.auth.hashers import check_password
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
-from django.contrib.auth.hashers import check_password
 
 from users.models.user import User
-from users.serializers.user_serializer.user_login_serializer import UserLoginSerializer
-from users.serializers.user_serializer.user_signup_serializer import UserSignUpSerializer
+from users.serializers.user_serializer.user_login_serializer import \
+    UserLoginSerializer
+from users.serializers.user_serializer.user_signup_serializer import \
+    UserSignUpSerializer
 from users.services import UserService
 
 

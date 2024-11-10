@@ -1,4 +1,4 @@
-from django.db import transaction, IntegrityError
+from django.db import IntegrityError, transaction
 from rest_framework import serializers, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -17,13 +17,19 @@ class ReformerProfileView(APIView):
     user_service = UserService()
 
     def get(self, request) -> Response:
-        user = request.user # 요청한 사용자 정보를 가져온다.
+        user = request.user  # 요청한 사용자 정보를 가져온다.
         try:
-            reformer_profile = Reformer.objects.filter(user=user).first() # 사용자의 프로필에 연결되어 있는 리포머 프로필 데이터를 가져온다.
-            if not reformer_profile: # 없다면 Exception
-                raise Reformer.DoesNotExist("해당 사용자는 리포머 프로필이 등록되어 있지 않습니다.")
+            reformer_profile = Reformer.objects.filter(
+                user=user
+            ).first()  # 사용자의 프로필에 연결되어 있는 리포머 프로필 데이터를 가져온다.
+            if not reformer_profile:  # 없다면 Exception
+                raise Reformer.DoesNotExist(
+                    "해당 사용자는 리포머 프로필이 등록되어 있지 않습니다."
+                )
 
-            serializer = ReformerProfileSerializer(instance=reformer_profile, context={'request': request})
+            serializer = ReformerProfileSerializer(
+                instance=reformer_profile, context={"request": request}
+            )
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Reformer.DoesNotExist as e:
             return Response(

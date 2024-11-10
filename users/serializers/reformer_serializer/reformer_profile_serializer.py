@@ -73,7 +73,7 @@ class ReformerProfileSerializer(serializers.Serializer):
 
     def validate(self, attrs):
         # 1. 요청한 user가 이미 reformer 프로필을 생성했는가?
-        request = self.context.get('request')
+        request = self.context.get("request")
         if Reformer.objects.filter(user=request.user).exists():
             raise serializers.ValidationError(
                 "해당 사용자는 이미 Reformer 프로필을 등록하였습니다."
@@ -81,8 +81,13 @@ class ReformerProfileSerializer(serializers.Serializer):
 
         # 2. reformer link가 http 또는 https로 시작하는가?
         if "reformer_link" in attrs:
-            if not (attrs["reformer_link"].startswith("http://") or attrs["reformer_link"].startswith("https://")):
-                raise serializers.ValidationError("Reformer link는 http 또는 https로 시작해야 합니다.")
+            if not (
+                attrs["reformer_link"].startswith("http://")
+                or attrs["reformer_link"].startswith("https://")
+            ):
+                raise serializers.ValidationError(
+                    "Reformer link는 http 또는 https로 시작해야 합니다."
+                )
 
         return attrs
 

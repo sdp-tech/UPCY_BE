@@ -5,25 +5,28 @@ from boto3 import client
 from django.db import transaction
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
-from rest_framework.permissions import BasePermission, IsAuthenticated
+from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from core.permissions import IsReformer
 from market.models import Service, ServiceOption, ServiceOptionImage
-from market.serializers.service_serializers.service_option.service_option_create_serializer import \
-    ServiceOptionCreateSerializer
-from market.serializers.service_serializers.service_option.service_option_retrieve_serializer import \
-    ServiceOptionRetrieveSerializer
-from market.serializers.service_serializers.service_option.service_option_update_serializer import \
-    ServiceOptionUpdateSerializer
+from market.serializers.service_serializers.service_option.service_option_create_serializer import (
+    ServiceOptionCreateSerializer,
+)
+from market.serializers.service_serializers.service_option.service_option_retrieve_serializer import (
+    ServiceOptionRetrieveSerializer,
+)
+from market.serializers.service_serializers.service_option.service_option_update_serializer import (
+    ServiceOptionUpdateSerializer,
+)
 
 
 class ServiceOptionCreateListView(APIView):
 
     def get_permissions(self) -> List[BasePermission]:
         if self.request.method == "GET":
-            return [IsAuthenticated()]
+            return [AllowAny()]
         elif self.request.method in ["POST"]:
             return [IsReformer()]
         return super().get_permissions()

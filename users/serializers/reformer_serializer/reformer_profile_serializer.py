@@ -1,8 +1,13 @@
 from rest_framework import serializers
 
-from users.models.reformer import (Reformer, ReformerAwards, ReformerCareer,
-                                   ReformerCertification, ReformerEducation,
-                                   ReformerFreelancer)
+from users.models.reformer import (
+    Reformer,
+    ReformerAwards,
+    ReformerCareer,
+    ReformerCertification,
+    ReformerEducation,
+    ReformerFreelancer,
+)
 
 
 class ReformerCertificationSerializer(serializers.ModelSerializer):

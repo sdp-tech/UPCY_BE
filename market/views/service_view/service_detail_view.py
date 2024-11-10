@@ -4,23 +4,25 @@ from boto3 import client
 from django.db import transaction
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from core.permissions import IsReformer
 from market.models import Service, ServiceImage
-from market.serializers.service_serializers.service_create_retrieve_serializer import \
-    ServiceRetrieveSerializer
-from market.serializers.service_serializers.service_update_serializer import \
-    ServiceUpdateSerializer
+from market.serializers.service_serializers.service_create_retrieve_serializer import (
+    ServiceRetrieveSerializer,
+)
+from market.serializers.service_serializers.service_update_serializer import (
+    ServiceUpdateSerializer,
+)
 from market.services import temporary_status_check
 
 
 class MarketServiceCrudView(APIView):
     def get_permissions(self):
         if self.request.method == "GET":
-            return [IsAuthenticated()]
+            return [AllowAny()]
         elif self.request.method in ["POST", "PUT", "DELETE"]:
             return [IsReformer()]
         return super().get_permissions()

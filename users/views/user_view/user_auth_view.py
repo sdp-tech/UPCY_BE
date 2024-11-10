@@ -7,10 +7,10 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 
 from users.models.user import User
-from users.serializers.user_serializer.user_login_serializer import \
-    UserLoginSerializer
-from users.serializers.user_serializer.user_signup_serializer import \
-    UserSignUpSerializer
+from users.serializers.user_serializer.user_login_serializer import UserLoginSerializer
+from users.serializers.user_serializer.user_signup_serializer import (
+    UserSignUpSerializer,
+)
 from users.services import UserService
 
 
@@ -47,25 +47,24 @@ class UserLoginApi(APIView):
     def post(self, request):
         try:
             serializer = UserLoginSerializer(data=request.data)
-            if serializer.is_valid(raise_exception=True):
-                data = serializer.validated_data
-                service = UserService()
-                login_data = service.login(
-                    email=data.get("email"),
-                    password=data.get("password"),
-                )
-                return Response(data=login_data, status=status.HTTP_200_OK)
-            return Response(
-                data={"message": "Invalid input data. check API documentation"},
-                status=status.HTTP_400_BAD_REQUEST,
+            serializer.is_valid(raise_exception=True)
+
+            data = serializer.validated_data
+            service = UserService()
+            login_data = service.login(
+                email=data.get("email"),
+                password=data.get("password"),
             )
-        except User.DoesNotExist:
+            return Response(data=login_data, status=status.HTTP_200_OK)
+        except User.DoesNotExist as e:
             return Response(
-                data={"message": "User does not exist"},
+                data={"message": str(e)},
+                status=status.HTTP_404_NOT_FOUND,
             )
         except ValidationError as e:
             return Response(
                 data={"message": str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
             )
         except Exception as e:
             return Response(

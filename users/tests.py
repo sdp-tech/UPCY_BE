@@ -60,6 +60,13 @@ class UserTestCase(APITestCase):
         self.assertEqual(created_user.introduce, request_data["introduce"])
 
     def test_user_login(self):
+        # 존재하지 않는 사용자로 로그인 시 400 에러 발생하는지 확인
+        request_data = {"email": "admin@test.com", "password": "123123"}
+        response = self.client.post(
+            path="/api/user/login", data=request_data, format="json"
+        )
+        self.assertEqual(response.status_code, 404)
+
         # 이메일 로그인 시 토큰 발급이 정상적으로 동작하는지 확인
         request_data = {"email": "test@test.com", "password": "123123"}
         response = self.client.post(

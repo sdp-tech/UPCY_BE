@@ -1,14 +1,16 @@
 from django.urls import path
 
-from users.views.reformer_view.reformer_education_view.reformer_education_create_list_view import \
-    ReformerEducationCreateListView
-from users.views.reformer_view.reformer_education_view.reformer_education_document_view import \
-    ReformerEducationDocumentView
-from users.views.reformer_view.reformer_education_view.reformer_education_view import \
-    ReformerEducationView
+from users.views.reformer_view.reformer_education_view.reformer_education_create_list_view import (
+    ReformerEducationCreateListView,
+)
+from users.views.reformer_view.reformer_education_view.reformer_education_document_view import (
+    ReformerEducationDocumentView,
+)
+from users.views.reformer_view.reformer_education_view.reformer_education_view import (
+    ReformerEducationView,
+)
 from users.views.reformer_view.reformer_profile_view import ReformerProfileView
-from users.views.token_view.token_view import (UserTokenRefreshView,
-                                               UserTokenVerifyView)
+from users.views.token_view.token_view import UserTokenRefreshView, UserTokenVerifyView
 from users.views.user_view.user_auth_view import *
 from users.views.user_view.user_crud_view import *
 

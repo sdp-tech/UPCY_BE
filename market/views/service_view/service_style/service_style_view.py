@@ -1,24 +1,27 @@
 from typing import List
 
 from rest_framework import status
-from rest_framework.permissions import BasePermission, IsAuthenticated
+from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from core.permissions import IsReformer
 from market.models import Service, ServiceStyle
-from market.serializers.service_serializers.service_style.service_style_create_serializer import \
-    ServiceStyleCreateSerializer
-from market.serializers.service_serializers.service_style.service_style_retrieve_serializer import \
-    ServiceStyleRetrieveSerializer
-from market.serializers.service_serializers.service_style.service_style_update_serializer import \
-    ServiceStyleUpdateSerializer
+from market.serializers.service_serializers.service_style.service_style_create_serializer import (
+    ServiceStyleCreateSerializer,
+)
+from market.serializers.service_serializers.service_style.service_style_retrieve_serializer import (
+    ServiceStyleRetrieveSerializer,
+)
+from market.serializers.service_serializers.service_style.service_style_update_serializer import (
+    ServiceStyleUpdateSerializer,
+)
 
 
 class ServiceStyleCreateListView(APIView):
     def get_permissions(self) -> List[BasePermission]:
         if self.request.method == "GET":
-            return [IsAuthenticated()]
+            return [AllowAny()]
         elif self.request.method in ["POST", "PUT", "PATCH", "DELETE"]:
             return [IsReformer()]
         return super().get_permissions()

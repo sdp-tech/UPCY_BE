@@ -59,8 +59,8 @@ class UserCrudApi(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         try:
-            self.service.logout(refresh_token=refresh_token)  # Refresh Token 만료 처리
             if self.service.delete_user(user, password):  # 사용자 삭제
+                self.service.logout(refresh_token=refresh_token)  # Refresh Token 만료 처리
                 return Response(
                     data={"message": "Successfully deleted user"},
                     status=status.HTTP_200_OK,

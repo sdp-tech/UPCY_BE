@@ -1,7 +1,12 @@
 from rest_framework import serializers
 
-from market.models import (Service, ServiceImage, ServiceMaterial,
-                           ServiceOption, ServiceStyle)
+from market.models import (
+    Service,
+    ServiceImage,
+    ServiceMaterial,
+    ServiceOption,
+    ServiceStyle,
+)
 
 
 class ServiceStyleSerializer(serializers.ModelSerializer):

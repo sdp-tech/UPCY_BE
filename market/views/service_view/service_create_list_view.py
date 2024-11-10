@@ -9,7 +9,9 @@ from core.permissions import IsReformer
 from market.models import Market, Service
 from market.pagination import ServiceListPagination
 from market.serializers.service_serializers.service_create_retrieve_serializer import (
-    ServiceCreateSerializer, ServiceRetrieveSerializer)
+    ServiceCreateSerializer,
+    ServiceRetrieveSerializer,
+)
 from market.services import temporary_status_check
 
 
@@ -17,7 +19,7 @@ class MarketServiceCreateListView(APIView):
 
     def get_permissions(self):
         if self.request.method == "GET":
-            return [IsAuthenticated()]
+            return [AllowAny()]
         elif self.request.method in ["POST"]:
             return [IsReformer()]
         return super().get_permissions()

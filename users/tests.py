@@ -1,6 +1,7 @@
 from rest_framework.test import APITestCase, APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from users.models.reformer import Reformer
 from users.models.user import User
 
 
@@ -180,11 +181,122 @@ class ReformerTestCase(APITestCase):
     def setUp(self):
         self.client = APIClient()
 
+        # Reformer 관련 API 처리는 반드시 Access token이 필요하므로 로그인 먼저 수행
+        self.test_user = User.objects.create_user(
+            email="test@test.com",
+            password="123123",
+            phone="01012341234",
+            full_name="hello",
+            nickname="nickname",
+            introduce="hello, django",
+        )
+        self.login_request_data = {
+            "email": "test@test.com",
+            "password": "123123"
+        }
+
     def test_reformer_create(self):
-        pass
+
+        # 1. 일반 로그인 상태
+        response = self.client.post(
+            path="/api/user/login",
+            data=self.login_request_data,
+            format="json"
+        )
+        self.access_token = response.data["access"]
+        self.refresh_token = response.data["refresh"]
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+
+        # 2. 요청 전, 사용자의 권한이 customer 레벨이고, 요청 후 사용자의 권한이 Reformer 레벨로 변경되는지 확인
+        user = User.objects.get_user_by_email(self.login_request_data.get("email")).first()
+        self.assertEqual(user.role, "customer")
+
+        response = self.client.post(
+            path="/api/user/reformer",
+            data={
+                "reformer_link": "https://www.naver.com",
+                "reformer_area": "seoul yongsan",
+                "education": [
+                    {
+                        "school": "Test school",
+                        "major": "Fashion Design",
+                        "academic_status": "Graduated"
+                    },
+                    {
+                        "school": "Another University",
+                        "major": "Art",
+                        "academic_status": "Graduated"
+                    }
+                ],
+                "certification": [
+                    {
+                        "name": "test cert",
+                        "issuing_authority": "asdfasdfasdf"
+                    },
+                    {
+                        "name": "test cert 2",
+                        "issuing_authority": "gjdofisjgfdg"
+                    }
+                ],
+                "awards": [
+                    {
+                        "competition": "어쩌구저쩌구대회",
+                        "prize": "멍때리기대회1등"
+                    },
+                    {
+                        "competition": "어쩌구저쩌구대회2",
+                        "prize": "웃음참기대회1등"
+                    }
+                ],
+                "career": [
+                    {
+                        "company_name": "sdiojfgoijfsgf",
+                        "department": "디자인",
+                        "period": "3년"
+                    },
+                    {
+                        "company_name": "pjgfhjfghjgoijfsgfthgdrthgdrth",
+                        "department": "디자인",
+                        "period": "6개월"
+                    }
+                ],
+                "freelancer": [
+                    {
+                        "project_name": "oubj89todjirng",
+                        "description": "이런저런 일을 했습니다"
+                    },
+                    {
+                        "project_name": "ㅁㄴㅇㄻㄴㅇㄻㄴㅇㄹ",
+                        "description": "이런저런 일을 했습니다 2"
+                    }
+                ]
+            },
+            format="json"
+        )
+        self.assertEqual(response.status_code, 201)
+        user = User.objects.get_user_by_email(self.login_request_data.get("email")).first()
+        self.assertEqual(user.role, "reformer") # 사용자의 권한이 reformer로 바뀌었는지 확인
+
+        # 3. Reformer 객체와 관련 객체가 생성되었는지 확인
+        reformer = Reformer.objects.filter(user=user)
+        self.assertEqual(reformer.count(), 1)
+        self.assertEqual(reformer.first().reformer_education.count(), 2)
+        self.assertEqual(reformer.first().reformer_certification.count(), 2)
+        self.assertEqual(reformer.first().reformer_awards.count(), 2)
+        self.assertEqual(reformer.first().reformer_career.count(), 2)
+        self.assertEqual(reformer.first().reformer_freelancer.count(), 2)
+
 
     def test_reformer_get_list(self):
-        pass
+        # 1. 로그인 상태
+        response = self.client.post(
+            path="/api/user/login",
+            data=self.login_request_data,
+            format="json"
+        )
+        self.access_token = response.data["access"]
+        self.refresh_token = response.data["refresh"]
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
 
     def test_reformer_update(self):
         pass

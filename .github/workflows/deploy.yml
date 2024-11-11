@@ -45,14 +45,14 @@ jobs:
         env:
           DJANGO_SETTINGS_MODULE: 'config.settings'
           DJANGO_DEBUG_MODE: true
-          UPCY_SECRET_KEY: 'test123123123123123123123' # 진짜 테스트 키 아닙니다.
+          UPCY_SECRET_KEY: 'test123123123123123123123' # 진짜 SECRET 키 아닙니다.
         run: |
           poetry run python manage.py migrate  # 데이터베이스 마이그레이션
-          poetry run python manage.py test     # Django 테스트 실행
+          poetry run python manage.py test     # Django 전체 테스트 실행
 
 
   deploy:
-    name: Deploy to ECR
+    name: Deploy Docker image to ECR and Run docker image in EC2 instance
     # PR이 머지되었을 때만 실행
     if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
     runs-on: ubuntu-latest

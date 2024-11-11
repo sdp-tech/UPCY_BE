@@ -1,7 +1,12 @@
 from rest_framework import serializers
 
-from market.models import (Service, ServiceImage, ServiceMaterial,
-                           ServiceOption, ServiceStyle)
+from market.models import (
+    Service,
+    ServiceImage,
+    ServiceMaterial,
+    ServiceOption,
+    ServiceStyle,
+)
 
 
 class ServiceStyleSerializer(serializers.ModelSerializer):
@@ -83,7 +88,9 @@ class ServiceRetrieveSerializer(serializers.ModelSerializer):
     service_style = ServiceStyleSerializer(many=True)
     service_material = ServiceMaterialSerializer(many=True)
     service_image = ServiceImageSerializer(many=True)
-    market_uuid = serializers.ReadOnlyField(source="market.market_uuid") # https://www.django-rest-framework.org/api-guide/fields/#readonlyfield
+    market_uuid = serializers.ReadOnlyField(
+        source="market.market_uuid"
+    )  # https://www.django-rest-framework.org/api-guide/fields/#readonlyfield
 
     class Meta:
         model = Service

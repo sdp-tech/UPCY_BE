@@ -1,4 +1,3 @@
-
 from typing import List
 
 from rest_framework import status
@@ -8,14 +7,17 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from core.permissions import IsReformer
-from order.models import Order, DeliveryInformation
+from order.models import DeliveryInformation, Order
+from order.serializers.order_serializers.order_delivery_information.order_delivery_create_serializer import (
+    DeliveryInformationCreateSerializer,
+)
+from order.serializers.order_serializers.order_delivery_information.order_delivery_retrieve_serializer import (
+    DeliveryInformationRetrieveSerializer,
+)
+from order.serializers.order_serializers.order_delivery_information.order_delivery_update_serializer import (
+    DeliveryInformationUpdateSerializer,
+)
 
-from order.serializers.order_serializers.order_delivery_information.order_delivery_retrieve_serializer import \
-    DeliveryInformationRetrieveSerializer
-from order.serializers.order_serializers.order_delivery_information.order_delivery_create_serializer import \
-    DeliveryInformationCreateSerializer
-from order.serializers.order_serializers.order_delivery_information.order_delivery_update_serializer import \
-    DeliveryInformationUpdateSerializer
 
 class OrderDeliveryCreateView(APIView):
     def get_permissions(self) -> List[BasePermission]:
@@ -38,7 +40,7 @@ class OrderDeliveryCreateView(APIView):
                 raise Order.DoesNotExist
 
             serializer = DeliveryInformationRetrieveSerializer(
-                instance = order.delivery_information
+                instance=order.delivery_information
             )
             return Response(data=serializer.data, status=status.HTTP_200_OK)
         except Order.DoesNotExist:
@@ -80,13 +82,13 @@ class OrderDeliveryCreateView(APIView):
             )
         except ValidationError as e:
             return Response(
-                data={"message": str(e)},
-                status=status.HTTP_400_BAD_REQUEST
+                data={"message": str(e)}, status=status.HTTP_400_BAD_REQUEST
             )
         except Exception as e:
             return Response(
                 data={"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
 
 class OrderDeliveryView(APIView):
     def get_permissions(self) -> List[BasePermission]:
@@ -97,14 +99,18 @@ class OrderDeliveryView(APIView):
 
     def get(self, request, **kwargs) -> Response:
         try:
-            delivery_information : DeliveryInformation = DeliveryInformation.objects.filter(
-                delivery_uuid = kwargs.get("delivery_uuid")
-            ).first()
+            delivery_information: DeliveryInformation = (
+                DeliveryInformation.objects.filter(
+                    delivery_uuid=kwargs.get("delivery_uuid")
+                ).first()
+            )
             if not delivery_information:
                 raise DeliveryInformation.DoesNotExist
 
-            serializer = DeliveryInformationRetrieveSerializer(instance=delivery_information)
-            return Response(data=serializer.data,status=status.HTTP_200_OK)
+            serializer = DeliveryInformationRetrieveSerializer(
+                instance=delivery_information
+            )
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
         except DeliveryInformation.DoesNotExist:
             return Response(
                 data={"message": "delivery information not found"},
@@ -117,9 +123,11 @@ class OrderDeliveryView(APIView):
 
     def put(self, request, **kwargs) -> Response:
         try:
-            delivery_information : DeliveryInformation = DeliveryInformation.objects.filter(
-                delivery_uuid=kwargs.get("delivery_uuid")
-            ).first()
+            delivery_information: DeliveryInformation = (
+                DeliveryInformation.objects.filter(
+                    delivery_uuid=kwargs.get("delivery_uuid")
+                ).first()
+            )
             if not delivery_information:
                 raise DeliveryInformation.DoesNotExist
 
@@ -145,5 +153,3 @@ class OrderDeliveryView(APIView):
             return Response(
                 data={"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-
-

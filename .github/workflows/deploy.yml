@@ -1,13 +1,17 @@
-name: Deploy to Amazon ECR
+name: Check code quality, run test code and Deploy to Amazon ECR
 
 on:
   pull_request:
-    types: [closed]
     branches:
       - upcy-14th-backend-dev
+    types:
+      - opened
+      - synchronize
+      - closed
 
 jobs:
   test:
+    if: github.event_name == 'pull_request' && github.event.action != 'closed'
     name: Django API Test
     runs-on: ubuntu-latest
 
@@ -44,7 +48,7 @@ jobs:
 #  deploy:
 #    name: Deploy to ECR
 #    # PR이 머지되었을 때만 실행
-#    if: github.event.pull_request.merged == true
+#    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
 #    runs-on: ubuntu-latest
 #
 #    steps:

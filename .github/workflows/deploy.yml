@@ -44,6 +44,7 @@ jobs:
       - name: Django 테스트 실행
         env:
           DJANGO_SETTINGS_MODULE: 'config.settings'
+          DJANGO_DEBUG_MODE: true
           UPCY_SECRET_KEY: 'test123123123123123123123' # 진짜 테스트 키 아닙니다.
         run: |
           poetry run python manage.py migrate  # 데이터베이스 마이그레이션

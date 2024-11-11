@@ -19,6 +19,10 @@ jobs:
       - name: 코드 Checkout
         uses: actions/checkout@v4
 
+      - uses: actions/setup-python@v3
+        with:
+          python-version: "3.12"
+
       - name: Poetry 설치
         run: |
           curl -sSL https://install.python-poetry.org | python3 -

@@ -1,12 +1,18 @@
+# 클라우드 아키텍쳐
+
+![image](https://github.com/user-attachments/assets/910f79f5-80f7-4420-9897-088adaacec95)
+
 # 프로젝트 아키텍쳐
 
-# 사용 기술
-- Django
-- Gunicorn
-- DRF
-- Docker
-- PostgreSQL
-- AWS
+추가 예정...
+
+## 기술 스택
+![Django](https://img.shields.io/badge/Django-092E20?style=for-the-badge&logo=django&logoColor=white)
+![Gunicorn](https://img.shields.io/badge/Gunicorn-499848?style=for-the-badge&logo=gunicorn&logoColor=white)
+![DRF](https://img.shields.io/badge/DRF-FF1709?style=for-the-badge&logo=django&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
+![AWS](https://img.shields.io/badge/AWS-232F3E?style=for-the-badge&logo=amazon-aws&logoColor=white)
 
 # UPCY 백엔드 환경 구성 방법
 
@@ -94,14 +100,14 @@ git push origin <본인이개발한브랜치이름> # 원격 레포지토리로 
 ```
 
 ## 2. 깃허브에 접속하여, Pull request를 생성합니다.
-```shell
+![image](https://github.com/user-attachments/assets/73fba190-c237-4823-a5a0-223dd4aab30c)
 
-```
 
-## 3. Actions 탭을 누르거나, PR 페이지에서 Django API Test 표시 확인
-```shell
+## 3. Actions 성공 여부를 확인합니다.
+아래 사진과 같이 초록색 체크 표시가 뜬다면, 성공한것입니다.
+![스크린샷 2024-11-11 16-19-17](https://github.com/user-attachments/assets/4bf0fc34-cbe0-4fde-ad5a-0d2632395d9d)
 
-```
 
 ## 4. 배포
 PR 및 코드리뷰가 성공적으로 완료되어 메인 개발 브랜치로 Merge되면 본인 코드가 자동으로 배포 환경에 반영됩니다.
+![스크린샷 2024-11-11 16-20-34](https://github.com/user-attachments/assets/c492eb06-c20f-40df-8275-5d50aef27d3e)

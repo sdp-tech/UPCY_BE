@@ -1,29 +1,36 @@
 from django.urls import path
 
-from users.views.reformer_view.reformer_certification_view.reformer_certificaton_view import ReformerCertificationView
-from users.views.reformer_view.reformer_education_view.reformer_education_create_list_view import \
-    ReformerEducationCreateListView
-from users.views.reformer_view.reformer_education_view.reformer_education_document_view import \
-    ReformerEducationDocumentView
-from users.views.reformer_view.reformer_education_view.reformer_education_view import \
-    ReformerEducationView
-from users.views.reformer_view.reformer_certification_view.reformer_certification_create_list_view import \
-    ReformerCertificationCreateListView
-from users.views.reformer_view.reformer_certification_view.reformer_certification_document_view import \
-    ReformerCertificationDocumentView
-from users.views.reformer_view.reformer_awards_view.reformer_awards_create_list_view import \
-    ReformerAwardsCreateListView
-from users.views.reformer_view.reformer_awards_view.reformer_awards_document_view import \
-    ReformerAwardsDocumentView
-from users.views.reformer_view.reformer_awards_view.reformer_awards_view import \
-    ReformerAwardsView
+from users.views.reformer_view.reformer_awards_view.reformer_awards_create_list_view import (
+    ReformerAwardsCreateListView,
+)
+from users.views.reformer_view.reformer_awards_view.reformer_awards_document_view import (
+    ReformerAwardsDocumentView,
+)
+from users.views.reformer_view.reformer_awards_view.reformer_awards_view import (
+    ReformerAwardsView,
+)
+from users.views.reformer_view.reformer_certification_view.reformer_certification_create_list_view import (
+    ReformerCertificationCreateListView,
+)
+from users.views.reformer_view.reformer_certification_view.reformer_certification_document_view import (
+    ReformerCertificationDocumentView,
+)
+from users.views.reformer_view.reformer_certification_view.reformer_certificaton_view import (
+    ReformerCertificationView,
+)
+from users.views.reformer_view.reformer_education_view.reformer_education_create_list_view import (
+    ReformerEducationCreateListView,
+)
+from users.views.reformer_view.reformer_education_view.reformer_education_document_view import (
+    ReformerEducationDocumentView,
+)
+from users.views.reformer_view.reformer_education_view.reformer_education_view import (
+    ReformerEducationView,
+)
 from users.views.reformer_view.reformer_profile_view import ReformerProfileView
-from users.views.token_view.token_view import (UserTokenRefreshView,
-                                               UserTokenVerifyView)
+from users.views.token_view.token_view import UserTokenRefreshView, UserTokenVerifyView
 from users.views.user_view.user_auth_view import *
 from users.views.user_view.user_crud_view import *
-
-
 
 app_name = "users"
 
@@ -50,7 +57,7 @@ urlpatterns = [
         ReformerEducationDocumentView.as_view(),
         name="reformer_education_document",
     ),
-path(
+    path(
         "/reformer/certification",
         ReformerCertificationCreateListView.as_view(),
         name="reformer_certification",
@@ -65,7 +72,7 @@ path(
         ReformerCertificationDocumentView.as_view(),
         name="reformer_certification_document",
     ),
-path(
+    path(
         "/reformer/awards",
         ReformerAwardsCreateListView.as_view(),
         name="reformer_awards",

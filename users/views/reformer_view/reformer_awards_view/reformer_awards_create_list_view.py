@@ -4,24 +4,24 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from users.models.reformer import Reformer, ReformerCertification
+from users.models.reformer import Reformer, ReformerAwards
 from users.serializers.reformer_serializer.reformer_profile_serializer import \
-    ReformerCertificationSerializer
+    ReformerAwardsSerializer
 
 
-class ReformerCertificationCreateListView(APIView):
+class ReformerAwardsCreateListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         try:
-            reformer_certification = ReformerCertification.objects.filter(
+            reformer_awards = ReformerAwards.objects.filter(
                 reformer=request.user.reformer_profile
             )
-            if not reformer_certification:
+            if not reformer_awards:
                 raise Reformer.DoesNotExist
 
-            serializer = ReformerCertificationSerializer(
-                instance=reformer_certification, many=True
+            serializer = ReformerAwardsSerializer(
+                instance=reformer_awards, many=True
             )
             return Response(data=serializer.data, status=status.HTTP_200_OK)
         except AttributeError as e:
@@ -40,9 +40,9 @@ class ReformerCertificationCreateListView(APIView):
         try:
             reformer = Reformer.objects.filter(user=request.user).first()
             if not reformer:
-                raise Reformer.DoesNotExist("Reformer 프로필 정보가 없습니다.")
+                raise Reformer.DoesNotExist
 
-            serializer = ReformerCertificationSerializer(
+            serializer = ReformerAwardsSerializer(
                 data=request.data, context={"reformer": reformer}
             )
             if serializer.is_valid():
@@ -62,8 +62,10 @@ class ReformerCertificationCreateListView(APIView):
                 data={"message": "데이터베이스 무결성 오류"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        except Reformer.DoesNotExist as e:
+        except Reformer.DoesNotExist:
             return Response(
-                data={"message": str(e)},
+                data={
+                    "message": "해당 User가 생성한 Reformer 프로필 정보가 존재하지 않습니다."
+                },
                 status=status.HTTP_404_NOT_FOUND,
             )

@@ -1,5 +1,8 @@
-from django.contrib.auth.models import (AbstractBaseUser, BaseUserManager,
-                                        PermissionsMixin)
+from django.contrib.auth.models import (
+    AbstractBaseUser,
+    BaseUserManager,
+    PermissionsMixin,
+)
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import QuerySet
@@ -47,7 +50,7 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(max_length=64, unique=True)  # 이메일
     phone = models.CharField(max_length=15, null=True, blank=True)  # 휴대전화 번호
-    full_name = models.CharField(max_length=40, null=True, blank=True) # 실명
+    full_name = models.CharField(max_length=40, null=True, blank=True)  # 실명
     nickname = models.CharField(max_length=20, null=True, blank=True)  # 사용자 닉네임
     agreement_terms = models.BooleanField(
         default=False

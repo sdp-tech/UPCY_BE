@@ -53,7 +53,7 @@ class UserCrudApi(APIView):
 
     def delete(self, request) -> Response:
         user = request.user  # 사용자 정보를 request에서 가져옴
-        refresh_token = request.data.get("refresh")
+        refresh_token = request.headers.get("RefreshToken")
         password = request.data.get("password")
         if not refresh_token:
             return Response(

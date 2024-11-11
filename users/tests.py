@@ -170,8 +170,8 @@ class UserTestCase(APITestCase):
         # 3. 회원 탈퇴
         response = self.client.delete(
             path="/api/user",
+            headers={"RefreshToken": refresh_token},
             data={
-                "refresh": refresh_token,
                 "password": self.login_request_data.get("password"),
             },
             format="json",

@@ -36,11 +36,30 @@ class ReformerCertificationSerializer(serializers.ModelSerializer):
         return instance
 
 
-class ReformerAwardSerializer(serializers.ModelSerializer):
+class ReformerAwardsSerializer(serializers.ModelSerializer):
+    award_uuid = serializers.UUIDField(read_only=True)
+    proof_document = serializers.FileField(read_only=True)
+
     class Meta:
         model = ReformerAwards
-        fields = ["competition", "prize"]
+        fields = [
+            "award_uuid",
+            "competition",
+            "prize",
+            "proof_document",
+        ]
 
+    def create(self, validated_data):
+        new_awards = ReformerAwards.objects.create(
+            reformer=self.context.get("reformer"), **validated_data
+        )
+        return new_awards
+
+    def update(self, instance, validated_data):
+        for key, value in validated_data.items():
+            setattr(instance, key, value)
+        instance.save()
+        return instance
 
 class ReformerCareerSerializer(serializers.ModelSerializer):
     class Meta:
@@ -85,7 +104,7 @@ class ReformerProfileSerializer(serializers.Serializer):
     nickname = serializers.SerializerMethodField()
     education = ReformerEducationSerializer(many=True, required=False)
     certification = ReformerCertificationSerializer(many=True, required=False)
-    awards = ReformerAwardSerializer(many=True, required=False)
+    awards = ReformerAwardsSerializer(many=True, required=False)
     career = ReformerCareerSerializer(many=True, required=False)
     freelancer = ReformerFreelancerSerializer(many=True, required=False)
     reformer_link = serializers.CharField(required=True)
@@ -125,7 +144,7 @@ class ReformerProfileSerializer(serializers.Serializer):
         representation["certification"] = ReformerCertificationSerializer(
             instance.reformer_certification.all(), many=True
         ).data
-        representation["awards"] = ReformerAwardSerializer(
+        representation["awards"] = ReformerAwardsSerializer(
             instance.reformer_awards.all(), many=True
         ).data
         representation["career"] = ReformerCareerSerializer(

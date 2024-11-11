@@ -11,9 +11,29 @@ from users.models.reformer import (
 
 
 class ReformerCertificationSerializer(serializers.ModelSerializer):
+    certification_uuid = serializers.UUIDField(read_only=True)
+    proof_document = serializers.FileField(read_only=True)
+
     class Meta:
         model = ReformerCertification
-        fields = ["name", "issuing_authority"]
+        fields = [
+            "certification_uuid",
+            "name",
+            "issuing_authority",
+            "proof_document",
+        ]
+
+    def create(self, validated_data):
+        new_certification = ReformerCertification.objects.create(
+            reformer=self.context.get("reformer"), **validated_data
+        )
+        return new_certification
+
+    def update(self, instance, validated_data):
+        for key, value in validated_data.items():
+            setattr(instance, key, value)
+        instance.save()
+        return instance
 
 
 class ReformerAwardSerializer(serializers.ModelSerializer):

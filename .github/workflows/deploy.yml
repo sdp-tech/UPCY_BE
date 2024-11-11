@@ -6,7 +6,7 @@ on:
   pull_request:
     types: [closed]
     branches:
-      - backend
+      - upcy-14th-backend-dev
 
 jobs:
   deploy:

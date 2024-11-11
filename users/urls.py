@@ -1,5 +1,11 @@
 from django.urls import path
 
+from users.views.reformer_view.reformer_certification_view.reformer_certification_create_list_view import (
+    ReformerCertificationCreateListView,
+)
+from users.views.reformer_view.reformer_certification_view.reformer_certification_document_view import (
+    ReformerCertificationDocumentView,
+)
 from users.views.reformer_view.reformer_certification_view.reformer_certificaton_view import (
     ReformerCertificationView,
 )
@@ -12,13 +18,6 @@ from users.views.reformer_view.reformer_education_view.reformer_education_docume
 from users.views.reformer_view.reformer_education_view.reformer_education_view import (
     ReformerEducationView,
 )
-from users.views.reformer_view.reformer_certification_view.reformer_certification_create_list_view import (
-    ReformerCertificationCreateListView,
-)
-from users.views.reformer_view.reformer_certification_view.reformer_certification_document_view import (
-    ReformerCertificationDocumentView,
-)
-
 from users.views.reformer_view.reformer_profile_view import ReformerProfileView
 from users.views.token_view.token_view import UserTokenRefreshView, UserTokenVerifyView
 from users.views.user_view.user_auth_view import *

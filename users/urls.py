@@ -11,6 +11,12 @@ from users.views.reformer_view.reformer_certification_view.reformer_certificatio
     ReformerCertificationCreateListView
 from users.views.reformer_view.reformer_certification_view.reformer_certification_document_view import \
     ReformerCertificationDocumentView
+from users.views.reformer_view.reformer_awards_view.reformer_awards_create_list_view import \
+    ReformerAwardsCreateListView
+from users.views.reformer_view.reformer_awards_view.reformer_awards_document_view import \
+    ReformerAwardsDocumentView
+from users.views.reformer_view.reformer_awards_view.reformer_awards_view import \
+    ReformerAwardsView
 from users.views.reformer_view.reformer_profile_view import ReformerProfileView
 from users.views.token_view.token_view import (UserTokenRefreshView,
                                                UserTokenVerifyView)
@@ -58,6 +64,21 @@ path(
         "/reformer/certification/<uuid:certification_uuid>/document",
         ReformerCertificationDocumentView.as_view(),
         name="reformer_certification_document",
+    ),
+path(
+        "/reformer/awards",
+        ReformerAwardsCreateListView.as_view(),
+        name="reformer_awards",
+    ),
+    path(
+        "/reformer/awards/<uuid:award_uuid>",
+        ReformerAwardsView.as_view(),
+        name="reformer_awards_detail",
+    ),
+    path(
+        "/reformer/awards/<uuid:award_uuid>/document",
+        ReformerAwardsDocumentView.as_view(),
+        name="reformer_awards_document",
     ),
     path("/profile-image", UserImageUploadView.as_view(), name="upload_profile_image"),
 ]

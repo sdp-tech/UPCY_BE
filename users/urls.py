@@ -17,13 +17,11 @@ from users.views.reformer_view.reformer_awards_view.reformer_awards_document_vie
     ReformerAwardsDocumentView
 from users.views.reformer_view.reformer_awards_view.reformer_awards_view import \
     ReformerAwardsView
+
 from users.views.reformer_view.reformer_profile_view import ReformerProfileView
-from users.views.token_view.token_view import (UserTokenRefreshView,
-                                               UserTokenVerifyView)
+from users.views.token_view.token_view import UserTokenRefreshView, UserTokenVerifyView
 from users.views.user_view.user_auth_view import *
 from users.views.user_view.user_crud_view import *
-
-
 
 app_name = "users"
 
@@ -50,7 +48,7 @@ urlpatterns = [
         ReformerEducationDocumentView.as_view(),
         name="reformer_education_document",
     ),
-path(
+    path(
         "/reformer/certification",
         ReformerCertificationCreateListView.as_view(),
         name="reformer_certification",

@@ -1,13 +1,18 @@
+# 클라우드 아키텍쳐
+
+![image](https://github.com/user-attachments/assets/910f79f5-80f7-4420-9897-088adaacec95)
+
 # 프로젝트 아키텍쳐
 
-![image](https://github.com/user-attachments/assets/9386b6fe-a1d6-4c04-b5a0-c44a882bf8ee)
+추가 예정...
 
-# 사용 기술
-- Django
-- Gunicorn
-- DRF
-- Docker
-- PostgreSQL
+## 기술 스택
+![Django](https://img.shields.io/badge/Django-092E20?style=for-the-badge&logo=django&logoColor=white)
+![Gunicorn](https://img.shields.io/badge/Gunicorn-499848?style=for-the-badge&logo=gunicorn&logoColor=white)
+![DRF](https://img.shields.io/badge/DRF-FF1709?style=for-the-badge&logo=django&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
+![AWS](https://img.shields.io/badge/AWS-232F3E?style=for-the-badge&logo=amazon-aws&logoColor=white)
 
 # UPCY 백엔드 환경 구성 방법
 
@@ -78,24 +83,31 @@ python manage.py migrate
 python manage.py runserver
 ```
 
-## Production
+# 개발 후 PR 방법
 
-> 추후 배포 과정은 자동화 예정입니다.
-
-### 도커 이미지 생성 및 PUSH/PULL
+## 1. 본인 로컬 콘솔에서 아래 과정을 수행합니다.
 ```shell
-docker build . -t <dockerhub_name>/upcy-be:latest
-docker push <dockerhub_name>/upcy-be:latest
+git status # 변경상태 확인
+git add . 또는 git add <파일명> # git stage (파일 추가)
+git commit -m "commit message" # commit
+
+# 원격 레포지토리에 본인이 개발한 코드를 반영하기 이전, 원격 저장소에서 발생한 변경 내역을 반영합니다.
+git pull origin upcy-14th-backend-dev
+# 만약 위 명령 실행 후 충돌이 발생했다면, 충돌 해결 또는 다른 백엔드 팀원에게 물어봅시다.
+# 충돌 해결 후 git add, git commit을 수행합니다.
+
+git push origin <본인이개발한브랜치이름> # 원격 레포지토리로 push
 ```
 
-> EC2에 접속하여 도커허브에 PUSH한 이미지를 내려받습니다.
-```shell
-docker pull <dockerhub_name>/upcy-be:latest
-```
+## 2. 깃허브에 접속하여, Pull request를 생성합니다.
+![image](https://github.com/user-attachments/assets/73fba190-c237-4823-a5a0-223dd4aab30c)
 
-### 컨테이너 실행 방법
-```shell
-sudo docker run -d --name upcy-be-container -p 8000:8000 <dockerhub_name>/upcy-be:latest # EC2에서 실행
-sudo docker container ls # 실행중인 컨테이너 리스트 확인
-sudo docker logs -f {container_id} # 콘솔 로그 보는 방법
-```
+
+## 3. Actions 성공 여부를 확인합니다.
+아래 사진과 같이 초록색 체크 표시가 뜬다면, 성공한것입니다.
+![스크린샷 2024-11-11 16-19-17](https://github.com/user-attachments/assets/4bf0fc34-cbe0-4fde-ad5a-0d2632395d9d)
+
+
+## 4. 배포
+PR 및 코드리뷰가 성공적으로 완료되어 메인 개발 브랜치로 Merge되면 본인 코드가 자동으로 배포 환경에 반영됩니다.
+![스크린샷 2024-11-11 16-20-34](https://github.com/user-attachments/assets/c492eb06-c20f-40df-8275-5d50aef27d3e)

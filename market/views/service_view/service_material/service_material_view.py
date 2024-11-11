@@ -2,25 +2,28 @@ from typing import List
 
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
-from rest_framework.permissions import BasePermission, IsAuthenticated
+from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from core.permissions import IsReformer
 from market.models import Service, ServiceMaterial
-from market.serializers.service_serializers.service_material.service_material_create_serializer import \
-    ServiceMaterialCreateSerializer
-from market.serializers.service_serializers.service_material.service_material_retrieve_serializer import \
-    ServiceMaterialRetrieveSerializer
-from market.serializers.service_serializers.service_material.service_material_update_serializer import \
-    ServiceMaterialUpdateSerializer
+from market.serializers.service_serializers.service_material.service_material_create_serializer import (
+    ServiceMaterialCreateSerializer,
+)
+from market.serializers.service_serializers.service_material.service_material_retrieve_serializer import (
+    ServiceMaterialRetrieveSerializer,
+)
+from market.serializers.service_serializers.service_material.service_material_update_serializer import (
+    ServiceMaterialUpdateSerializer,
+)
 
 
 class ServiceMaterialCreateListView(APIView):
 
     def get_permissions(self) -> List[BasePermission]:
         if self.request.method == "GET":
-            return [IsAuthenticated()]
+            return [AllowAny()]
         elif self.request.method in ["POST"]:
             return [IsReformer()]
         return super().get_permissions()
@@ -63,11 +66,12 @@ class ServiceMaterialCreateListView(APIView):
                 .first()
             )
             if not service:
-                raise Service.DoesNotExist("해당 uuid에 해당하는 service가 존재하지 않습니다.")
+                raise Service.DoesNotExist(
+                    "해당 uuid에 해당하는 service가 존재하지 않습니다."
+                )
 
             serializer = ServiceMaterialCreateSerializer(
-                data=request.data,
-                context={"service": service}
+                data=request.data, context={"service": service}
             )
             if serializer.is_valid(raise_exception=True):
                 serializer.save()

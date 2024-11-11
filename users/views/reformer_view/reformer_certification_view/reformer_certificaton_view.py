@@ -9,8 +9,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from users.models.reformer import ReformerEducation, ReformerCertification
-from users.serializers.reformer_serializer.reformer_profile_serializer import \
-    ReformerEducationSerializer, ReformerCertificationSerializer
+from users.serializers.reformer_serializer.reformer_profile_serializer import (
+    ReformerEducationSerializer,
+    ReformerCertificationSerializer,
+)
 
 
 class ReformerCertificationView(APIView):
@@ -18,14 +20,16 @@ class ReformerCertificationView(APIView):
 
     def get(self, request, **kwargs):
         try:
-            certification_uuid = self.kwargs.get("certification_uuid")
+            certification_uuid = kwargs.get("certification_uuid")
             reformer_certification = ReformerCertification.objects.filter(
                 certification_uuid=certification_uuid
             ).first()
             if not reformer_certification:
                 raise ReformerCertification.DoesNotExist
 
-            serializer = ReformerCertificationSerializer(instance=reformer_certification)
+            serializer = ReformerCertificationSerializer(
+                instance=reformer_certification
+            )
             return Response(data=serializer.data, status=status.HTTP_200_OK)
         except ReformerCertification.DoesNotExist:
             return Response(
@@ -33,6 +37,10 @@ class ReformerCertificationView(APIView):
                     "message": "해당 UUID에 해당하는 리포머 자격증 내역 정보가 존재하지 않습니다."
                 },
                 status=status.HTTP_404_NOT_FOUND,
+            )
+        except Exception as e:
+            return Response(
+                data={"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
     def put(self, request, **kwargs):
@@ -76,11 +84,15 @@ class ReformerCertificationView(APIView):
                 raise ReformerCertification.DoesNotExist
 
             with transaction.atomic():
-                s3 = client("s3")
-                s3.delete_object(
-                    Bucket=os.getenv("AWS_STORAGE_BUCKET_NAME"),
-                    Key=reformer_certification.proof_document.name,
-                )
+                if (
+                    reformer_certification.proof_document
+                ):  # 증명 서류가 존재한다면, 삭제
+                    s3 = client("s3")
+                    s3.delete_object(
+                        Bucket=os.getenv("AWS_STORAGE_BUCKET_NAME"),
+                        Key=reformer_certification.proof_document.name,
+                    )
+
                 reformer_certification.delete()
                 return Response(
                     data={"message": "successfully deleted"}, status=status.HTTP_200_OK

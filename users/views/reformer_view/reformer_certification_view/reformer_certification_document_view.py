@@ -11,9 +11,6 @@ from users.models.reformer import ReformerEducation, ReformerCertification
 class ReformerCertificationDocumentView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        pass
-
     def post(self, request, **kwargs):
         try:
             certification_uuid = kwargs.get("education_uuid")

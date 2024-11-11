@@ -5,8 +5,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from users.models.reformer import Reformer, ReformerAwards
-from users.serializers.reformer_serializer.reformer_profile_serializer import \
-    ReformerAwardsSerializer
+from users.serializers.reformer_serializer.reformer_profile_serializer import (
+    ReformerAwardsSerializer,
+)
 
 
 class ReformerAwardsCreateListView(APIView):
@@ -20,9 +21,7 @@ class ReformerAwardsCreateListView(APIView):
             if not reformer_awards:
                 raise Reformer.DoesNotExist
 
-            serializer = ReformerAwardsSerializer(
-                instance=reformer_awards, many=True
-            )
+            serializer = ReformerAwardsSerializer(instance=reformer_awards, many=True)
             return Response(data=serializer.data, status=status.HTTP_200_OK)
         except AttributeError as e:
             return Response(

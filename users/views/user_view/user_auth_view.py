@@ -7,17 +7,10 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 
 from users.models.user import User
-<<<<<<< HEAD
-from users.serializers.user_serializer.user_login_serializer import \
-    UserLoginSerializer
-from users.serializers.user_serializer.user_signup_serializer import \
-    UserSignUpSerializer
-=======
 from users.serializers.user_serializer.user_login_serializer import UserLoginSerializer
 from users.serializers.user_serializer.user_signup_serializer import (
     UserSignUpSerializer,
 )
->>>>>>> c58c23774c09e48cfe239ed971af9fe92c340c29
 from users.services import UserService
 
 
@@ -54,7 +47,7 @@ class UserLoginApi(APIView):
     def post(self, request):
         try:
             serializer = UserLoginSerializer(data=request.data)
-<<<<<<< HEAD
+
             if serializer.is_valid(raise_exception=True):
                 data = serializer.validated_data
                 service = UserService()
@@ -66,15 +59,6 @@ class UserLoginApi(APIView):
             return Response(
                 data={"message": "Invalid input data. check API documentation"},
                 status=status.HTTP_400_BAD_REQUEST,
-=======
-            serializer.is_valid(raise_exception=True)
-
-            data = serializer.validated_data
-            service = UserService()
-            login_data = service.login(
-                email=data.get("email"),
-                password=data.get("password"),
->>>>>>> c58c23774c09e48cfe239ed971af9fe92c340c29
             )
             return Response(data=login_data, status=status.HTTP_200_OK)
         except User.DoesNotExist as e:

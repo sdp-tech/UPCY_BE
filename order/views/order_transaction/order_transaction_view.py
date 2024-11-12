@@ -19,7 +19,6 @@ from order.serializers.order_serializers.order_transaction.order_transaction_upd
 )
 
 
-
 class OrderTransactionOptionCreateView(APIView):
 
     def get_permissions(self) -> List[BasePermission]:

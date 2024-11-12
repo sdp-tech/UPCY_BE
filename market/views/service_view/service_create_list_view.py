@@ -9,13 +9,9 @@ from core.permissions import IsReformer
 from market.models import Market, Service
 from market.pagination import ServiceListPagination
 from market.serializers.service_serializers.service_create_retrieve_serializer import (
-<<<<<<< HEAD
-    ServiceCreateSerializer, ServiceRetrieveSerializer)
-=======
     ServiceCreateSerializer,
     ServiceRetrieveSerializer,
 )
->>>>>>> c58c23774c09e48cfe239ed971af9fe92c340c29
 from market.services import temporary_status_check
 
 
@@ -88,11 +84,7 @@ class GetAllServiceView(ListAPIView):
     generics.ListAPIView를 활용해서 더 쉽게 API 구성이 가능합니다.
     """
 
-<<<<<<< HEAD
     permission_classes = [IsAuthenticated]
-=======
-    permission_classes = [AllowAny]
->>>>>>> c58c23774c09e48cfe239ed971af9fe92c340c29
     serializer_class = ServiceRetrieveSerializer  # 시리얼라이저 지정
     pagination_class = ServiceListPagination  # 페이지네이션 클래스 지정
 

@@ -1,8 +1,5 @@
-<<<<<<< HEAD
 from telnetlib import AUTHENTICATION
 
-=======
->>>>>>> c58c23774c09e48cfe239ed971af9fe92c340c29
 from rest_framework.test import APIClient, APITestCase
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -28,10 +25,6 @@ class UserTestCase(APITestCase):
         request_data = {
             "email": "user@test.com",
             "password": "123123",
-<<<<<<< HEAD
-=======
-            "full_name": "hello",
->>>>>>> c58c23774c09e48cfe239ed971af9fe92c340c29
             "agreement_terms": True,
         }
         response = self.client.post(
@@ -177,16 +170,7 @@ class UserTestCase(APITestCase):
 
         # 3. 회원 탈퇴
         response = self.client.delete(
-<<<<<<< HEAD
             path="/api/user", data={"refresh": refresh_token}, format="json"
-=======
-            path="/api/user",
-            data={
-                "refresh": refresh_token,
-                "password": self.login_request_data.get("password"),
-            },
-            format="json",
->>>>>>> c58c23774c09e48cfe239ed971af9fe92c340c29
         )
         self.assertEqual(response.status_code, 200)
 
@@ -205,10 +189,6 @@ class ReformerTestCase(APITestCase):
             email="test@test.com",
             password="123123",
             phone="01012341234",
-<<<<<<< HEAD
-=======
-            full_name="hello",
->>>>>>> c58c23774c09e48cfe239ed971af9fe92c340c29
             nickname="nickname",
             introduce="hello, django",
         )

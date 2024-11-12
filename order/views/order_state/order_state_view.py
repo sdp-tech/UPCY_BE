@@ -19,7 +19,6 @@ from order.serializers.order_serializers.order_state.order_state_update_serializ
 )
 
 
-
 class OrderStateCreateView(APIView):
     def get_permissions(self) -> List[BasePermission]:
         if self.request.method == "GET":

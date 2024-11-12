@@ -10,13 +10,9 @@ from rest_framework.views import APIView
 
 from users.models.reformer import ReformerCertification, ReformerEducation
 from users.serializers.reformer_serializer.reformer_profile_serializer import (
-<<<<<<< HEAD
-    ReformerCertificationSerializer, ReformerEducationSerializer)
-=======
     ReformerCertificationSerializer,
     ReformerEducationSerializer,
 )
->>>>>>> c58c23774c09e48cfe239ed971af9fe92c340c29
 
 
 class ReformerCertificationView(APIView):

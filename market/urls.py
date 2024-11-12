@@ -8,24 +8,15 @@ from market.views.image_upload_view import (
 from market.views.market_view.market_create_list_view import MarketCreateListView
 from market.views.market_view.market_crud_view import MarketCrudView
 from market.views.service_view.service_create_list_view import (
-<<<<<<< HEAD
-    GetAllServiceView, MarketServiceCreateListView)
-=======
     GetAllServiceView,
     MarketServiceCreateListView,
 )
->>>>>>> c58c23774c09e48cfe239ed971af9fe92c340c29
 from market.views.service_view.service_detail_view import MarketServiceCrudView
 from market.views.service_view.service_material.service_material_view import (
     ServiceMaterialCreateListView,
     ServiceMaterialView,
 )
 from market.views.service_view.service_option.service_option_view import (
-<<<<<<< HEAD
-    ServiceOptionCreateListView, ServiceOptionView)
-from market.views.service_view.service_style.service_style_view import (
-    ServiceStyleCreateListView, ServiceStyleView)
-=======
     ServiceOptionCreateListView,
     ServiceOptionView,
 )
@@ -33,18 +24,11 @@ from market.views.service_view.service_style.service_style_view import (
     ServiceStyleCreateListView,
     ServiceStyleView,
 )
->>>>>>> c58c23774c09e48cfe239ed971af9fe92c340c29
 
 urlpatterns = [
     path("", MarketCreateListView.as_view(), name="market_create_list"),
     path(
-<<<<<<< HEAD
         "/service", GetAllServiceView.as_view(), name="service_list_without_market_uuid"
-=======
-        "/services",
-        GetAllServiceView.as_view(),
-        name="service_list_without_market_uuid",
->>>>>>> c58c23774c09e48cfe239ed971af9fe92c340c29
     ),
     path("/<uuid:market_uuid>", MarketCrudView.as_view(), name="market_crud"),
     path(

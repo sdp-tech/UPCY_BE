@@ -25,7 +25,9 @@ class ReformerProfileView(APIView):
             if not reformer_profile:
                 raise Reformer.DoesNotExist
 
-            serializer = ReformerProfileSerializer(instance=reformer_profile, context={'request': request})
+            serializer = ReformerProfileSerializer(
+                instance=reformer_profile, context={"request": request}
+            )
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Reformer.DoesNotExist:
             return Response(

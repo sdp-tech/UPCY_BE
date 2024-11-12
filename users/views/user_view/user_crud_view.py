@@ -41,8 +41,7 @@ class UserCrudApi(APIView):
                 )
         except ValidationError as e:
             return Response(
-                data={"message": str(e)},
-                status=status.HTTP_400_BAD_REQUEST
+                data={"message": str(e)}, status=status.HTTP_400_BAD_REQUEST
             )
         except Exception as e:
             return Response(
@@ -51,7 +50,7 @@ class UserCrudApi(APIView):
             )
 
     def delete(self, request) -> Response:
-        user = request.user #사용자 정보를 request에서 가져옴
+        user = request.user  # 사용자 정보를 request에서 가져옴
         refresh_token = request.data.get("refresh")
         password = request.data.get("password")
         if not refresh_token:

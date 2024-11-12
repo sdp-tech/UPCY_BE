@@ -4,23 +4,23 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from users.models.reformer import Reformer, ReformerAwards
+from users.models.reformer import Reformer, ReformerCareer
 from users.serializers.reformer_serializer.reformer_profile_serializer import \
-    ReformerAwardsSerializer
+    ReformerCareerSerializer
 
 
-class ReformerAwardsCreateListView(APIView):
+class ReformerCareerCreateListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         try:
-            reformer_awards = ReformerAwards.objects.filter(
+            reformer_career = ReformerCareer.objects.filter(
                 reformer=request.user.reformer_profile
             )
-            if not reformer_awards:
+            if not reformer_career:
                 raise Reformer.DoesNotExist
 
-            serializer = ReformerAwardsSerializer(instance=reformer_awards, many=True)
+            serializer = ReformerCareerSerializer(instance=reformer_career, many=True)
             return Response(data=serializer.data, status=status.HTTP_200_OK)
         except AttributeError as e:
             return Response(
@@ -40,7 +40,7 @@ class ReformerAwardsCreateListView(APIView):
             if not reformer:
                 raise Reformer.DoesNotExist
 
-            serializer = ReformerAwardsSerializer(
+            serializer = ReformerCareerSerializer(
                 data=request.data, context={"reformer": reformer}
             )
             if serializer.is_valid():

@@ -63,11 +63,12 @@ class ServiceMaterialCreateListView(APIView):
                 .first()
             )
             if not service:
-                raise Service.DoesNotExist("해당 uuid에 해당하는 service가 존재하지 않습니다.")
+                raise Service.DoesNotExist(
+                    "해당 uuid에 해당하는 service가 존재하지 않습니다."
+                )
 
             serializer = ServiceMaterialCreateSerializer(
-                data=request.data,
-                context={"service": service}
+                data=request.data, context={"service": service}
             )
             if serializer.is_valid(raise_exception=True):
                 serializer.save()

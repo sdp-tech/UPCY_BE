@@ -3,13 +3,13 @@ from datetime import tzinfo
 from typing import Dict
 
 from boto3 import client
+from django.contrib.auth.hashers import check_password
 from django.db import transaction
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from django.contrib.auth.hashers import check_password
 from users.models.user import User
 
 
@@ -71,15 +71,15 @@ class UserService:
             raise e
 
     @staticmethod
-    def delete_user(user: User,password: str) -> bool:
+    def delete_user(user: User, password: str) -> bool:
         """
         사용자 삭제하는 함수 (회원탈퇴 시 사용함)
         """
         try:
 
-            if password=="":
+            if password == "":
                 raise ValidationError("비밀번호 필드에 공백이 입력되었습니다.")
-            if check_password(password,user.password):
+            if check_password(password, user.password):
                 with transaction.atomic():
 
                     s3 = client("s3")

@@ -15,6 +15,7 @@ from order.serializers.order_serializers.order_transaction.order_transaction_ret
 from order.serializers.order_serializers.order_transaction.order_transaction_update_serializer import \
     TransactionOptionUpdateSerializer
 
+
 class OrderTransactionOptionCreateView(APIView):
 
     def get_permissions(self) -> List[BasePermission]:
@@ -27,8 +28,8 @@ class OrderTransactionOptionCreateView(APIView):
         try:
             order = (
                 Order.objects.filter(
-                    service_uuid = kwargs.get("service_uuid"),
-                    order_uuid = kwargs.get("order_uuid"),
+                    service_uuid=kwargs.get("service_uuid"),
+                    order_uuid=kwargs.get("order_uuid"),
                 )
                 .select_related("service")
                 .first()
@@ -42,7 +43,7 @@ class OrderTransactionOptionCreateView(APIView):
             return Response(data=serializer.data, status=status.HTTP_200_OK)
         except Order.DoesNotExist:
             return Response(
-                data={"message":"Order not found"},
+                data={"message": "Order not found"},
                 status=status.HTTP_404_NOT_FOUND,
             )
         except Exception as e:
@@ -54,8 +55,8 @@ class OrderTransactionOptionCreateView(APIView):
         try:
             order = (
                 Order.objects.filter(
-                    service_uuid = kwargs.get("service_uuid"),
-                    order_uuid = kwargs.get("order_uuid"),
+                    service_uuid=kwargs.get("service_uuid"),
+                    order_uuid=kwargs.get("order_uuid"),
                 )
                 .select_related("service")
                 .first()
@@ -64,28 +65,28 @@ class OrderTransactionOptionCreateView(APIView):
                 raise Order.DoesNotExist
 
             serializer = TransactionOptionCreateSerializer(
-                data=request.data, context={"service_order":order}
+                data=request.data, context={"service_order": order}
             )
             if serializer.is_valid(raise_exception=True):
                 serializer.save()
                 return Response(
-                    data = {"message" : "successfully created"},
+                    data={"message": "successfully created"},
                     status=status.HTTP_201_CREATED,
                 )
         except Order.DoesNotExist:
             return Response(
-                data={"message" : "service order not found"},
+                data={"message": "service order not found"},
                 status=status.HTTP_404_NOT_FOUND,
             )
         except ValidationError as e:
             return Response(
-                data={"message": str(e)},
-                status=status.HTTP_400_BAD_REQUEST
+                data={"message": str(e)}, status=status.HTTP_400_BAD_REQUEST
             )
         except Exception as e:
             return Response(
                 data={"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
 
 class OrderTransactionOptionView(APIView):
 
@@ -97,18 +98,20 @@ class OrderTransactionOptionView(APIView):
 
     def get(self, request, **kwargs) -> Response:
         try:
-            transaction_option : TransactionOption = TransactionOption.objects.filter(
-                transaction_uuid = kwargs.get("transaction_uuid")
+            transaction_option: TransactionOption = TransactionOption.objects.filter(
+                transaction_uuid=kwargs.get("transaction_uuid")
             ).first()
             if not transaction_option:
                 raise TransactionOption.DoesNotExist
 
-            serializer = TransactionOptionRetrieveSerializer(instance=transaction_option)
+            serializer = TransactionOptionRetrieveSerializer(
+                instance=transaction_option
+            )
             return Response(data=serializer.data, status=status.HTTP_200_OK)
         except TransactionOption.DoesNotExist:
             return Response(
-                data={"message" : "transaction option not found"},
-                status = status.HTTP_404_NOT_FOUND,
+                data={"message": "transaction option not found"},
+                status=status.HTTP_404_NOT_FOUND,
             )
         except Exception as e:
             return Response(
@@ -117,8 +120,8 @@ class OrderTransactionOptionView(APIView):
 
     def put(self, request, **kwargs) -> Response:
         try:
-            transaction_option : TransactionOption = TransactionOption.objects.filter(
-                transaction_uuid = kwargs.get("transaction_uuid")
+            transaction_option: TransactionOption = TransactionOption.objects.filter(
+                transaction_uuid=kwargs.get("transaction_uuid")
             ).first()
             if not transaction_option:
                 raise TransactionOption.DoesNotExist
@@ -145,4 +148,3 @@ class OrderTransactionOptionView(APIView):
             return Response(
                 data={"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-

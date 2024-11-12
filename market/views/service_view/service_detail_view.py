@@ -28,13 +28,19 @@ class MarketServiceCrudView(APIView):
     def get(self, request, **kwargs) -> Response:
         try:
             temporary_status = temporary_status_check(request)
-            market_service = Service.objects.filter(
-                market__market_uuid=kwargs.get("market_uuid"),
-                service_uuid=kwargs.get("service_uuid"),
-                temporary=temporary_status,
-            ).select_related("market").first()
+            market_service = (
+                Service.objects.filter(
+                    market__market_uuid=kwargs.get("market_uuid"),
+                    service_uuid=kwargs.get("service_uuid"),
+                    temporary=temporary_status,
+                )
+                .select_related("market")
+                .first()
+            )
             if not market_service:
-                raise Service.DoesNotExist("해당 조건과 UUID에 해당하는 서비스가 존재하지 않습니다.")
+                raise Service.DoesNotExist(
+                    "해당 조건과 UUID에 해당하는 서비스가 존재하지 않습니다."
+                )
 
             serializer = ServiceRetrieveSerializer(instance=market_service)
             return Response(data=serializer.data, status=status.HTTP_200_OK)

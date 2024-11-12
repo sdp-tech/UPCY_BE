@@ -5,8 +5,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from users.models.reformer import Reformer, ReformerAwards
-from users.serializers.reformer_serializer.reformer_profile_serializer import \
-    ReformerAwardsSerializer
+from users.serializers.reformer_serializer.reformer_profile_serializer import (
+    ReformerAwardsSerializer,
+)
 
 
 class ReformerAwardsCreateListView(APIView):

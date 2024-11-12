@@ -1,16 +1,16 @@
-from sqlite3 import IntegrityError
-
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from rest_framework import serializers, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from users.models.reformer import Reformer
-from users.serializers.reformer_serializer.reformer_profile_serializer import \
-    ReformerProfileSerializer
-from users.serializers.reformer_serializer.reformer_update_serializer import \
-    ReformerUpdateSerializer
+from users.serializers.reformer_serializer.reformer_profile_serializer import (
+    ReformerProfileSerializer,
+)
+from users.serializers.reformer_serializer.reformer_update_serializer import (
+    ReformerUpdateSerializer,
+)
 from users.services import UserService
 
 
@@ -19,21 +19,23 @@ class ReformerProfileView(APIView):
     user_service = UserService()
 
     def get(self, request) -> Response:
-        user = request.user
+        user = request.user  # 요청한 사용자 정보를 가져온다.
         try:
-            reformer_profile = Reformer.objects.filter(user=user).first()
-            if not reformer_profile:
-                raise Reformer.DoesNotExist
+            reformer_profile = Reformer.objects.filter(
+                user=user
+            ).first()  # 사용자의 프로필에 연결되어 있는 리포머 프로필 데이터를 가져온다.
+            if not reformer_profile:  # 없다면 Exception
+                raise Reformer.DoesNotExist(
+                    "해당 사용자는 리포머 프로필이 등록되어 있지 않습니다."
+                )
 
             serializer = ReformerProfileSerializer(
                 instance=reformer_profile, context={"request": request}
             )
             return Response(serializer.data, status=status.HTTP_200_OK)
-        except Reformer.DoesNotExist:
+        except Reformer.DoesNotExist as e:
             return Response(
-                data={
-                    "message": "Cannot find reformer profile that belongs to the user"
-                },
+                data={"message": str(e)},
                 status=status.HTTP_404_NOT_FOUND,
             )
         except Exception as e:

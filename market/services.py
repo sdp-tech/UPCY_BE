@@ -5,8 +5,13 @@ from boto3 import client
 from django.core.exceptions import ValidationError
 from django.db import transaction
 
-from market.models import (Market, Service, ServiceImage, ServiceOption,
-                           ServiceOptionImage)
+from market.models import (
+    Market,
+    Service,
+    ServiceImage,
+    ServiceOption,
+    ServiceOptionImage,
+)
 
 
 def validate_image_files(image_files: List) -> None:

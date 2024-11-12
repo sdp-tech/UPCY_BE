@@ -5,8 +5,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from users.models.reformer import Reformer, ReformerCertification
-from users.serializers.reformer_serializer.reformer_profile_serializer import \
-    ReformerCertificationSerializer
+from users.serializers.reformer_serializer.reformer_profile_serializer import (
+    ReformerCertificationSerializer,
+)
 
 
 class ReformerCertificationCreateListView(APIView):
@@ -40,7 +41,7 @@ class ReformerCertificationCreateListView(APIView):
         try:
             reformer = Reformer.objects.filter(user=request.user).first()
             if not reformer:
-                raise Reformer.DoesNotExist
+                raise Reformer.DoesNotExist("Reformer 프로필 정보가 없습니다.")
 
             serializer = ReformerCertificationSerializer(
                 data=request.data, context={"reformer": reformer}
@@ -62,10 +63,8 @@ class ReformerCertificationCreateListView(APIView):
                 data={"message": "데이터베이스 무결성 오류"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        except Reformer.DoesNotExist:
+        except Reformer.DoesNotExist as e:
             return Response(
-                data={
-                    "message": "해당 User가 생성한 Reformer 프로필 정보가 존재하지 않습니다."
-                },
+                data={"message": str(e)},
                 status=status.HTTP_404_NOT_FOUND,
             )

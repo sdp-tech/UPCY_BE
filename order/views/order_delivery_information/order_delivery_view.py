@@ -8,12 +8,25 @@ from rest_framework.views import APIView
 
 from core.permissions import IsReformer
 from order.models import DeliveryInformation, Order
+<<<<<<< HEAD
 from order.serializers.order_serializers.order_delivery_information.order_delivery_create_serializer import \
     DeliveryInformationCreateSerializer
 from order.serializers.order_serializers.order_delivery_information.order_delivery_retrieve_serializer import \
     DeliveryInformationRetrieveSerializer
 from order.serializers.order_serializers.order_delivery_information.order_delivery_update_serializer import \
     DeliveryInformationUpdateSerializer
+=======
+from order.serializers.order_serializers.order_delivery_information.order_delivery_create_serializer import (
+    DeliveryInformationCreateSerializer,
+)
+from order.serializers.order_serializers.order_delivery_information.order_delivery_retrieve_serializer import (
+    DeliveryInformationRetrieveSerializer,
+)
+from order.serializers.order_serializers.order_delivery_information.order_delivery_update_serializer import (
+    DeliveryInformationUpdateSerializer,
+)
+
+>>>>>>> c58c23774c09e48cfe239ed971af9fe92c340c29
 
 
 class OrderDeliveryCreateView(APIView):

@@ -10,14 +10,13 @@ from rest_framework.views import APIView
 
 from core.permissions import IsReformer
 from market.models import Market
-from market.serializers.market_serializers.market_serializer import \
-    MarketSerializer
-from market.serializers.market_serializers.market_update_serializer import \
-    MarketUpdateSerializer
+from market.serializers.market_serializers.market_serializer import MarketSerializer
+from market.serializers.market_serializers.market_update_serializer import (
+    MarketUpdateSerializer,
+)
 
 
 class MarketCrudView(APIView):
-
     def get_permissions(self):
         if self.request.method == "GET":
             return [IsAuthenticated()]
@@ -26,11 +25,12 @@ class MarketCrudView(APIView):
         return super().get_permissions()
 
     def get(self, request, **kwargs) -> Response:
+        """
+        market uuid에 해당하는 마켓 정보를 반환하는 API
+        """
         try:
             market = (
-                Market.objects.filter(
-                    reformer__user=request.user, market_uuid=kwargs.get("market_uuid")
-                )
+                Market.objects.filter(market_uuid=kwargs.get("market_uuid"))
                 .select_related("reformer")
                 .first()
             )

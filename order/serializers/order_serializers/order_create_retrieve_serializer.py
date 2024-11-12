@@ -1,7 +1,18 @@
 from rest_framework import serializers
 
+<<<<<<< HEAD
 from order.models import (AdditionalImage, DeliveryInformation, Order,
                           OrderImage, OrderState, TransactionOption)
+=======
+from order.models import (
+    AdditionalImage,
+    DeliveryInformation,
+    Order,
+    OrderImage,
+    OrderState,
+    TransactionOption,
+)
+>>>>>>> c58c23774c09e48cfe239ed971af9fe92c340c29
 
 
 class OrderImageSerializer(serializers.ModelSerializer):

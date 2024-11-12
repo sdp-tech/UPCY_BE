@@ -8,12 +8,16 @@ from rest_framework.views import APIView
 
 from core.permissions import IsReformer
 from order.models import Order, OrderState
-from order.serializers.order_serializers.order_state.order_state_create_serializer import \
-    OrderStateCreateSerializer
-from order.serializers.order_serializers.order_state.order_state_retrieve_serializer import \
-    OrderStateRetrieveSerializer
-from order.serializers.order_serializers.order_state.order_state_update_serializer import \
-    OrderStateUpdateSerializer
+from order.serializers.order_serializers.order_state.order_state_create_serializer import (
+    OrderStateCreateSerializer,
+)
+from order.serializers.order_serializers.order_state.order_state_retrieve_serializer import (
+    OrderStateRetrieveSerializer,
+)
+from order.serializers.order_serializers.order_state.order_state_update_serializer import (
+    OrderStateUpdateSerializer,
+)
+
 
 
 class OrderStateCreateView(APIView):

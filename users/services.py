@@ -76,23 +76,29 @@ class UserService:
         사용자 삭제하는 함수 (회원탈퇴 시 사용함)
         """
         try:
+<<<<<<< HEAD
 
             if password == "":
                 raise ValidationError("비밀번호 필드에 공백이 입력되었습니다.")
             if check_password(password, user.password):
                 with transaction.atomic():
+=======
+            if password == "" or password is None:
+                raise ValidationError("비밀번호 필드에 공백이 입력되었습니다.")
+>>>>>>> c58c23774c09e48cfe239ed971af9fe92c340c29
 
+            if check_password(password, user.password):
+                with transaction.atomic():
                     s3 = client("s3")
-                    s3.delete_object(
-                        Bucket=os.getenv("AWS_STORAGE_BUCKET_NAME"),
-                        Key=user.profile_image.name,
-                    )
-
+                    if user.profile_image and user.profile_image.name:
+                        s3.delete_object(
+                            Bucket=os.getenv("AWS_STORAGE_BUCKET_NAME"),
+                            Key=user.profile_image.name,
+                        )
                     user.delete()
                     return True
-
         except Exception as e:
-            raise e
+            raise Exception(str(e))
 
     @staticmethod
     def update_user_role(user: User, role: str) -> None:

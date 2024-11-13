@@ -57,13 +57,15 @@ class MarketServiceCreateListView(APIView):
             ).first()
             if not market:
                 raise Market.DoesNotExist
-            serialized = ServiceCreateSerializer(
+
+            serializer = ServiceCreateSerializer(
                 data=request.data, context={"market": market}
             )
-            serialized.is_valid(raise_exception=True)
-            reform_service = serialized.save()
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+
             return Response(
-                data={"service_uuid": reform_service.service_uuid},
+                data=serializer.data,
                 status=status.HTTP_201_CREATED,
             )
         except Market.DoesNotExist:

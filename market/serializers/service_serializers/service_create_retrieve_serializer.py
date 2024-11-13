@@ -41,6 +41,7 @@ class ServiceCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Service
         fields = [
+            "service_uuid",
             "service_title",
             "service_content",
             "service_category",
@@ -52,6 +53,42 @@ class ServiceCreateSerializer(serializers.ModelSerializer):
             "service_material",
             "temporary",
         ]
+        extra_kwargs = {
+            "service_uuid": {"read_only": True},
+            "service_title": {"write_only": True},
+            "service_content": {"write_only": True},
+            "service_category": {"write_only": True},
+            "service_period": {"write_only": True},
+            "basic_price": {"write_only": True},
+            "max_price": {"write_only": True},
+            "temporary": {"write_only": True},
+        }
+
+    def to_representation(self, instance):
+        return {
+            "service_uuid": instance.service_uuid,
+            "service_options": [
+                {
+                    "option_uuid": option.option_uuid,
+                    "option_name": option.option_name,
+                }
+                for option in instance.service_option.all()
+            ],
+            "service_materials": [
+                {
+                    "material_uuid": material.material_uuid,
+                    "material_name": material.material_name,
+                }
+                for material in instance.service_material.all()
+            ],
+            "service_styles": [
+                {
+                    "style_uuid": style.style_uuid,
+                    "style_name": style.style_name,
+                }
+                for style in instance.service_style.all()
+            ],
+        }
 
     def create(self, validated_data):
         service_style = validated_data.pop("service_style")

@@ -4,7 +4,7 @@ from boto3 import client
 from django.db import transaction
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -19,7 +19,7 @@ from market.serializers.market_serializers.market_update_serializer import (
 class MarketCrudView(APIView):
     def get_permissions(self):
         if self.request.method == "GET":
-            return [IsAuthenticated()]
+            return [AllowAny()]
         elif self.request.method in ["POST", "PUT", "DELETE"]:
             return [IsReformer()]
         return super().get_permissions()

@@ -1,7 +1,7 @@
 from typing import List
 
 from rest_framework import status
-from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated
+from rest_framework.permissions import AllowAny, BasePermission
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -100,7 +100,7 @@ class ServiceStyleCreateListView(APIView):
 class ServiceStyleView(APIView):
     def get_permissions(self) -> List[BasePermission]:
         if self.request.method == "GET":
-            return [IsAuthenticated()]
+            return [AllowAny()]
         elif self.request.method in ["PUT", "DELETE"]:
             return [IsReformer()]
         return super().get_permissions()

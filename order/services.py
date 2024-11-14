@@ -5,7 +5,6 @@ from boto3 import client
 from django.core.exceptions import ValidationError
 from django.db import transaction
 
-from market.models import Service
 from order.models import AdditionalImage, Order, OrderImage
 
 
@@ -14,6 +13,11 @@ def validate_image_files(image_files: List) -> None:
     for image_file in image_files:
         if image_file.size > 10 * 1024 * 1024:  # 10MB 이상의 이미지는 허용되지 않음
             raise ValidationError("Image file size must be less than 10MB")
+
+
+"""
+마켓이랑 다르게 단일 이미지 파일 업로드용 함수는 없어도 될 것 같은데 어떻게 생각하시나요...?
+"""
 
 
 class OrderImageUploadService:

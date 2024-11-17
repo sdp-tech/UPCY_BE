@@ -145,4 +145,6 @@ class ServiceRetrieveSerializer(serializers.ModelSerializer):
             "service_material",
             "service_image",
             "temporary",
+            "created",
+            "updated",
         ]

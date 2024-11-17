@@ -20,6 +20,9 @@ from market.services import temporary_status_check
 
 
 class MarketServiceCrudView(APIView):
+    """
+    uuid값을 사용하여 Service CRUD를 수행하는 View
+    """
     def get_permissions(self):
         if self.request.method == "GET":
             return [AllowAny()]

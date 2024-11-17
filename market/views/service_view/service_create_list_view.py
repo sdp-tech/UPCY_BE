@@ -23,25 +23,27 @@ class MarketServiceCreateListView(APIView):
     """
 
     # 쿼리 파라미터로 전달 가능 한 필드 지정
-    DEFAULT_SORT = '-created'
+    DEFAULT_SORT = "-created"
     ALLOWED_SORT_FIELDS = {
-        'created': 'created',  # 생성 된 날짜 기준 오름차순
-        '-created': '-created',  # 생성 된 날짜 기준 내림차순 (가장 최근에 생성된 서비스 항목)
-        'updated': 'updated',  # 업데이트 된 서비스 오름차순
-        '-updated': '-updated',  # 업데이트 된 서비스 내림차순 (가장 최근에 업데이트 된 서비스 항목)
-        'title': 'service_title',  # 서비스 제목 오름차순
-        '-title': '-service_title',  # 서비스 제목 내림차순
-        'category': 'service_category',  # 카테고리 이름 오름차순
-        '-category': '-service_category',  # 카테고리 이름 내림차순
-        'basic_price': 'basic_price',  # 기본 가격 오름차순
-        '-basic_price': '-basic_price',  # 기본 가격 내림차순
+        "created": "created",  # 생성 된 날짜 기준 오름차순
+        "-created": "-created",  # 생성 된 날짜 기준 내림차순 (가장 최근에 생성된 서비스 항목)
+        "updated": "updated",  # 업데이트 된 서비스 오름차순
+        "-updated": "-updated",  # 업데이트 된 서비스 내림차순 (가장 최근에 업데이트 된 서비스 항목)
+        "title": "service_title",  # 서비스 제목 오름차순
+        "-title": "-service_title",  # 서비스 제목 내림차순
+        "category": "service_category",  # 카테고리 이름 오름차순
+        "-category": "-service_category",  # 카테고리 이름 내림차순
+        "basic_price": "basic_price",  # 기본 가격 오름차순
+        "-basic_price": "-basic_price",  # 기본 가격 내림차순
     }
 
     def get_queryset(self, market_uuid: str, temporary: bool) -> QuerySet:
         """
         쿼리셋 반환 및 정렬 적용
         """
-        queryset = Service.objects.filter(market__market_uuid=market_uuid, temporary=temporary).select_related("market")
+        queryset = Service.objects.filter(
+            market__market_uuid=market_uuid, temporary=temporary
+        ).select_related("market")
         if not queryset.exists():
             raise Service.DoesNotExist("해당 마켓에 생성된 서비스가 존재하지 않습니다.")
 
@@ -52,7 +54,9 @@ class MarketServiceCreateListView(APIView):
             else:
                 raise ValueError("정렬 파라미터 값이 올바르지 않습니다.")
         else:
-            queryset = queryset.order_by(self.ALLOWED_SORT_FIELDS[self.DEFAULT_SORT]) # 따로 안넘어왔다면 기본값으로 created 내림차순 정렬
+            queryset = queryset.order_by(
+                self.ALLOWED_SORT_FIELDS[self.DEFAULT_SORT]
+            )  # 따로 안넘어왔다면 기본값으로 created 내림차순 정렬
 
         return queryset
 
@@ -66,7 +70,9 @@ class MarketServiceCreateListView(APIView):
     def get(self, request, **kwargs):
         try:
             temporary_status = temporary_status_check(request)
-            queryset = self.get_queryset(market_uuid=kwargs.get("market_uuid"), temporary=temporary_status)
+            queryset = self.get_queryset(
+                market_uuid=kwargs.get("market_uuid"), temporary=temporary_status
+            )
 
             serialized = ServiceRetrieveSerializer(queryset, many=True)
             return Response(data=serialized.data, status=status.HTTP_200_OK)
@@ -125,18 +131,18 @@ class GetAllServiceView(ListAPIView):
     pagination_class = ServiceListPagination  # 페이지네이션 클래스 지정
 
     # 쿼리 파라미터로 전달 가능 한 필드 지정
-    DEFAULT_SORT = '-created'
+    DEFAULT_SORT = "-created"
     ALLOWED_SORT_FIELDS = {
-        'created': 'created', # 생성 된 날짜 기준 오름차순
-        '-created': '-created', # 생성 된 날짜 기준 내림차순 (가장 최근에 생성된 서비스 항목)
-        'updated': 'updated', # 업데이트 된 서비스 오름차순
-        '-updated': '-updated', # 업데이트 된 서비스 내림차순 (가장 최근에 업데이트 된 서비스 항목)
-        'title': 'service_title', # 서비스 제목 오름차순
-        '-title': '-service_title', # 서비스 제목 내림차순
-        'category': 'service_category', # 카테고리 이름 오름차순
-        '-category': '-service_category', # 카테고리 이름 내림차순
-        'basic_price': 'basic_price', # 기본 가격 오름차순
-        '-basic_price': '-basic_price', # 기본 가격 내림차순
+        "created": "created",  # 생성 된 날짜 기준 오름차순
+        "-created": "-created",  # 생성 된 날짜 기준 내림차순 (가장 최근에 생성된 서비스 항목)
+        "updated": "updated",  # 업데이트 된 서비스 오름차순
+        "-updated": "-updated",  # 업데이트 된 서비스 내림차순 (가장 최근에 업데이트 된 서비스 항목)
+        "title": "service_title",  # 서비스 제목 오름차순
+        "-title": "-service_title",  # 서비스 제목 내림차순
+        "category": "service_category",  # 카테고리 이름 오름차순
+        "-category": "-service_category",  # 카테고리 이름 내림차순
+        "basic_price": "basic_price",  # 기본 가격 오름차순
+        "-basic_price": "-basic_price",  # 기본 가격 내림차순
     }
 
     def get_queryset(self) -> QuerySet:
@@ -152,7 +158,9 @@ class GetAllServiceView(ListAPIView):
             else:
                 raise ValueError("정렬 파라미터 값이 올바르지 않습니다.")
         else:
-            queryset = queryset.order_by(self.ALLOWED_SORT_FIELDS[self.DEFAULT_SORT]) # 따로 안넘어왔다면 기본값으로 created 내림차순 정렬
+            queryset = queryset.order_by(
+                self.ALLOWED_SORT_FIELDS[self.DEFAULT_SORT]
+            )  # 따로 안넘어왔다면 기본값으로 created 내림차순 정렬
 
         return queryset
 

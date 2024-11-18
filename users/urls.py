@@ -9,6 +9,15 @@ from users.views.reformer_view.reformer_awards_view.reformer_awards_document_vie
 from users.views.reformer_view.reformer_awards_view.reformer_awards_view import (
     ReformerAwardsView,
 )
+from users.views.reformer_view.reformer_career_view.reformer_career_create_list_view import (
+    ReformerCareerCreateListView,
+)
+from users.views.reformer_view.reformer_career_view.reformer_career_document_view import (
+    ReformerCareerDocumentView,
+)
+from users.views.reformer_view.reformer_career_view.reformer_career_view import (
+    ReformerCareerView,
+)
 from users.views.reformer_view.reformer_certification_view.reformer_certification_create_list_view import (
     ReformerCertificationCreateListView,
 )
@@ -26,6 +35,15 @@ from users.views.reformer_view.reformer_education_view.reformer_education_docume
 )
 from users.views.reformer_view.reformer_education_view.reformer_education_view import (
     ReformerEducationView,
+)
+from users.views.reformer_view.reformer_freelancer_view.reformer_freelancer_create_list_view import (
+    ReformerFreelancerCreateListView,
+)
+from users.views.reformer_view.reformer_freelancer_view.reformer_freelancer_document_view import (
+    ReformerFreelancerDocumentView,
+)
+from users.views.reformer_view.reformer_freelancer_view.reformer_freelancer_view import (
+    ReformerFreelancerView,
 )
 from users.views.reformer_view.reformer_profile_view import ReformerProfileView
 from users.views.token_view.token_view import UserTokenRefreshView, UserTokenVerifyView
@@ -86,6 +104,36 @@ urlpatterns = [
         "/reformer/awards/<uuid:award_uuid>/document",
         ReformerAwardsDocumentView.as_view(),
         name="reformer_awards_document",
+    ),
+    path(
+        "/reformer/career",
+        ReformerCareerCreateListView.as_view(),
+        name="reformer_career",
+    ),
+    path(
+        "/reformer/career/<uuid:career_uuid>",
+        ReformerCareerView.as_view(),
+        name="reformer_career_detail",
+    ),
+    path(
+        "/reformer/career/<uuid:career_uuid>/document",
+        ReformerCareerDocumentView.as_view(),
+        name="reformer_career_document",
+    ),
+    path(
+        "/reformer/freelancer",
+        ReformerFreelancerCreateListView.as_view(),
+        name="reformer_freelancer",
+    ),
+    path(
+        "/reformer/freelancer/<uuid:freelancer_uuid>",
+        ReformerFreelancerView.as_view(),
+        name="reformer_freelancer_detail",
+    ),
+    path(
+        "/reformer/freelancer/<uuid:freelancer_uuid>/document",
+        ReformerFreelancerDocumentView.as_view(),
+        name="reformer_freelancer_document",
     ),
     path("/profile-image", UserImageUploadView.as_view(), name="upload_profile_image"),
 ]

@@ -63,15 +63,30 @@ class ReformerAwardsSerializer(serializers.ModelSerializer):
 
 
 class ReformerCareerSerializer(serializers.ModelSerializer):
+    career_uuid = serializers.UUIDField(read_only=True)
+    proof_document = serializers.FileField(read_only=True)
+
     class Meta:
         model = ReformerCareer
-        fields = ["company_name", "department", "period"]
+        fields = [
+            "career_uuid",
+            "company_name",
+            "department",
+            "period",
+            "proof_document",
+        ]
 
+    def create(self, validated_data):
+        new_career = ReformerCareer.objects.create(
+            reformer=self.context.get("reformer"), **validated_data
+        )
+        return new_career
 
-class ReformerFreelancerSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ReformerFreelancer
-        fields = ["project_name", "description"]
+    def update(self, instance, validated_data):
+        for key, value in validated_data.items():
+            setattr(instance, key, value)
+        instance.save()
+        return instance
 
 
 class ReformerEducationSerializer(serializers.ModelSerializer):
@@ -93,6 +108,32 @@ class ReformerEducationSerializer(serializers.ModelSerializer):
             reformer=self.context.get("reformer"), **validated_data
         )
         return new_education
+
+    def update(self, instance, validated_data):
+        for key, value in validated_data.items():
+            setattr(instance, key, value)
+        instance.save()
+        return instance
+
+
+class ReformerFreelancerSerializer(serializers.ModelSerializer):
+    freelancer_uuid = serializers.UUIDField(read_only=True)
+    proof_document = serializers.FileField(read_only=True)
+
+    class Meta:
+        model = ReformerFreelancer
+        fields = [
+            "freelancer_uuid",
+            "project_name",
+            "description",
+            "proof_document",
+        ]
+
+    def create(self, validated_data):
+        new_freelancer = ReformerFreelancer.objects.create(
+            reformer=self.context.get("reformer"), **validated_data
+        )
+        return new_freelancer
 
     def update(self, instance, validated_data):
         for key, value in validated_data.items():

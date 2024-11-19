@@ -1,0 +1,79 @@
+[33m7b74bd9[m[33m ([m[1;36mHEAD -> [m[1;32mupcy-14th-backend-devv[m[33m)[m HEAD@{0}: checkout: moving from upcy-14th-backend-dev to upcy-14th-backend-devv
+[33me556875[m[33m ([m[1;31morigin/upcy-14th-backend-dev[m[33m, [m[1;32mupcy-14th-backend-dev[m[33m)[m HEAD@{1}: checkout: moving from feat/110/order_views to upcy-14th-backend-dev
+[33m3a8dc2b[m[33m ([m[1;31morigin/feat/110/order_views[m[33m, [m[1;32mfeat/110/order_views[m[33m)[m HEAD@{2}: checkout: moving from upcy-14th-backend-dev to feat/110/order_views
+[33me556875[m[33m ([m[1;31morigin/upcy-14th-backend-dev[m[33m, [m[1;32mupcy-14th-backend-dev[m[33m)[m HEAD@{3}: checkout: moving from fix/110/order_fix to upcy-14th-backend-dev
+[33mdaf32d1[m[33m ([m[1;32mfix/110/order_fix[m[33m)[m HEAD@{4}: checkout: moving from upcy-14th-backend-dev to fix/110/order_fix
+[33me556875[m[33m ([m[1;31morigin/upcy-14th-backend-dev[m[33m, [m[1;32mupcy-14th-backend-dev[m[33m)[m HEAD@{5}: checkout: moving from fix/110/order_fix to upcy-14th-backend-dev
+[33mdaf32d1[m[33m ([m[1;32mfix/110/order_fix[m[33m)[m HEAD@{6}: commit: #110:fix order
+[33m88c9ea5[m HEAD@{7}: commit: #110:fix order
+[33m4bdee08[m[33m ([m[1;31morigin/fix/110/order_fix[m[33m)[m HEAD@{8}: commit: #110 fix : modify views and add urls
+[33m7b74bd9[m[33m ([m[1;36mHEAD -> [m[1;32mupcy-14th-backend-devv[m[33m)[m HEAD@{9}: checkout: moving from upcy-14th-backend-dev to fix/110/order_fix
+[33me556875[m[33m ([m[1;31morigin/upcy-14th-backend-dev[m[33m, [m[1;32mupcy-14th-backend-dev[m[33m)[m HEAD@{10}: checkout: moving from fix/110/order_fix to upcy-14th-backend-dev
+[33m7b74bd9[m[33m ([m[1;36mHEAD -> [m[1;32mupcy-14th-backend-devv[m[33m)[m HEAD@{11}: rebase (abort): returning to refs/heads/fix/110/order_fix
+[33ma657b58[m HEAD@{12}: rebase (continue): 1. Migration 오류 수정 -> 모든 팀원들의 migration 파일이 맞지 않아서 계속 오류가 발생했습니다. 한번 git pull 하셔서 통일하는게 좋을 것 같아요 계속 오류 발생하면 알려주세요!
+[33m920e51c[m HEAD@{13}: pull origin fix/110/order_fix --rebase (pick): 비밀번호 확인
+[33ma0877c1[m HEAD@{14}: pull origin fix/110/order_fix --rebase (pick): 비밀번호 확인 코드 수정
+[33madb641c[m HEAD@{15}: pull origin fix/110/order_fix --rebase (pick): 탈퇴시 비밀번호 확인
+[33m443ff88[m HEAD@{16}: pull origin fix/110/order_fix --rebase (start): checkout 443ff88aa5efa1f7eac7ee4c979d7167f86bb203
+[33m7b74bd9[m[33m ([m[1;36mHEAD -> [m[1;32mupcy-14th-backend-devv[m[33m)[m HEAD@{17}: commit: #110 fix : modify views and add urls
+[33md18eaa9[m HEAD@{18}: checkout: moving from fix/110/order_fix to fix/110/order_fix
+[33md18eaa9[m HEAD@{19}: pull origin upcy-14th-backend-dev: Fast-forward
+[33m563905e[m HEAD@{20}: reset: moving to HEAD
+[33m563905e[m HEAD@{21}: reset: moving to origin/upcy-14th-backend-dev
+[33m563905e[m HEAD@{22}: reset: moving to origin/upcy-14th-backend-dev
+[33m563905e[m HEAD@{23}: reset: moving to origin/upcy-14th-backend-dev
+[33m3a8dc2b[m[33m ([m[1;31morigin/feat/110/order_views[m[33m, [m[1;32mfeat/110/order_views[m[33m)[m HEAD@{24}: reset: moving to 3a8dc2b
+[33ma9ae675[m HEAD@{25}: reset: moving to a9ae675
+[33m443ff88[m HEAD@{26}: reset: moving to HEAD
+[33m443ff88[m HEAD@{27}: reset: moving to HEAD
+[33m443ff88[m HEAD@{28}: reset: moving to HEAD
+[33m443ff88[m HEAD@{29}: reset: moving to HEAD
+[33m443ff88[m HEAD@{30}: commit: #110 fix:modify order
+[33ma9ae675[m HEAD@{31}: checkout: moving from fix/110/order_fix to fix/110/order_fix
+[33ma9ae675[m HEAD@{32}: commit: #110 fix : modify order
+[33m3a8dc2b[m[33m ([m[1;31morigin/feat/110/order_views[m[33m, [m[1;32mfeat/110/order_views[m[33m)[m HEAD@{33}: checkout: moving from feat/110/order_views to fix/110/order_fix
+[33m3a8dc2b[m[33m ([m[1;31morigin/feat/110/order_views[m[33m, [m[1;32mfeat/110/order_views[m[33m)[m HEAD@{34}: commit: #110 feat: add views files and modify permissions
+[33me1feb82[m[33m ([m[1;31morigin/feat/110/order_serializers_services[m[33m, [m[1;32mfeat/110/order_serializers_services[m[33m)[m HEAD@{35}: checkout: moving from feat/110/order_serializers_services to feat/110/order_views
+[33me1feb82[m[33m ([m[1;31morigin/feat/110/order_serializers_services[m[33m, [m[1;32mfeat/110/order_serializers_services[m[33m)[m HEAD@{36}: commit: #110 feat : modify order models, add services, serializers
+[33me556875[m[33m ([m[1;31morigin/upcy-14th-backend-dev[m[33m, [m[1;32mupcy-14th-backend-dev[m[33m)[m HEAD@{37}: checkout: moving from feat/110/order_serializers_services to feat/110/order_serializers_services
+[33me556875[m[33m ([m[1;31morigin/upcy-14th-backend-dev[m[33m, [m[1;32mupcy-14th-backend-dev[m[33m)[m HEAD@{38}: checkout: moving from upcy-14th-backend-dev to feat/110/order_serializers_services
+[33me556875[m[33m ([m[1;31morigin/upcy-14th-backend-dev[m[33m, [m[1;32mupcy-14th-backend-dev[m[33m)[m HEAD@{39}: merge origin/upcy-14th-backend-dev: Fast-forward
+[33m19a602c[m HEAD@{40}: reset: moving to HEAD
+[33m19a602c[m HEAD@{41}: reset: moving to origin/upcy-14th-backend-dev
+[33m0a4fdd5[m HEAD@{42}: merge origin/upcy-14th-backend-dev: Fast-forward
+[33mf9995d7[m HEAD@{43}: checkout: moving from feat/110/order_model_modify to upcy-14th-backend-dev
+[33mc0d778f[m[33m ([m[1;32mfeat/110/order_model_modify[m[33m)[m HEAD@{44}: commit (cherry-pick): 110 feat : modify order models.py
+[33m9c2ddbe[m HEAD@{45}: checkout: moving from main to feat/110/order_model_modify
+[33mcd0136b[m[33m ([m[1;32mmain[m[33m)[m HEAD@{46}: commit: #110 : modify order models.py
+[33m9c2ddbe[m HEAD@{47}: reset: moving to origin/upcy-14th-backend-dev
+[33m9c2ddbe[m HEAD@{48}: pull origin upcy-14th-backend-dev: Fast-forward
+[33m8dcc4e5[m HEAD@{49}: reset: moving to HEAD
+[33m8dcc4e5[m HEAD@{50}: pull origin upcy-14th-backend-dev: Fast-forward
+[33m3600c59[m HEAD@{51}: pull origin upcy-14th-backend-dev: Fast-forward
+[33mf9995d7[m HEAD@{52}: reset: moving to origin/upcy-14th-backend-dev
+[33m34b2700[m HEAD@{53}: checkout: moving from upcy-14th-backend-dev to main
+[33mf9995d7[m HEAD@{54}: reset: moving to origin/upcy-14th-backend-dev
+[33mf9995d7[m HEAD@{55}: checkout: moving from main to upcy-14th-backend-dev
+[33m34b2700[m HEAD@{56}: commit: simple change
+[33m44eacf7[m[33m ([m[1;31morigin/main[m[33m)[m HEAD@{57}: checkout: moving from main to main
+[33m44eacf7[m[33m ([m[1;31morigin/main[m[33m)[m HEAD@{58}: checkout: moving from main to main
+[33m44eacf7[m[33m ([m[1;31morigin/main[m[33m)[m HEAD@{59}: pull origin main: Fast-forward
+[33ma7a0997[m HEAD@{60}: reset: moving to origin/main
+[33m1c83ee5[m HEAD@{61}: checkout: moving from feat/61/docker_connection to main
+[33mc6523fb[m[33m ([m[1;32mfeat/61/docker_connection[m[33m)[m HEAD@{62}: reset: moving to HEAD
+[33mc6523fb[m[33m ([m[1;32mfeat/61/docker_connection[m[33m)[m HEAD@{63}: commit: Merge branch 'feat/61/docker_connection' of https://github.com/chaechaeis/UPCY_BE into feat/61/docker_connection
+[33m60c07c2[m HEAD@{64}: reset: moving to HEAD
+[33m60c07c2[m HEAD@{65}: reset: moving to HEAD
+[33m60c07c2[m HEAD@{66}: reset: moving to HEAD
+[33m60c07c2[m HEAD@{67}: reset: moving to origin/main
+[33m60c07c2[m HEAD@{68}: reset: moving to origin/main
+[33m1990db6[m HEAD@{69}: reset: moving to HEAD
+[33m1990db6[m HEAD@{70}: pull origin main: Merge made by the 'ort' strategy.
+[33m3dd9d72[m HEAD@{71}: reset: moving to HEAD
+[33m3dd9d72[m HEAD@{72}: pull origin main: Merge made by the 'ort' strategy.
+[33ma3fa762[m HEAD@{73}: reset: moving to HEAD
+[33ma3fa762[m HEAD@{74}: reset: moving to HEAD
+[33ma3fa762[m HEAD@{75}: pull origin main: Merge made by the 'ort' strategy.
+[33m7aa634e[m[33m ([m[1;31morigin/feat/61/docker_connection[m[33m)[m HEAD@{76}: reset: moving to HEAD
+[33m7aa634e[m[33m ([m[1;31morigin/feat/61/docker_connection[m[33m)[m HEAD@{77}: reset: moving to HEAD
+[33m7aa634e[m[33m ([m[1;31morigin/feat/61/docker_connection[m[33

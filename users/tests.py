@@ -183,6 +183,7 @@ class UserTestCase(APITestCase):
         self.assertEqual(user_count, 0)
 
 
+
 class ReformerTestCase(APITestCase):
 
     def setUp(self):

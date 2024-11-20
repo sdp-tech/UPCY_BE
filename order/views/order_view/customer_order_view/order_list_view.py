@@ -58,10 +58,7 @@ class CustomerOrderCreateListView(APIView):
 
             serializer = OrderCreateSerializer(
                 data=request.data,
-                context={
-                    "order_user": request.user,
-                    "service": service
-                }
+                context={"order_user": request.user, "service": service},
             )
             serializer.is_valid(raise_exception=True)
             serializer.save()
@@ -69,7 +66,9 @@ class CustomerOrderCreateListView(APIView):
             return Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
         except ValidationError as e:
-            return Response(data={"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                data={"message": str(e)}, status=status.HTTP_400_BAD_REQUEST
+            )
         except Service.DoesNotExist:
             return Response(
                 data={"message": "Service not found"},

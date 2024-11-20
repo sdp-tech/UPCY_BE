@@ -5,7 +5,6 @@ from boto3 import client
 from django.core.exceptions import ValidationError
 from django.db import transaction
 
-from market.models import Service
 from order.models import AdditionalImage, Order, OrderImage
 
 
@@ -47,32 +46,6 @@ class OrderImageUploadService:
                     )
                 # AdditionalImage > Bulk create
                 AdditionalImage.objects.bulk_create(images)
-
-        except ValidationError as e:
-            raise ValidationError(f"Validation Error: {str(e)}")
-        except Exception as e:
-            raise e
-
-    @staticmethod
-    @transaction.atomic
-    def upload_order_image(service_order: Order, image_file) -> None:
-        """
-        리폼할 의류 및 추가 요청사항 이미지(단일)를 S3에 업로드
-        & DB에 저장하는 함수
-        """
-        try:
-            if image_file.size > 10 * 1024 * 1024:  # 10MB 미만의 이미지
-                raise ValidationError("Image file size must be less than 10MB")
-
-            # 엔티티 타입별 이미지 객체 생성
-
-            order_image = OrderImage.objects.create(
-                service_order=service_order, image=image_file
-            )
-            order_image.save()
-            print(
-                "Successfully uploaded service option image"
-            )  # 추후 로그 출력으로 수정
 
         except ValidationError as e:
             raise ValidationError(f"Validation Error: {str(e)}")

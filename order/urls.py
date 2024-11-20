@@ -18,7 +18,11 @@ from order.views.order_view.reformer_order_view.order_list_view import (
 )
 
 urlpatterns = [
-    path("/<uuid:service_uuid>", CustomerOrderCreateListView.as_view(), name="customer_order_create"),
+    path(
+        "/<uuid:service_uuid>",
+        CustomerOrderCreateListView.as_view(),
+        name="customer_order_create",
+    ),
     path("/customer/update", OrderCrudView.as_view(), name="customer_order_update"),
     path(
         "/customer/view",

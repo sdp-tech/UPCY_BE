@@ -1,5 +1,6 @@
 import uuid
 from decimal import Decimal
+
 from django.db import models
 
 from core.models import TimeStampedModel
@@ -27,7 +28,7 @@ class Order(TimeStampedModel):
         on_delete=models.SET_NULL,
         related_name="service_orders",
         null=True,
-        db_index=True, # service 가지고 reformer, market까지 다 찾아야하니까 인덱스 설정
+        db_index=True,  # service 가지고 reformer, market까지 다 찾아야하니까 인덱스 설정
     )  # 어떤 서비스에 대한 주문인지
     order_reformer = models.ForeignKey(
         "users.Reformer",
@@ -46,7 +47,9 @@ class Order(TimeStampedModel):
         "users.User", on_delete=models.CASCADE, related_name="request_user_order"
     )  # 주문한 사람이 누군지
 
-    order_uuid = models.UUIDField(null=False, unique=True, default=uuid.uuid4) # 주문 식별자
+    order_uuid = models.UUIDField(
+        null=False, unique=True, default=uuid.uuid4
+    )  # 주문 식별자
 
     materials = models.ManyToManyField(
         "market.ServiceMaterial",
@@ -130,9 +133,15 @@ class TransactionOption(TimeStampedModel):
     transaction_option = models.CharField(
         max_length=50, null=False, choices=[("pickup", "대면"), ("delivery", "택배")]
     )  # 거래 방식 (택배 or 대면)
-    delivery_address = models.TextField(null=True, blank=True, default=None)  # 결과물 배송지
-    delivery_name = models.TextField(null=True, blank=True, default=None)  # 배송 받을 이름
-    delivery_phone_number = models.TextField(null=True, blank=True, default=None)  # 배송 받을 전화번호
+    delivery_address = models.TextField(
+        null=True, blank=True, default=None
+    )  # 결과물 배송지
+    delivery_name = models.TextField(
+        null=True, blank=True, default=None
+    )  # 배송 받을 이름
+    delivery_phone_number = models.TextField(
+        null=True, blank=True, default=None
+    )  # 배송 받을 전화번호
 
     class Meta:
         db_table = "transaction_option"

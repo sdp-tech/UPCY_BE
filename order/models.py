@@ -1,9 +1,9 @@
 import uuid
-from enum import unique
-
+from decimal import Decimal
 from django.db import models
 
 from core.models import TimeStampedModel
+from market.models import Service
 
 
 def get_order_image_upload_path(instance, filename):
@@ -22,49 +22,52 @@ def get_order_additional_image_upload_path(instance, filename):
 
 
 class Order(TimeStampedModel):
-    service = models.ForeignKey(
+    service_order = models.ForeignKey(
         "market.Service",
         on_delete=models.SET_NULL,
-        related_name="service_order",
+        related_name="service_orders",
         null=True,
+        db_index=True, # service 가지고 reformer, market까지 다 찾아야하니까 인덱스 설정
     )  # 어떤 서비스에 대한 주문인지
+    order_reformer = models.ForeignKey(
+        "users.Reformer",
+        on_delete=models.SET_NULL,
+        related_name="reformer_order",
+        null=True,
+    )  # 서비스를 제작한 리포머
+    order_market = models.ForeignKey(
+        "market.Market",
+        on_delete=models.SET_NULL,
+        related_name="market_order",
+        null=True,
+    )  # 서비스의 마켓 정보
+
     request_user = models.ForeignKey(
         "users.User", on_delete=models.CASCADE, related_name="request_user_order"
-    )  # 주문한 사람
-    order_number = models.CharField(
-        max_length=20, unique=True, null=False
-    )  # 주문을 구분할 수 있는 숫자. 나중에 랜덤으로 설정될 수 있도록 수정 예정
-    order_uuid = models.UUIDField(null=False, unique=True, default=uuid.uuid4)
+    )  # 주문한 사람이 누군지
 
-    material_name = models.ManyToManyField(
+    order_uuid = models.UUIDField(null=False, unique=True, default=uuid.uuid4) # 주문 식별자
+
+    materials = models.ManyToManyField(
         "market.ServiceMaterial",
-        related_name="order_texture_name",
+        related_name="materials_order",
         blank=True,
-    )  # 소재 선택
-    extra_material_name = models.CharField(max_length=50, null=True)  # 기타 소재
-    additional_option = models.ManyToManyField(
+    )  # 사용 소재 선택
+    extra_material = models.CharField(max_length=50, null=True)  # 기타 소재
+    additional_options = models.ManyToManyField(
         "market.ServiceOption",
-        related_name="additional_option_order",
+        related_name="additional_options_order",
         blank=True,
     )  # 옵션 선택
     additional_request = models.TextField(null=True)  # 추가 요청 사항
     order_service_price = models.PositiveIntegerField(null=True)  # 서비스 금액
     order_option_price = models.PositiveIntegerField(null=True)  # 옵션 추가 금액
     total_price = models.PositiveIntegerField(null=True)  # 예상 결제 금액 (서비스+옵션)
-    request_date = models.DateField(null=False)  # 주문 시간
+    request_date = models.DateField(auto_now_add=True)  # 주문 시간
     kakaotalk_openchat_link = models.TextField(null=True)  # 카톡 오픈채팅 링크
 
     class Meta:
         db_table = "order"
-
-    def save(self, *args, **kwargs):
-        # Order 객체가 처음 생성될 때만 실행
-        is_new = self.pk is None
-        super().save(*args, **kwargs)
-
-        # 신규 Order일 경우 OrderState 생성
-        if is_new:
-            OrderState.objects.create(service_order=self)
 
 
 class OrderImage(TimeStampedModel):
@@ -72,7 +75,7 @@ class OrderImage(TimeStampedModel):
     service_order = models.ForeignKey(
         "order.Order", on_delete=models.CASCADE, related_name="order_image"
     )
-    image = models.FileField(
+    order_image = models.FileField(
         upload_to=get_order_image_upload_path, null=False, max_length=255
     )
 
@@ -86,7 +89,7 @@ class AdditionalImage(TimeStampedModel):
         "order.Order", on_delete=models.CASCADE, related_name="additional_image"
     )
     additional_uuid = models.UUIDField(null=False, unique=True, default=uuid.uuid4)
-    image = models.FileField(
+    additional_image = models.FileField(
         upload_to=get_order_additional_image_upload_path, null=True, max_length=255
     )  # 수정 필요
 
@@ -127,20 +130,12 @@ class TransactionOption(TimeStampedModel):
     transaction_option = models.CharField(
         max_length=50, null=False, choices=[("pickup", "대면"), ("delivery", "택배")]
     )  # 거래 방식 (택배 or 대면)
-    delivery_address = models.TextField(null=False)  # 결과물 배송지
-    delivery_name = models.TextField(null=False)  # 배송 받을 이름
-    delivery_phone_number = models.TextField(null=False)  # 배송 받을 전화번호
+    delivery_address = models.TextField(null=True, blank=True, default=None)  # 결과물 배송지
+    delivery_name = models.TextField(null=True, blank=True, default=None)  # 배송 받을 이름
+    delivery_phone_number = models.TextField(null=True, blank=True, default=None)  # 배송 받을 전화번호
 
     class Meta:
         db_table = "transaction_option"
-
-    def save(self, *args, **kwargs):
-        # transaction_option 값이 "delivery"일 때만 DeliveryInformation 생성
-        is_new = self.pk is None
-        super().save(*args, **kwargs)
-
-        if is_new and self.transaction_option == "delivery":
-            DeliveryInformation.objects.create(service_order=self.service_order)
 
 
 class DeliveryInformation(TimeStampedModel):
@@ -149,13 +144,12 @@ class DeliveryInformation(TimeStampedModel):
         "order.Order", on_delete=models.CASCADE, related_name="delivery_information"
     )
     delivery_uuid = models.UUIDField(null=False, unique=True, default=uuid.uuid4)
-    delivery_company = models.CharField(max_length=50, null=True)  # 택배 회사
+    delivery_company = models.CharField(
+        max_length=50, null=True
+    )  # 택배 회사(추후 CharField로 바꿀 생각 있음)
     delivery_tracking_number = models.CharField(
         max_length=50, null=True
     )  # 택배 송장 번호
 
     class Meta:
         db_table = "delivery_information"
-
-
-# 리뷰 관련된 내용은 2차 개발 기간에..

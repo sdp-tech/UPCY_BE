@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 from core.permissions import IsCustomer
 from order.models import Order
 from order.serializers.order_serializers.order_create_retrieve_serializer import (
-    OrderCreateSerializer,
+    OrderRetrieveSerializer,
 )
 from order.serializers.order_serializers.order_update_serializer import (
     OrderUpdateSerializer,
@@ -32,7 +32,7 @@ class OrderCrudView(APIView):
             if not order:
                 raise Order.DoesNotExist
 
-            serialized = OrderCreateSerializer(instance=order, many=True)
+            serialized = OrderRetrieveSerializer(instance=order, many=True)
             serialized.is_valid(raise_exception=True)
             return Response(serialized.data, status=status.HTTP_200_OK)
         except Order.DoesNotExist:

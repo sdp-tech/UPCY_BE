@@ -1,5 +1,6 @@
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -9,6 +10,8 @@ from order.serializers.order_serializers.order_create_retrieve_serializer import
     OrderImageSerializer,
 )
 from order.services import OrderImageUploadService
+
+# 이미지도 추가나 삭제가 가능하도록 PUT이랑 DELETE 추가하는 게 좋지 않을까요?
 
 
 class OrderImageView(APIView):
@@ -22,7 +25,7 @@ class OrderImageView(APIView):
     def get_permissions(self):
         # GET 요청일 때는 Reformer와 Customer 모두 접근 가능
         if self.request.method == "GET":
-            return [IsCustomer() | IsReformer()]
+            return [IsAuthenticated()]
         # POST 요청일 때는 Customer만 접근 가능
         elif self.request.method == "POST":
             return [IsCustomer()]
@@ -83,7 +86,6 @@ class OrderImageView(APIView):
             return Response(
                 data={"message": "Order Images uploaded successfully"},
                 status=status.HTTP_201_CREATED,
-                # 여기 200이 맞을까요 201이 맞을까요?
             )
 
         except Order.DoesNotExist:
@@ -111,7 +113,7 @@ class OrderAdditionalImageView(APIView):
     def get_permissions(self):
         # GET 요청일 때는 Reformer와 Customer 모두 접근 가능
         if self.request.method == "GET":
-            return [IsCustomer() | IsReformer()]
+            return [IsAuthenticated()]
         # POST 요청일 때는 Customer만 접근 가능
         elif self.request.method == "POST":
             return [IsCustomer()]

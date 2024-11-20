@@ -4,6 +4,7 @@ from enum import unique
 from django.db import models
 
 from core.models import TimeStampedModel
+from market.models import Service
 
 
 def get_order_image_upload_path(instance, filename):
@@ -22,18 +23,29 @@ def get_order_additional_image_upload_path(instance, filename):
 
 
 class Order(TimeStampedModel):
-    service = models.ForeignKey(
+    service_order = models.ForeignKey(
         "market.Service",
         on_delete=models.SET_NULL,
         related_name="service_order",
         null=True,
     )  # 어떤 서비스에 대한 주문인지
+    order_reformer = models.ForeignKey(
+        "users.Reformer",
+        on_delete=models.SET_NULL,
+        related_name="reformer_order",
+        null=True,
+    )  # 서비스를 제작한 리포머
+    order_market = models.ForeignKey(
+        "market.Market",
+        on_delete=models.SET_NULL,
+        related_name="market_order",
+        null=True,
+    )  # 서비스의 마켓
+
     request_user = models.ForeignKey(
         "users.User", on_delete=models.CASCADE, related_name="request_user_order"
     )  # 주문한 사람
-    order_number = models.CharField(
-        max_length=20, unique=True, null=False
-    )  # 주문을 구분할 수 있는 숫자. 나중에 랜덤으로 설정될 수 있도록 수정 예정
+
     order_uuid = models.UUIDField(null=False, unique=True, default=uuid.uuid4)
 
     material_name = models.ManyToManyField(
@@ -60,6 +72,11 @@ class Order(TimeStampedModel):
     def save(self, *args, **kwargs):
         # Order 객체가 처음 생성될 때만 실행
         is_new = self.pk is None
+        # Service를 통해 Reformer 설정
+        if self.service_order and self.service_order.market and self.service_order.market.reformer:
+            self.order_reformer = (
+                self.service.market.reformer
+            )  # Service를 통해 Reformer 설정
         super().save(*args, **kwargs)
 
         # 신규 Order일 경우 OrderState 생성
@@ -72,7 +89,7 @@ class OrderImage(TimeStampedModel):
     service_order = models.ForeignKey(
         "order.Order", on_delete=models.CASCADE, related_name="order_image"
     )
-    image = models.FileField(
+    order_image = models.FileField(
         upload_to=get_order_image_upload_path, null=False, max_length=255
     )
 
@@ -86,7 +103,7 @@ class AdditionalImage(TimeStampedModel):
         "order.Order", on_delete=models.CASCADE, related_name="additional_image"
     )
     additional_uuid = models.UUIDField(null=False, unique=True, default=uuid.uuid4)
-    image = models.FileField(
+    additional_image = models.FileField(
         upload_to=get_order_additional_image_upload_path, null=True, max_length=255
     )  # 수정 필요
 
@@ -127,9 +144,9 @@ class TransactionOption(TimeStampedModel):
     transaction_option = models.CharField(
         max_length=50, null=False, choices=[("pickup", "대면"), ("delivery", "택배")]
     )  # 거래 방식 (택배 or 대면)
-    delivery_address = models.TextField(null=False)  # 결과물 배송지
-    delivery_name = models.TextField(null=False)  # 배송 받을 이름
-    delivery_phone_number = models.TextField(null=False)  # 배송 받을 전화번호
+    delivery_address = models.TextField(null=True)  # 결과물 배송지
+    delivery_name = models.TextField(null=True)  # 배송 받을 이름
+    delivery_phone_number = models.TextField(null=True)  # 배송 받을 전화번호
 
     class Meta:
         db_table = "transaction_option"
@@ -149,7 +166,9 @@ class DeliveryInformation(TimeStampedModel):
         "order.Order", on_delete=models.CASCADE, related_name="delivery_information"
     )
     delivery_uuid = models.UUIDField(null=False, unique=True, default=uuid.uuid4)
-    delivery_company = models.CharField(max_length=50, null=True)  # 택배 회사
+    delivery_company = models.CharField(
+        max_length=50, null=True
+    )  # 택배 회사(추후 CharField로 바꿀 생각 있음)
     delivery_tracking_number = models.CharField(
         max_length=50, null=True
     )  # 택배 송장 번호

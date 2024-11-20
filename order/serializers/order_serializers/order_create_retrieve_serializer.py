@@ -13,19 +13,19 @@ from order.models import (
 class OrderImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderImage
-        fields = ["image"]
+        fields = ["order_image"]
 
 
 class AdditionalImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = AdditionalImage
-        fields = ["image"]
+        fields = ["additional_image"]
 
 
 class OrderStateSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderState
-        fields = ["orderState_uuid", "reformer_status"]
+        fields = ["order_state_uuid", "reformer_status"]
 
 
 class TransactionOptionSerializer(serializers.ModelSerializer):
@@ -47,17 +47,40 @@ class DeliveryInformationSerializer(serializers.ModelSerializer):
 
 
 class OrderCreateSerializer(serializers.ModelSerializer):
+
     order_uuid = serializers.UUIDField(read_only=True)
     order_image = OrderImageSerializer(many=True, required=False)
     additional_image = AdditionalImageSerializer(many=True, required=False)
     order_state = OrderStateSerializer(required=True)
     transaction_option = TransactionOptionSerializer(required=False)
-    delivery_information = DeliveryInformationSerializer(required=False)
+    delivery_information = DeliveryInformationSerializer(required=False)\
+
+    extra_material_name = serializers.CharField(
+        required=False, allow_null = True, allow_blank=True
+    )
+    additional_request = serializers.CharField(
+        required=False, allow_null=True, allow_blank=True
+    )  # 추가 요청 사항
+    order_service_price = serializers.IntegerField(
+        required=False, allow_null=True
+    )  # 서비스 금액
+    order_option_price = serializers.IntegerField(
+        required=False, allow_null=True
+    )  # 옵션 추가 금액
+    total_price = serializers.IntegerField(
+        required=False, allow_null=True
+    )  # 예상 결제 금액 (서비스 + 옵션)
+    request_date = serializers.DateField(required=True)  # 주문 날짜
+    kakaotalk_openchat_link = serializers.CharField(
+        required=False, allow_null=True, allow_blank=True
+    )  # 카톡 오픈채팅 링크
 
     class Meta:
         model = Order
         fields = [
             "order_uuid",
+            "service_order",
+            "order_reformer",
             "material_name",
             "extra_material_name",
             "additional_option",
@@ -75,11 +98,15 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
+
+
         order_images_data = validated_data.pop("order_image", [])
         additional_images_data = validated_data.pop("additional_image", [])
         order_state_data = validated_data.pop("order_state", None)
         transaction_option_data = validated_data.pop("transaction_option", None)
         delivery_information_data = validated_data.pop("delivery_information", None)
+        material_name_data = validated_data.pop("material_name", [])
+        additional_option_data = validated_data.pop("additional_option", [])
 
         service_order = self.context.get("service_order")
         order = Order.objects.create(service_order=service_order, **validated_data)
@@ -112,7 +139,10 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                 order=order, **delivery_information_data
             )
             delivery_information_data.save()
-
+        if material_name_data:
+            order.material_name.set(material_name_data)
+        if additional_option_data:
+            order.additional_option.set(additional_option_data)
         return order
 
 
@@ -124,10 +154,31 @@ class OrderRetrieveSerializer(serializers.ModelSerializer):
     transaction_option = TransactionOptionSerializer(required=False)
     delivery_information = DeliveryInformationSerializer(required=False)
 
+    extra_material_name = serializers.CharField(
+        required=False, allow_null=True, allow_blank=True
+    )
+    additional_request = serializers.CharField(
+        required=False, allow_null=True, allow_blank=True
+    )  # 추가 요청 사항
+    order_service_price = serializers.IntegerField(
+        required=False, allow_null=True
+    )  # 서비스 금액
+    order_option_price = serializers.IntegerField(
+        required=False, allow_null=True
+    )  # 옵션 추가 금액
+    total_price = serializers.IntegerField(
+        required=False, allow_null=True
+    )  # 예상 결제 금액 (서비스 + 옵션)
+    request_date = serializers.DateField(required=True)  # 주문 날짜
+    kakaotalk_openchat_link = serializers.CharField(
+        required=False, allow_null=True, allow_blank=True
+    )  # 카톡 오픈채팅 링크
+
     class Meta:
         model = Order
         fields = [
             "order_uuid",
+            "service_order"
             "material_name",
             "extra_material_name",
             "additional_option",

@@ -32,9 +32,14 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.black]
 line-length = 88
+extend-exclude = '''
+# 마이그레이션 파일 제외
+/migrations/
+'''
 
 [tool.isort]
 profile = "black"
 line_length = 88
 known_third_party = ["example_package"] # 필요에 따라 third-party 패키지를 여기에 추가
 skip_gitignore = true
+skip_glob = ["*/migrations/*"]  # 모든 migrations 폴더 제외

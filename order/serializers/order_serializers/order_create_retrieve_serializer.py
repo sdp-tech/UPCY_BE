@@ -1,5 +1,6 @@
 from typing import Any, Dict, List
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from rest_framework import serializers
 
@@ -111,20 +112,27 @@ class OrderCreateSerializer(serializers.ModelSerializer):
             if materials_data:
                 material_instances: List[Any] = []
                 for material in materials_data:
-                    material_instances.append(
-                        ServiceMaterial.objects.get(
-                            material_uuid=material["material_uuid"]
+                    material_instance: ServiceMaterial = ServiceMaterial.objects.filter(
+                        material_uuid=material["material_uuid"]
+                    ).first()
+                    if material_instance is None:
+                        raise ObjectDoesNotExist(
+                            "material_uuid에 해당하는 선택 옵션에 존재하지 않습니다."
                         )
-                    )
+                    material_instances.append(material_instance)
                 order.materials.set(material_instances)
 
             if options_data:
                 option_instances: List[Any] = []
                 option_price: int = 0
                 for option in options_data:
-                    option_instance: ServiceOption = ServiceOption.objects.get(
+                    option_instance: ServiceOption = ServiceOption.objects.filter(
                         option_uuid=option["option_uuid"]
-                    )
+                    ).first()
+                    if option_instance is None:
+                        raise ObjectDoesNotExist(
+                            "option_uuid에 해당하는 선택 옵션이 존재하지 않습니다."
+                        )
                     option_instances.append(option_instance)
                     option_price += option_instance.option_price
                 order.additional_options.set(option_instances)

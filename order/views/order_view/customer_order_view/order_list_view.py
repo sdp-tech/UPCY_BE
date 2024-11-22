@@ -1,3 +1,4 @@
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import QuerySet
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
@@ -54,24 +55,29 @@ class CustomerOrderCreateListView(APIView):
                 )
             service = Service.objects.filter(service_uuid=service_uuid).first()
             if not service:
-                raise Service.DoesNotExist
+                raise Service.DoesNotExist(
+                    "service_uuid에 해당하는 서비스가 존재하지 않습니다."
+                )
 
             serializer = OrderCreateSerializer(
                 data=request.data,
                 context={"order_user": request.user, "service": service},
             )
             serializer.is_valid(raise_exception=True)
-            serializer.save()
+            created_order: Order = serializer.save()
 
-            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+            return Response(
+                data={"order_uuid": created_order.order_uuid},
+                status=status.HTTP_201_CREATED,
+            )
 
         except ValidationError as e:
             return Response(
                 data={"message": str(e)}, status=status.HTTP_400_BAD_REQUEST
             )
-        except Service.DoesNotExist:
+        except ObjectDoesNotExist as e:
             return Response(
-                data={"message": "Service not found"},
+                data={"message": str(e)},
                 status=status.HTTP_404_NOT_FOUND,
             )
         except Exception as e:

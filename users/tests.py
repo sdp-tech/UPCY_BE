@@ -75,6 +75,7 @@ class UserTestCase(APITestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn("access", response.data)
+
         self.assertIn("refresh", response.data)
 
     def test_user_logout(self):
@@ -183,7 +184,6 @@ class UserTestCase(APITestCase):
         self.assertEqual(user_count, 0)
 
 
-
 class ReformerTestCase(APITestCase):
 
     def setUp(self):
@@ -283,17 +283,73 @@ class ReformerTestCase(APITestCase):
         self.assertEqual(reformer.first().reformer_career.count(), 2)
         self.assertEqual(reformer.first().reformer_freelancer.count(), 2)
 
+        # 4. 이미 등록된 리포머를 등록하려고 하는 경우, 에러가 뜨는지 확인
+
+
     def test_reformer_get_list(self):
         # 1. 로그인 상태
         response = self.client.post(
             path="/api/user/login", data=self.login_request_data, format="json"
         )
         self.access_token = response.data["access"]
-        self.refresh_token = response.data["refresh"]
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
 
+        # 2. 리포머 목록 요청
+        response = self.client.get(path="/api/user/reformer", format="json")
+        self.assertEqual(response.status_code, 200)
+
+        # 3. 응답 데이터 확인
+        reformer_list = response.data
+        self.assertIsInstance(reformer_list, list)
+        self.assertGreaterEqual(len(reformer_list), 1)  # 최소 1개의 리포머가 있어야 함
+        self.assertEqual(reformer_list[0]["user"]["email"], self.test_user.email)
+        self.assertEqual(reformer_list[0]["reformer_link"], None)  # 기본값 확인 가능
+        self.assertEqual(reformer_list[0]["reformer_area"], None)
+
+
+
+
+
     def test_reformer_update(self):
-        pass
+        # 1. 로그인 상태
+        response = self.client.post(
+            path="/api/user/login", data=self.login_request_data, format="json"
+        )
+        self.access_token = response.data["access"]
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+
+        # 2. 리포머 정보 업데이트
+        update_data = {
+            "reformer_link": "https://updated-link.com",
+            "reformer_area": "seoul gangnam",
+        }
+        response = self.client.put(
+            path="/api/user/reformer", data=update_data, format="json"
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # 3. 업데이트된 정보 확인
+        reformer = Reformer.objects.get(user=self.test_user)
+        self.assertEqual(reformer.reformer_link, "https://updated-link.com")
+        self.assertEqual(reformer.reformer_area, "seoul gangnam")
+
 
     def test_reformer_delete(self):
-        pass
+        # 1. 로그인 상태
+        response = self.client.post(
+            path="/api/user/login", data=self.login_request_data, format="json"
+        )
+        self.access_token = response.data["access"]
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.access_token)
+
+        # 2. 리포머 삭제 요청
+        response = self.client.delete(path="/api/user/reformer", format="json")
+        self.assertEqual(response.status_code, 204)  # 삭제 성공 시 일반적으로 204 반환
+
+        # 3. 삭제 확인
+        reformer_count = Reformer.objects.filter(user=self.test_user).count()
+        self.assertEqual(reformer_count, 0)
+
+        # 4. 삭제된 상태에서 재요청 시 에러 확인
+        response = self.client.delete(path="/api/user/reformer", format="json")
+        self.assertEqual(response.status_code, 404)  # 이미 삭제된 리소스

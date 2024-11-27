@@ -96,7 +96,7 @@ class MarketCrudView(APIView):
                 market.delete()
                 return Response(
                     data={"message": "market deleted"},
-                    status=status.HTTP_204_NO_CONTENT,
+                    status=status.HTTP_200_OK,
                 )
         except Market.DoesNotExist:
             return Response(

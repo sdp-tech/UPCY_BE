@@ -1,8 +1,8 @@
 import os
+from unittest.mock import MagicMock, patch
 
-from rest_framework.test import APIClient, APITestCase
-from unittest.mock import patch, MagicMock
 from django.test import override_settings
+from rest_framework.test import APIClient, APITestCase
 
 from market.models import Market
 from users.models.reformer import Reformer
@@ -95,7 +95,7 @@ class MarketTestCase(APITestCase):
         )
 
         self.assertEqual(response.status_code, 403)
-        self.assertIn('detail', response.data)
+        self.assertIn("detail", response.data)
 
     def test_forbid_market_create_more_than_one(self):
         # 이미 마켓이 존재하는데 마켓을 또 생성하는 경우 금지해야함
@@ -167,20 +167,17 @@ class MarketTestCase(APITestCase):
             "market_introduce": "Updated Introduce",
         }
         response = self.customer_client.put(
-            f"/api/market/{market_uuid}",
-            data=update_data,
-            format="json"
+            f"/api/market/{market_uuid}", data=update_data, format="json"
         )
 
         # 권한 검증
         self.assertEqual(response.status_code, 403)
-        self.assertIn('detail', response.data)
+        self.assertIn("detail", response.data)
 
         # 마켓 정보가 변경되지 않았는지 확인
         market = Market.objects.get(market_uuid=market_uuid)
         self.assertEqual(market.market_name, self.TEST_MARKET_NAME)
         self.assertEqual(market.market_introduce, self.TEST_MARKET_INTRODUCE)
-
 
     def test_update_market_info(self):
         # 마켓 정보 수정 시도 테스트
@@ -215,7 +212,7 @@ class MarketTestCase(APITestCase):
         self.assertEqual(market.market_name, update_data["market_name"])
         self.assertEqual(market.market_introduce, update_data["market_introduce"])
 
-    @patch('market.views.market_view.market_crud_view.client')
+    @patch("market.views.market_view.market_crud_view.client")
     def test_delete_market_info(self, mock_boto3_client: MagicMock):
         # 마켓 삭제 시도 테스트
 
@@ -250,8 +247,7 @@ class MarketTestCase(APITestCase):
 
         # S3 delete_object 호출 검증
         mock_s3.delete_object.assert_called_once_with(
-            Bucket=os.getenv("AWS_STORAGE_BUCKET_NAME"),
-            Key="README.md"
+            Bucket=os.getenv("AWS_STORAGE_BUCKET_NAME"), Key="README.md"
         )
 
         # 마켓 정보가 삭제 되었는지 확인

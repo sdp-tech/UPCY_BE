@@ -1,5 +1,10 @@
+from typing import Any, Dict, List
+
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import transaction
 from rest_framework import serializers
 
+from market.models import Service, ServiceMaterial, ServiceOption
 from order.models import (
     AdditionalImage,
     DeliveryInformation,
@@ -8,24 +13,42 @@ from order.models import (
     OrderState,
     TransactionOption,
 )
+from users.models import User
+
+
+class MaterialSerializer(serializers.ModelSerializer):
+    material_uuid = serializers.UUIDField()
+
+    class Meta:
+        model = ServiceMaterial
+        fields = ["material_uuid"]
+
+
+class OptionSerializer(serializers.Serializer):
+    option_uuid = serializers.UUIDField()
+
+    class Meta:
+        model = ServiceOption
+        fields = ["option_uuid"]
 
 
 class OrderImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderImage
-        fields = ["image"]
+        fields = ["order_image"]
 
 
 class AdditionalImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = AdditionalImage
-        fields = ["image"]
+        fields = ["additional_image"]
 
 
 class OrderStateSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderState
-        fields = ["orderState_uuid", "reformer_status"]
+        fields = ["order_state_uuid", "reformer_status"]
+        read_only_fields = ["order_state_uuid"]
 
 
 class TransactionOptionSerializer(serializers.ModelSerializer):
@@ -38,82 +61,105 @@ class TransactionOptionSerializer(serializers.ModelSerializer):
             "delivery_name",
             "delivery_phone_number",
         ]
+        read_only_fields = ["transaction_uuid"]
 
 
 class DeliveryInformationSerializer(serializers.ModelSerializer):
     class Meta:
         model = DeliveryInformation
         fields = ["delivery_uuid", "delivery_company", "delivery_tracking_number"]
+        read_only_fields = ["delivery_uuid"]
 
 
 class OrderCreateSerializer(serializers.ModelSerializer):
-    order_uuid = serializers.UUIDField(read_only=True)
-    order_image = OrderImageSerializer(many=True, required=False)
-    additional_image = AdditionalImageSerializer(many=True, required=False)
-    order_state = OrderStateSerializer(required=True)
-    transaction_option = TransactionOptionSerializer(required=False)
-    delivery_information = DeliveryInformationSerializer(required=False)
+    materials = MaterialSerializer(many=True, required=True)
+    additional_options = OptionSerializer(many=True, required=False)
+    transaction = TransactionOptionSerializer(write_only=True, required=True)
 
     class Meta:
         model = Order
         fields = [
-            "order_uuid",
-            "material_name",
-            "extra_material_name",
-            "additional_option",
+            "materials",
+            "extra_material",
             "additional_request",
-            "order_service_price",
-            "order_option_price",
-            "total_price",
-            "request_date",
-            "kakaotalk_openchat_link",
-            "order_image",
-            "additional_image",
-            "order_state",
-            "transaction_option",
-            "delivery_information",
+            "additional_options",
+            "transaction",
         ]
 
-    def create(self, validated_data):
-        order_images_data = validated_data.pop("order_image", [])
-        additional_images_data = validated_data.pop("additional_image", [])
-        order_state_data = validated_data.pop("order_state", None)
-        transaction_option_data = validated_data.pop("transaction_option", None)
-        delivery_information_data = validated_data.pop("delivery_information", None)
+    def validate(self, attrs):
+        return attrs
 
-        service_order = self.context.get("service_order")
-        order = Order.objects.create(service_order=service_order, **validated_data)
-        order.save()
+    def create(self, validated_data: Dict[str, Any]) -> Order:
+        service: Service = self.context["service"]
+        request_user: User = self.context["order_user"]
+        transaction_data: Dict[str, Any] | None = validated_data.pop(
+            "transaction", None
+        )
+        materials_data: List[Any] = validated_data.pop("materials", [])
+        options_data: List[Any] = validated_data.pop("additional_options", [])
 
-        for image_data in order_images_data:
-            order_images_data = OrderImage.objects.create(order=order, **image_data)
-            order_images_data.save()
-
-        for image_data in additional_images_data:
-            additional_images_data = AdditionalImage.objects.create(
-                order=order, **image_data
+        with transaction.atomic():
+            # 주문 생성
+            order: Order = Order.objects.create(
+                service_order=service,
+                order_market=service.market,
+                order_reformer=service.market.reformer,
+                request_user=request_user,
+                **validated_data
             )
-            additional_images_data.save()
 
-        if order_state_data:
-            order_state_data = OrderState.objects.create(
-                order=order, **order_state_data
-            )
-            order_state_data.save()
+            # M2M 관계 설정
+            if materials_data:
+                material_instances: List[Any] = []
+                for material in materials_data:
+                    material_instance: ServiceMaterial = ServiceMaterial.objects.filter(
+                        material_uuid=material["material_uuid"]
+                    ).first()
+                    if material_instance is None:
+                        raise ObjectDoesNotExist(
+                            "material_uuid에 해당하는 선택 옵션에 존재하지 않습니다."
+                        )
+                    material_instances.append(material_instance)
+                order.materials.set(material_instances)
 
-        if transaction_option_data:
-            transaction_option_data = TransactionOption.objects.create(
-                order=order, **transaction_option_data
-            )
-            transaction_option_data.save()
+            if options_data:
+                option_instances: List[Any] = []
+                option_price: int = 0
+                for option in options_data:
+                    option_instance: ServiceOption = ServiceOption.objects.filter(
+                        option_uuid=option["option_uuid"]
+                    ).first()
+                    if option_instance is None:
+                        raise ObjectDoesNotExist(
+                            "option_uuid에 해당하는 선택 옵션이 존재하지 않습니다."
+                        )
+                    option_instances.append(option_instance)
+                    option_price += option_instance.option_price
+                order.additional_options.set(option_instances)
 
-        if delivery_information_data:
-            delivery_information_data = DeliveryInformation.objects.create(
-                order=order, **delivery_information_data
-            )
-            delivery_information_data.save()
+            # 추가 금액 및 카카오톡 링크 업데이트
+            order.order_service_price = order.service_order.basic_price
+            order.order_option_price = option_price
+            order.total_price = order.order_service_price + order.order_option_price
+            order.kakaotalk_openchat_link = service.market.reformer.reformer_link
+            order.save()
 
-        return order
+            # 거래 옵션 생성
+            if transaction_data:
+                service_transaction: TransactionOption = (
+                    TransactionOption.objects.create(
+                        service_order=order, **transaction_data
+                    )
+                )
+                if service_transaction.transaction_option == "delivery":
+                    DeliveryInformation.objects.create(
+                        service_order=order
+                    )  # 나머지는 PUT 요청을 통해 택배 정보 업데이트
+
+            # 주문 상태 생성
+            OrderState.objects.create(service_order=order, reformer_status="pending")
+
+            return order
 
 
 class OrderRetrieveSerializer(serializers.ModelSerializer):
@@ -124,22 +170,25 @@ class OrderRetrieveSerializer(serializers.ModelSerializer):
     transaction_option = TransactionOptionSerializer(required=False)
     delivery_information = DeliveryInformationSerializer(required=False)
 
+    extra_material_name = serializers.CharField(
+        required=False, allow_null=True, allow_blank=True
+    )
+    additional_request = serializers.CharField(
+        required=False, allow_null=True, allow_blank=True
+    )  # 추가 요청 사항
+    order_service_price = serializers.IntegerField(
+        required=False, allow_null=True
+    )  # 서비스 금액
+    order_option_price = serializers.IntegerField(
+        required=False, allow_null=True
+    )  # 옵션 추가 금액
+    total_price = serializers.IntegerField(
+        required=False, allow_null=True
+    )  # 예상 결제 금액 (서비스 + 옵션)
+    request_date = serializers.DateField(required=True)  # 주문 날짜
+    kakaotalk_openchat_link = serializers.CharField(
+        required=False, allow_null=True, allow_blank=True
+    )  # 카톡 오픈채팅 링크
+
     class Meta:
         model = Order
-        fields = [
-            "order_uuid",
-            "material_name",
-            "extra_material_name",
-            "additional_option",
-            "additional_request",
-            "order_service_price",
-            "order_option_price",
-            "total_price",
-            "request_date",
-            "kakaotalk_openchat_link",
-            "order_image",
-            "additional_image",
-            "order_state",
-            "transaction_option",
-            "delivery_information",
-        ]

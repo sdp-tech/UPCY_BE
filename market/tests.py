@@ -213,6 +213,7 @@ class MarketTestCase(APITestCase):
         self.assertEqual(market.market_introduce, update_data["market_introduce"])
 
     @patch("market.views.market_view.market_crud_view.client")
+
     def test_delete_market_info(self, mock_boto3_client: MagicMock):
         # 마켓 삭제 시도 테스트
 

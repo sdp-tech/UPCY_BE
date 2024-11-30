@@ -77,11 +77,15 @@ class ReformerEducationView(APIView):
                 raise ReformerEducation.DoesNotExist
 
             with transaction.atomic():
-                s3 = client("s3")
-                s3.delete_object(
-                    Bucket=os.getenv("AWS_STORAGE_BUCKET_NAME"),
-                    Key=reformer_education.proof_document.name,
-                )
+                if (
+                        reformer_education.proof_document
+                ):  # 증명 서류가 존재한다면, 삭제
+                    s3 = client("s3")
+                    s3.delete_object(
+                        Bucket=os.getenv("AWS_STORAGE_BUCKET_NAME"),
+                        Key=reformer_education.proof_document.name,
+                    )
+
                 reformer_education.delete()
                 return Response(
                     data={"message": "successfully deleted"}, status=status.HTTP_200_OK
@@ -99,7 +103,7 @@ class ReformerEducationView(APIView):
         except ReformerEducation.DoesNotExist:
             return Response(
                 data={
-                    "message": "해당 UUID에 해당하는 리포머 학력 정보가 존재하지 않습니다."
+                    "message": "해당 UUID에 해당하는 리포머  학력 내역 정보가 존재하지 않습니다."
                 },
                 status=status.HTTP_404_NOT_FOUND,
             )

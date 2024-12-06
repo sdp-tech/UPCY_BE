@@ -8,45 +8,45 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from users.models.reformer import ReformerEducation
+from users.models.reformer import ReformerCareer
 from users.serializers.reformer_serializer.reformer_profile_serializer import (
-    ReformerEducationSerializer,
+    ReformerCareerSerializer,
 )
 
 
-class ReformerEducationView(APIView):
+class ReformerCareerView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, **kwargs):
         try:
-            education_uuid = kwargs.get("education_uuid")
-            reformer_education = ReformerEducation.objects.filter(
-                education_uuid=education_uuid
+            career_uuid = self.kwargs.get("career_uuid")
+            reformer_career = ReformerCareer.objects.filter(
+                career_uuid=career_uuid
             ).first()
-            if not reformer_education:
-                raise ReformerEducation.DoesNotExist
+            if not reformer_career:
+                raise ReformerCareer.DoesNotExist
 
-            serializer = ReformerEducationSerializer(instance=reformer_education)
+            serializer = ReformerCareerSerializer(instance=reformer_career)
             return Response(data=serializer.data, status=status.HTTP_200_OK)
-        except ReformerEducation.DoesNotExist:
+        except ReformerCareer.DoesNotExist:
             return Response(
                 data={
-                    "message": "해당 UUID에 해당하는 리포머 학력 정보가 존재하지 않습니다."
+                    "message": "해당 UUID에 해당하는 리포머 경력 정보가 존재하지 않습니다."
                 },
                 status=status.HTTP_404_NOT_FOUND,
             )
 
     def put(self, request, **kwargs):
         try:
-            education_uuid = kwargs.get("education_uuid")
-            reformer_education = ReformerEducation.objects.filter(
-                education_uuid=education_uuid
+            career_uuid = kwargs.get("career_uuid")
+            reformer_career = ReformerCareer.objects.filter(
+                career_uuid=career_uuid
             ).first()
-            if not reformer_education:
-                raise ReformerEducation.DoesNotExist
+            if not reformer_career:
+                raise ReformerCareer.DoesNotExist
 
-            serializer = ReformerEducationSerializer(
-                instance=reformer_education, data=request.data, partial=True
+            serializer = ReformerCareerSerializer(
+                instance=reformer_career, data=request.data, partial=True
             )
             if serializer.is_valid(raise_exception=True):
                 serializer.save()
@@ -59,32 +59,37 @@ class ReformerEducationView(APIView):
             return Response(
                 data={"message": str(e)}, status=status.HTTP_400_BAD_REQUEST
             )
-        except ReformerEducation.DoesNotExist:
+        except ReformerCareer.DoesNotExist:
             return Response(
                 data={
-                    "message": "해당 UUID에 해당하는 리포머 학력 정보가 존재하지 않습니다."
+                    "message": "해당 UUID에 해당하는 리포머 경력 정보가 존재하지 않습니다."
                 },
                 status=status.HTTP_404_NOT_FOUND,
+            )
+        except Exception as e:
+            return Response(
+                data={"message": f"예상치 못한 오류가 발생했습니다: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
     def delete(self, request, **kwargs):
         try:
-            education_uuid = kwargs.get("education_uuid")
-            reformer_education = ReformerEducation.objects.filter(
-                education_uuid=education_uuid
+            career_uuid = kwargs.get("career_uuid")
+            reformer_career = ReformerCareer.objects.filter(
+                career_uuid=career_uuid
             ).first()
-            if not reformer_education:
-                raise ReformerEducation.DoesNotExist
+            if not reformer_career:
+                raise ReformerCareer.DoesNotExist
 
             with transaction.atomic():
-                if reformer_education.proof_document:  # 증명 서류가 존재한다면, 삭제
+                if reformer_career.proof_document:  # 증명 서류가 존재한다면, 삭제
                     s3 = client("s3")
                     s3.delete_object(
                         Bucket=os.getenv("AWS_STORAGE_BUCKET_NAME"),
-                        Key=reformer_education.proof_document.name,
+                        Key=reformer_career.proof_document.name,
                     )
 
-                reformer_education.delete()
+                reformer_career.delete()
                 return Response(
                     data={"message": "successfully deleted"}, status=status.HTTP_200_OK
                 )
@@ -98,10 +103,10 @@ class ReformerEducationView(APIView):
                 data={"message": "백엔드에서 설정한 버킷이 존재하지 않습니다."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
-        except ReformerEducation.DoesNotExist:
+        except ReformerCareer.DoesNotExist:
             return Response(
                 data={
-                    "message": "해당 UUID에 해당하는 리포머  학력 내역 정보가 존재하지 않습니다."
+                    "message": "해당 UUID에 해당하는 리포머 경력 내역 정보가 존재하지 않습니다."
                 },
                 status=status.HTTP_404_NOT_FOUND,
             )

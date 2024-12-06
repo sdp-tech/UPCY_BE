@@ -3,6 +3,7 @@ import uuid
 from django.db import models
 
 from core.models import TimeStampedModel
+from market.managers import MarketManager, ServiceManager, ServiceMaterialManager
 from users.models.reformer import Reformer
 
 
@@ -48,6 +49,8 @@ class Market(TimeStampedModel):
     )  # 마켓 썸네일
     # market_rate = models.DecimalField(max_digits=2, decimal_places=1, default=0.0) # 마켓 평점 -> 추후 리뷰기능 개발 시 추가
 
+    objects = MarketManager()
+
     class Meta:
         db_table = "market"
 
@@ -69,11 +72,14 @@ class Service(TimeStampedModel):
     )  # 서비스 제작 예상 기간
     basic_price = models.PositiveIntegerField(null=False, default=0)  # 서비스 기본 요금
     max_price = models.PositiveIntegerField(null=False, default=0)  # 서비스 최대 요금
-    # service_request_count = models.IntegerField(null=False, default=0) # 서비스 이용 수 -> 추후 개발
-
+    suspended = models.BooleanField(
+        null=False, default=False
+    )  # 서비스가 일시 중단되었는지 확인하는 필드
     temporary = models.BooleanField(
         default=False
     )  # 해당 서비스가 임시 저장된 상태인지 표시하는 필드. True인 경우, 임시 저장된 데이터이다.
+
+    objects = ServiceManager()
 
     class Meta:
         db_table = "market_service"
@@ -87,6 +93,8 @@ class ServiceMaterial(TimeStampedModel):
 
     material_uuid = models.UUIDField(null=False, unique=True, default=uuid.uuid4)
     material_name = models.CharField(max_length=50, null=False)
+
+    objects = ServiceMaterialManager()
 
     class Meta:
         db_table = "market_service_material"

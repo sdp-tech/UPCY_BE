@@ -2,13 +2,14 @@ import os
 from typing import List
 
 from boto3 import client
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from rest_framework import status
-from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny, BasePermission
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from core.exceptions import view_exception_handler
 from core.permissions import IsReformer
 from market.models import Service, ServiceOption, ServiceOptionImage
 from market.serializers.service_serializers.service_option.service_option_create_serializer import (
@@ -31,64 +32,48 @@ class ServiceOptionCreateListView(APIView):
             return [IsReformer()]
         return super().get_permissions()
 
+    @view_exception_handler
     def get(self, request, **kwargs) -> Response:
-        try:
-            service = (
-                Service.objects.filter(
-                    market__market_uuid=kwargs.get("market_uuid"),
-                    service_uuid=kwargs.get("service_uuid"),
-                )
-                .select_related("market")
-                .first()
+        service = (
+            Service.objects.filter(
+                market__market_uuid=kwargs.get("market_uuid"),
+                service_uuid=kwargs.get("service_uuid"),
             )
-            if not service:
-                raise Service.DoesNotExist
+            .select_related("market")
+            .first()
+        )
+        if not service:
+            raise ObjectDoesNotExist("market service not found")
 
-            serializer = ServiceOptionRetrieveSerializer(
-                instance=service.service_option, many=True
-            )
-            return Response(data=serializer.data, status=status.HTTP_200_OK)
-        except Service.DoesNotExist:
-            return Response(
-                data={"message": "market service not found"},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-        except Exception as e:
-            return Response(
-                data={"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+        serializer = ServiceOptionRetrieveSerializer(
+            instance=service.service_option, many=True
+        )
 
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+    @view_exception_handler
     def post(self, request, **kwargs) -> Response:
-        try:
-            service = (
-                Service.objects.filter(
-                    market__market_uuid=kwargs.get("market_uuid"),
-                    service_uuid=kwargs.get("service_uuid"),
-                )
-                .select_related("market")
-                .first()
+        service = (
+            Service.objects.filter(
+                market__market_uuid=kwargs.get("market_uuid"),
+                service_uuid=kwargs.get("service_uuid"),
             )
-            if not service:
-                raise Service.DoesNotExist
+            .select_related("market")
+            .first()
+        )
+        if not service:
+            raise ObjectDoesNotExist("market service not found")
 
-            serializer = ServiceOptionCreateSerializer(
-                data=request.data, context={"service": service}
-            )
-            if serializer.is_valid(raise_exception=True):
-                serializer.save()
-                return Response(
-                    data={"message": "successfully created"},
-                    status=status.HTTP_201_CREATED,
-                )
-        except Service.DoesNotExist:
-            return Response(
-                data={"message": "market service not found"},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-        except Exception as e:
-            return Response(
-                data={"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+        serializer = ServiceOptionCreateSerializer(
+            data=request.data, context={"service": service}
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            data={"message": "successfully created"},
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class ServiceOptionView(APIView):
@@ -100,92 +85,62 @@ class ServiceOptionView(APIView):
             return [IsReformer()]
         return super().get_permissions()
 
+    @view_exception_handler
     def get(self, request, **kwargs) -> Response:
-        try:
-            service_option: ServiceOption = ServiceOption.objects.filter(
-                option_uuid=kwargs.get("option_uuid")
-            ).first()
-            if not service_option:
-                raise ServiceOption.DoesNotExist
+        service_option: ServiceOption = ServiceOption.objects.filter(
+            option_uuid=kwargs.get("option_uuid")
+        ).first()
+        if not service_option:
+            raise ObjectDoesNotExist("Service option not found")
 
-            serializer = ServiceOptionRetrieveSerializer(instance=service_option)
-            return Response(data=serializer.data, status=status.HTTP_200_OK)
-        except ServiceOption.DoesNotExist:
-            return Response(
-                data={"message": "service option not found"},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-        except Exception as e:
-            return Response(
-                data={"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+        serializer = ServiceOptionRetrieveSerializer(instance=service_option)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
+    @view_exception_handler
     def put(self, request, **kwargs) -> Response:
-        try:
-            service_option: ServiceOption = ServiceOption.objects.filter(
-                option_uuid=kwargs.get("option_uuid")
-            ).first()
-            if not service_option:
-                raise ServiceOption.DoesNotExist
+        service_option: ServiceOption = ServiceOption.objects.filter(
+            option_uuid=kwargs.get("option_uuid")
+        ).first()
+        if not service_option:
+            raise ObjectDoesNotExist("Service option not found")
 
-            serializer = ServiceOptionUpdateSerializer(
-                instance=service_option, data=request.data, partial=True
-            )
-            if serializer.is_valid(raise_exception=True):
-                serializer.save()
-                return Response(
-                    data={"message": "successfully updated"}, status=status.HTTP_200_OK
-                )
-        except ValidationError as e:
-            return Response(
-                data={"message": str(e)}, status=status.HTTP_400_BAD_REQUEST
-            )
-        except ServiceOption.DoesNotExist:
-            return Response(
-                data={"message": "service option not found"},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-        except Exception as e:
-            return Response(
-                data={"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+        serializer = ServiceOptionUpdateSerializer(
+            instance=service_option, data=request.data, partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
 
+        return Response(
+            data={"message": "successfully updated"}, status=status.HTTP_200_OK
+        )
+
+    @view_exception_handler
     def delete(self, request, **kwargs) -> Response:
         # service option 삭제 view
-        try:
-            service_option = ServiceOption.objects.filter(
-                option_uuid=kwargs.get("option_uuid")
-            ).first()
-            if not service_option:
-                raise ServiceOption.DoesNotExist
+        service_option = ServiceOption.objects.filter(
+            option_uuid=kwargs.get("option_uuid")
+        ).first()
+        if not service_option:
+            raise ObjectDoesNotExist("Service option not found")
 
-            with transaction.atomic():
-                s3 = client("s3")
-                service_option_images = ServiceOptionImage.objects.filter(
-                    service_option=service_option
-                )
+        with transaction.atomic():
+            s3 = client("s3")
+            service_option_images = ServiceOptionImage.objects.filter(
+                service_option=service_option
+            )
 
-                s3.delete_objects(
-                    Bucket=os.getenv("AWS_STORAGE_BUCKET_NAME"),
-                    Delete={
-                        "Objects": [
-                            {"Key": service_option_image.image.name}
-                            for service_option_image in service_option_images
-                        ]
-                    },
-                )
-                service_option_images.delete()  # 연관된 이미지 먼저 삭제
-                service_option.delete()  # Service option 삭제
+            s3.delete_objects(
+                Bucket=os.getenv("AWS_STORAGE_BUCKET_NAME"),
+                Delete={
+                    "Objects": [
+                        {"Key": service_option_image.image.name}
+                        for service_option_image in service_option_images
+                    ]
+                },
+            )
+            service_option_images.delete()  # 연관된 이미지 먼저 삭제
+            service_option.delete()  # Service option 삭제
 
-            return Response(
-                data={"message": "service option deleted"}, status=status.HTTP_200_OK
-            )
-        except ServiceOption.DoesNotExist:
-            return Response(
-                data={"message": "service option not found"},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-        except Exception as e:
-            return Response(
-                data={"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+        return Response(
+            data={"message": "service option deleted"}, status=status.HTTP_200_OK
+        )

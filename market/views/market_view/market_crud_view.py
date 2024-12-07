@@ -1,13 +1,14 @@
 import os
 
 from boto3 import client
+from botocore.client import BaseClient
 from django.db import transaction
 from rest_framework import status
-from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from core.exceptions import view_exception_handler
 from core.permissions import IsReformer
 from market.models import Market
 from market.serializers.market_serializers.market_serializer import MarketSerializer
@@ -17,6 +18,7 @@ from market.serializers.market_serializers.market_update_serializer import (
 
 
 class MarketCrudView(APIView):
+
     def get_permissions(self):
         if self.request.method == "GET":
             return [AllowAny()]
@@ -24,89 +26,47 @@ class MarketCrudView(APIView):
             return [IsReformer()]
         return super().get_permissions()
 
+    @view_exception_handler
     def get(self, request, **kwargs) -> Response:
         """
         market uuid에 해당하는 마켓 정보를 반환하는 API
         """
-        try:
-            market = (
-                Market.objects.filter(market_uuid=kwargs.get("market_uuid"))
-                .select_related("reformer")
-                .first()
-            )
-            if not market:
-                raise Market.DoesNotExist
+        market: Market = Market.objects.get_market_by_market_uuid_related_to_reformer(
+            market_uuid=kwargs.get("market_uuid")
+        )
+        serializer: MarketSerializer = MarketSerializer(instance=market)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
-            serialized = MarketSerializer(instance=market)
-            return Response(data=serialized.data, status=status.HTTP_200_OK)
-        except Market.DoesNotExist:
-            return Response(
-                data={"message": "market not found"}, status=status.HTTP_404_NOT_FOUND
-            )
-        except Exception as e:
-            return Response(
-                data={"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-
+    @view_exception_handler
     def put(self, request, **kwargs) -> Response:
-        try:
-            market = (
-                Market.objects.filter(
-                    reformer__user=request.user, market_uuid=kwargs.get("market_uuid")
-                )
-                .select_related("reformer")
-                .first()
-            )
-            if not market:
-                raise Market.DoesNotExist
+        market: Market = Market.objects.get_market_by_market_uuid_related_to_reformer(
+            market_uuid=kwargs.get("market_uuid")
+        )
 
-            serialized = MarketUpdateSerializer(instance=market, data=request.data)
-            if serialized.is_valid(raise_exception=True):
-                serialized.save()
-                return Response(
-                    data={"message": "market updated"}, status=status.HTTP_200_OK
-                )
-        except Market.DoesNotExist:
-            return Response(
-                data={"message": "market not found"}, status=status.HTTP_404_NOT_FOUND
-            )
-        except Exception as e:
-            return Response(
-                data={"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+        serializer: MarketUpdateSerializer = MarketUpdateSerializer(
+            instance=market, data=request.data
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
 
-    def delete(self, request, **kwargs):
-        try:
-            market = (
-                Market.objects.filter(
-                    reformer__user=request.user, market_uuid=kwargs.get("market_uuid")
-                )
-                .select_related("reformer")
-                .first()
-            )
-            if not market:
-                raise Market.DoesNotExist
+        return Response(data={"message": "market updated"}, status=status.HTTP_200_OK)
 
-            with transaction.atomic():
-                s3 = client("s3")
+    @view_exception_handler
+    def delete(self, request, **kwargs) -> Response:
+        market: Market = Market.objects.get_market_by_market_uuid_related_to_reformer(
+            market_uuid=kwargs.get("market_uuid")
+        )
+
+        with transaction.atomic():
+            if market.market_thumbnail:
+                s3: BaseClient = client("s3")
                 s3.delete_object(
                     Bucket=os.getenv("AWS_STORAGE_BUCKET_NAME"),
                     Key=market.market_thumbnail.name,
                 )
-                market.delete()
-                return Response(
-                    data={"message": "market deleted"},
-                    status=status.HTTP_200_OK,
-                )
-        except Market.DoesNotExist:
+
+            market.delete()
             return Response(
-                data={"message": "market not found"}, status=status.HTTP_404_NOT_FOUND
-            )
-        except ValidationError as e:
-            return Response(
-                data={"message": str(e)}, status=status.HTTP_400_BAD_REQUEST
-            )
-        except Exception as e:
-            return Response(
-                data={"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                data={"message": "market deleted"},
+                status=status.HTTP_200_OK,
             )

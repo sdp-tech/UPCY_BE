@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from core.exceptions import view_exception_handler
 from core.permissions import IsReformer
 from market.models import Market
 from market.serializers.market_serializers.market_serializer import MarketSerializer
@@ -20,56 +21,27 @@ class MarketCreateListView(APIView):
             return [IsReformer()]
         return super().get_permissions()
 
+    @view_exception_handler
     def get(self, request) -> Response:
-        try:
-            market = (
-                Market.objects.filter(reformer__user=request.user)
-                .select_related("reformer")
-                .first()
-            )
-            if not market:  # 마켓이 존재하지 않으면, 에러처리
-                raise Market.DoesNotExist("리포머가 생성한 마켓이 존재하지 않습니다.")
+        market: Market = Market.objects.get_market_by_user_related_to_reformer(
+            user=request.user
+        )
+        serializer: MarketSerializer = MarketSerializer(instance=market)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
-            serialized = MarketSerializer(instance=market)
-            return Response(data=serialized.data, status=status.HTTP_200_OK)
-        except Market.DoesNotExist:
-            return Response(
-                data={"message": "market not found"}, status=status.HTTP_404_NOT_FOUND
-            )
-        except Exception as e:
-            return Response(
-                data={"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-
+    @view_exception_handler
     def post(self, request) -> Response:
-        try:
-            # 리포머 프로필이 존재하는지 확인
-            reformer = Reformer.objects.filter(user=request.user).first()
-            if not reformer:
-                raise Reformer.DoesNotExist(
-                    "리포머 프로필이 존재하지 않습니다. 리포머 사용자만 호출 가능합니다."
-                )
+        # 리포머 프로필이 존재하는지 확인
+        reformer: Reformer = Reformer.objects.filter(user=request.user).first()
+        if not reformer:
+            raise ObjectDoesNotExist("Reformer not found")
 
-            # 리포머가 생성한 마켓이 몇개인지 확인
-            if Market.objects.filter(reformer=reformer).exists():
-                # 리포머 한명이 생성할 수 있는 마켓은 최대 1개
-                raise ValidationError(
-                    "리포머는 최대 1개의 마켓 까지만 생성이 가능합니다."
-                )
+        # 리포머가 생성한 마켓이 이미 존재하는지 확인
+        market: Market = Market.objects.check_if_market_exists(reformer=reformer)
+        if market:  # 이미 마켓 인스턴스가 리포머에 대해 존재한다면 유효하지 않은 요청
+            raise ValidationError("This reformer has already created a market.")
 
-            serialized = MarketSerializer(
-                data=request.data, context={"reformer": reformer}
-            )
-            serialized.is_valid(raise_exception=True)
-            serialized.save()
-            return Response(data=serialized.data, status=status.HTTP_201_CREATED)
-        except ObjectDoesNotExist as e:
-            return Response(data={"message": str(e)}, status=status.HTTP_404_NOT_FOUND)
-        except ValidationError as e:
-            return Response(
-                data={"message": str(e)}, status=status.HTTP_400_BAD_REQUEST
-            )
-        except Exception as e:
-            return Response(
-                data={"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+        serializer = MarketSerializer(data=request.data, context={"reformer": reformer})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(data=serializer.data, status=status.HTTP_201_CREATED)

@@ -77,9 +77,7 @@ class ReformerEducationView(APIView):
                 raise ReformerEducation.DoesNotExist
 
             with transaction.atomic():
-                if (
-                        reformer_education.proof_document
-                ):  # 증명 서류가 존재한다면, 삭제
+                if reformer_education.proof_document:  # 증명 서류가 존재한다면, 삭제
                     s3 = client("s3")
                     s3.delete_object(
                         Bucket=os.getenv("AWS_STORAGE_BUCKET_NAME"),

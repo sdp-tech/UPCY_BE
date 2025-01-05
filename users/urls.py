@@ -46,7 +46,9 @@ from users.views.reformer_view.reformer_freelancer_view.reformer_freelancer_view
     ReformerFreelancerView,
 )
 from users.views.reformer_view.reformer_profile_view import ReformerProfileView
-from users.views.reformer_view.reformer_specific_profile_view import ReformerSpecificProfileView
+from users.views.reformer_view.reformer_specific_profile_view import (
+    ReformerSpecificProfileView,
+)
 from users.views.token_view.token_view import UserTokenRefreshView, UserTokenVerifyView
 from users.views.user_view.user_auth_view import *
 from users.views.user_view.user_crud_view import *
@@ -61,7 +63,11 @@ urlpatterns = [
     path("/token/verify", UserTokenVerifyView.as_view(), name="token_verify"),
     path("/token/refresh", UserTokenRefreshView.as_view(), name="token_refresh"),
     path("/reformer", ReformerProfileView.as_view(), name="reformer"),
-    path("/reformer/<str:email>", ReformerSpecificProfileView.as_view(), name="specific_reformer"),
+    path(
+        "/reformer/<str:email>",
+        ReformerSpecificProfileView.as_view(),
+        name="specific_reformer",
+    ),
     path(
         "/reformer/education",
         ReformerEducationCreateListView.as_view(),

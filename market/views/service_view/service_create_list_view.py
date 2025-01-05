@@ -44,7 +44,7 @@ class MarketServiceCreateListView(ServiceQueryParamMixin, APIView):
     @view_exception_handler
     def get(self, request, **kwargs):
         """
-        market uuid를 사용하여 서비스 리스트를 반환하는 메서드
+        마켓에 생성된 서비스 리스트를 반환하는 로직을 처리하는 View
         """
         temporary_status = temporary_status_check(request)
         queryset = self.get_queryset(

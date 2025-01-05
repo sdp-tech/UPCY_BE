@@ -1,19 +1,22 @@
 from rest_framework import serializers, status
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny
 
-from users.models.user import User
 from users.models.reformer import Reformer
+from users.models.user import User
 from users.serializers.reformer_serializer.reformer_profile_serializer import (
     ReformerProfileSerializer,
 )
 from users.services import UserService
 
-class ReformerSpecificProfileView(APIView):
-    permission_classes = [AllowAny,]
 
-    def get(self, request, email:str) -> Response:
+class ReformerSpecificProfileView(APIView):
+    permission_classes = [
+        AllowAny,
+    ]
+
+    def get(self, request, email: str) -> Response:
         try:
             user = User.objects.get(email=email)
             reformer_profile = Reformer.objects.get(user=user)

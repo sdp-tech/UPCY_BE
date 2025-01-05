@@ -66,7 +66,7 @@ class ServiceManager(models.Manager):
     ) -> QuerySet:
         queryset: QuerySet = self.model.objects.filter(
             market__market_uuid=market_uuid, temporary=temporary
-        ).select_related("market")
+        ).select_related("market", "market__reformer", "market__reformer__user")
         if not queryset.exists():
             raise ObjectDoesNotExist("Service not found")
 

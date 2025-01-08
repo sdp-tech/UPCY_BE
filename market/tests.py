@@ -21,14 +21,7 @@ class MarketTestCase(APITestCase):
         "service_title": "reform service",
         "service_content": "asdfadfgf",
         "service_category": "category1",
-        "service_style": [
-            {
-                "style_name": "style 1"
-            },
-            {
-                "style_name": "style 2"
-            }
-        ],
+        "service_style": [{"style_name": "style 1"}, {"style_name": "style 2"}],
         "service_period": 7,
         "basic_price": 12345,
         "max_price": 99999,
@@ -36,27 +29,23 @@ class MarketTestCase(APITestCase):
             {
                 "option_name": "option 1",
                 "option_content": "asdfasdfa",
-                "option_price": 123123
+                "option_price": 123123,
             },
             {
                 "option_name": "option 2",
                 "option_content": "asdfasdfa",
-                "option_price": 1256473123
+                "option_price": 1256473123,
             },
             {
                 "option_name": "option 3",
                 "option_content": "asdfasdfa",
-                "option_price": 12312543
-            }
+                "option_price": 12312543,
+            },
         ],
         "service_material": [
-            {
-                "material_name": "material 1"
-            },
-            {
-                "material_name": "material 2"
-            }
-        ]
+            {"material_name": "material 1"},
+            {"material_name": "material 2"},
+        ],
     }
 
     @classmethod
@@ -97,9 +86,7 @@ class MarketTestCase(APITestCase):
             agreement_terms=True,
         )
         self.reformer = Reformer.objects.create(
-            user=self.test_user,
-            reformer_link="www.naver.com",
-            reformer_area="Seoul"
+            user=self.test_user, reformer_link="www.naver.com", reformer_area="Seoul"
         )
         self.token = self.client.post(
             path=f"/api/user/login",
@@ -306,9 +293,9 @@ class MarketTestCase(APITestCase):
             data={
                 "market_name": self.TEST_MARKET_NAME,
                 "market_introduce": self.TEST_MARKET_INTRODUCE,
-                "market_address": self.TEST_MARKET_ADDRESS
+                "market_address": self.TEST_MARKET_ADDRESS,
             },
-            format="json"
+            format="json",
         )
         self.assertEqual(response.status_code, 201)
         market_uuid = response.data.get("market_uuid", None)
@@ -319,27 +306,22 @@ class MarketTestCase(APITestCase):
             response = self.client.post(
                 path=f"/api/market/{market_uuid}/service",
                 data=self.TEST_SERVICE_CREATE_DATA,
-                format="json"
+                format="json",
             )
             self.assertEqual(response.status_code, 201)
 
         # 3. DB에 존재하는 전체 서비스 리스트 가져오기 (10개 만들었으니까 총 10개 있어야 함)
-        response = self.client.get(
-            path=f"/api/market/services",
-            format="json"
-        )
+        response = self.client.get(path=f"/api/market/services", format="json")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data.get("results", None)), 10)
 
         # 4. 특정 market에 속한 서비스 리스트 가져오기
         # market_uuid에 10개 만들었으므로 10개 있어야함
         response = self.client.get(
-            path=f"/api/market/{market_uuid}/service",
-            format="json"
+            path=f"/api/market/{market_uuid}/service", format="json"
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 10)
-
 
     def tearDown(self):
         Service.objects.all().delete()

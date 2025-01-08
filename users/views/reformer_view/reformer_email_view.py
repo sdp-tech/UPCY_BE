@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 from users.models.reformer import Reformer
 from users.models.user import User
 
+
 class ReformerEmailView(APIView):
     permission_classes = [
         AllowAny,

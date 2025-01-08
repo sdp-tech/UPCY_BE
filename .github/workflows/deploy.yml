@@ -43,13 +43,12 @@ jobs:
 
       - name: Django 테스트 실행
         env:
-          DJANGO_SETTINGS_MODULE: 'config.settings'
+          DJANGO_SETTINGS_MODULE: "config.settings"
           DJANGO_DEBUG_MODE: true
-          UPCY_SECRET_KEY: 'test123123123123123123123' # 진짜 SECRET 키 아닙니다.
+          UPCY_SECRET_KEY: "test123123123123123123123" # 진짜 SECRET 키 아닙니다.
         run: |
           poetry run python manage.py migrate  # 데이터베이스 마이그레이션
           poetry run python manage.py test     # Django 전체 테스트 실행
-
 
   deploy:
     name: Deploy Docker image to ECR and Run docker image in EC2 instance
@@ -58,54 +57,54 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: 코드 Checkout
-      uses: actions/checkout@v4
+      - name: 코드 Checkout
+        uses: actions/checkout@v4
 
-    - name: AWS Credentials 가져오기
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{secrets.AWS_REGION}}
+      - name: AWS Credentials 가져오기
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
 
-    - name: AWS ECR 로그인
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v2
+      - name: AWS ECR 로그인
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
 
-    - name: 백엔드 도커 이미지 생성 및 배포
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY_NAME }}
-        IMAGE_TAG: ${{ github.sha }}
-      run: |
-        # 도커 이미지 생성
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
+      - name: 백엔드 도커 이미지 생성 및 배포
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY_NAME }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          # 도커 이미지 생성
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
 
-        # ECR로 도커 이미지 PUSH
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          # ECR로 도커 이미지 PUSH
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
-    - name: EC2에 배포 및 백엔드 어플리케이션 실행
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.EC2_USERNAME }}
-        key: ${{ secrets.EC2_SSH_KEY }}
-        script: ./deploy.sh
+      - name: EC2에 배포 및 백엔드 어플리케이션 실행
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: ./deploy.sh
 
-    - name: 배포 결과 확인
-      if: always()
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.EC2_USERNAME }}
-        key: ${{ secrets.EC2_SSH_KEY }}
-        script: |
-          # 컨테이너 상태 확인
-          if docker ps | grep -q "${{ secrets.ECR_REPOSITORY_NAME }}"; then
-            echo "Container is running successfully"
-            exit 0
-          else
-            echo "Container is not running"
-            exit 1
-          fi
+      - name: 배포 결과 확인
+        if: always()
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            # 컨테이너 상태 확인
+            if docker ps | grep -q "${{ secrets.ECR_REPOSITORY_NAME }}"; then
+              echo "Container is running successfully"
+              exit 0
+            else
+              echo "Container is not running"
+              exit 1
+            fi

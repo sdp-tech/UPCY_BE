@@ -24,7 +24,7 @@ from market.views.service_view.service_style.service_style_view import (
     ServiceStyleCreateListView,
     ServiceStyleView,
 )
-
+from market.views.report_views import ReportUserView
 urlpatterns = [
     path("", MarketCreateListView.as_view(), name="market_create_list"),
     path(
@@ -83,4 +83,7 @@ urlpatterns = [
         ServiceOptionImageUploadView.as_view(),
         name="market_service_option_image_upload",
     ),
+    path('report/', ReportUserView.as_view(), name='report_user'),
+
 ]
+

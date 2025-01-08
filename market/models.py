@@ -6,6 +6,8 @@ from core.models import TimeStampedModel
 from market.managers import MarketManager, ServiceManager, ServiceMaterialManager
 from users.models.reformer import Reformer
 
+from django.db import models
+from django.contrib.auth.models import User
 
 def get_market_thumbnail_upload_path(instance, filename):
     email_name = instance.reformer.user.email.split("@")[0]
@@ -154,3 +156,15 @@ class ServiceOptionImage(TimeStampedModel):
 
     class Meta:
         db_table = "market_service_option_image"
+
+class Report(models.Model):
+    reported_user = models.ForeignKey(User, related_name="reports_received", on_delete=models.CASCADE)
+    reporter_user = models.ForeignKey(User, related_name="reports_made", on_delete=models.CASCADE)
+    reason = models.CharField(max_length=255)
+    details = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Report against {self.reported_user.username} by {self.reporter_user.username}"
+
+

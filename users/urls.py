@@ -36,6 +36,7 @@ from users.views.reformer_view.reformer_education_view.reformer_education_docume
 from users.views.reformer_view.reformer_education_view.reformer_education_view import (
     ReformerEducationView,
 )
+from users.views.reformer_view.reformer_email_view import ReformerEmailView
 from users.views.reformer_view.reformer_freelancer_view.reformer_freelancer_create_list_view import (
     ReformerFreelancerCreateListView,
 )
@@ -67,6 +68,11 @@ urlpatterns = [
         "/reformer/<str:email>",
         ReformerSpecificProfileView.as_view(),
         name="specific_reformer",
+    ),
+    path(
+        "/reformer/nickname/<str:nickname>",
+        ReformerEmailView.as_view(),
+        name="reformer_email_data",
     ),
     path(
         "/reformer/education",

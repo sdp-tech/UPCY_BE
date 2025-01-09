@@ -16,9 +16,9 @@ class ReformerSpecificProfileView(APIView):
         AllowAny,
     ]
 
-    def get(self, request, nickname: str) -> Response:
+    def get(self, request, email: str) -> Response:
         try:
-            user = User.objects.get(nickname=nickname)
+            user = User.objects.get(email=email)
             reformer_profile = Reformer.objects.get(user=user)
             if not reformer_profile:
                 raise Reformer.DoesNotExist(

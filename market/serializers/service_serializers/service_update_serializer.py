@@ -13,6 +13,7 @@ class ServiceUpdateSerializer(serializers.ModelSerializer):
             "service_period",
             "basic_price",
             "max_price",
+            "suspended",
         ]
         extra_kwargs = {
             "service_title": {"required": False},
@@ -21,6 +22,7 @@ class ServiceUpdateSerializer(serializers.ModelSerializer):
             "service_period": {"required": False},
             "basic_price": {"required": False},
             "max_price": {"required": False},
+            "suspended": {"required": False},
         }
 
     def validate(self, attrs):
@@ -68,5 +70,6 @@ class ServiceUpdateSerializer(serializers.ModelSerializer):
         instance.service_period = validated_data.get(
             "service_period", instance.service_period
         )
+        instance.suspended = validated_data.get("suspended", instance.suspended)
         instance.save()
         return instance

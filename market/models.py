@@ -1,5 +1,7 @@
 import uuid
 
+from django.conf import settings
+from django.contrib.auth.models import User
 from django.db import models
 
 from core.models import TimeStampedModel
@@ -154,3 +156,18 @@ class ServiceOptionImage(TimeStampedModel):
 
     class Meta:
         db_table = "market_service_option_image"
+
+
+class Report(models.Model):
+    reported_user = models.ForeignKey(
+        "users.User", related_name="reports_received", on_delete=models.CASCADE
+    )
+    reporter_user = models.ForeignKey(
+        "users.User", related_name="reports_made", on_delete=models.CASCADE
+    )
+    reason = models.CharField(max_length=255)
+    details = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "report"

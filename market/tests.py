@@ -283,6 +283,19 @@ class MarketTestCase(APITestCase):
         # 마켓 정보가 삭제 되었는지 확인
         self.assertEqual(Market.objects.filter(market_uuid=market_uuid).count(), 0)
 
+    def test_report_market(self):
+        # 마켓 신고가 정상적으로 작동하는 것
+        response = self.client.post(
+            path="/api/market/report",
+            data={
+                "reported_user_id": self.test_user.id,
+                "reason": "허위 정보 게시",
+                "details": "잘못된 정보를 포함한 마켓 설명",
+            },
+        )
+        self.assertEqual(response.data["reported_user"], self.test_user.id)
+        self.assertEqual(response.data["reason"], "허위 정보 게시")
+
     def test_get_service_list(self):
         # 서비스 리스트 가져오기 테스트
 
@@ -297,6 +310,7 @@ class MarketTestCase(APITestCase):
             format="json",
         )
         self.assertEqual(response.status_code, 201)
+
         market_uuid = response.data.get("market_uuid", None)
         self.assertIsNotNone(market_uuid, None)
 
@@ -347,7 +361,7 @@ class MarketTestCase(APITestCase):
         service_uuid = response.data.get("service_uuid", None)
         self.assertNotEqual(service_uuid, None)
 
-        service: Suspended = Service.objects.filter(service_uuid=service_uuid).first()
+        service = Service.objects.filter(service_uuid=service_uuid).first()
         self.assertEqual(service.suspended, False)
 
         # 3. 서비스 suspended 업데이트 시도

@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 from django.test import override_settings
 from rest_framework.test import APIClient, APITestCase
 
-from market.models import Market
+from market.models import Market, Service
 from users.models.reformer import Reformer
 from users.models.user import User
 
@@ -17,6 +17,36 @@ class MarketTestCase(APITestCase):
     TEST_MARKET_NAME = "test market"
     TEST_MARKET_INTRODUCE = "asdfasdfasdf"
     TEST_MARKET_ADDRESS = "Seoul"
+    TEST_SERVICE_CREATE_DATA = {
+        "service_title": "reform service",
+        "service_content": "asdfadfgf",
+        "service_category": "category1",
+        "service_style": [{"style_name": "style 1"}, {"style_name": "style 2"}],
+        "service_period": 7,
+        "basic_price": 12345,
+        "max_price": 99999,
+        "service_option": [
+            {
+                "option_name": "option 1",
+                "option_content": "asdfasdfa",
+                "option_price": 123123,
+            },
+            {
+                "option_name": "option 2",
+                "option_content": "asdfasdfa",
+                "option_price": 1256473123,
+            },
+            {
+                "option_name": "option 3",
+                "option_content": "asdfasdfa",
+                "option_price": 12312543,
+            },
+        ],
+        "service_material": [
+            {"material_name": "material 1"},
+            {"material_name": "material 2"},
+        ],
+    }
 
     @classmethod
     def setUpTestData(cls):
@@ -26,7 +56,7 @@ class MarketTestCase(APITestCase):
             email=cls.TEST_CUSTOMER_EMAIL,
             password=cls.TEST_PASSWORD,
             phone="01012341234",
-            nickname="nickname",
+            nickname="test_customer",
             introduce="hello, django",
             role="customer",
             is_active=True,
@@ -49,7 +79,7 @@ class MarketTestCase(APITestCase):
             email=self.TEST_EMAIL,
             password=self.TEST_PASSWORD,
             phone="01012341234",
-            nickname="nickname",
+            nickname="test_user_hello",
             introduce="hello, django",
             role="reformer",
             is_active=True,
@@ -88,7 +118,7 @@ class MarketTestCase(APITestCase):
             path="/api/market",
             data={
                 "market_name": "Invalid market",
-                "market_introduce": "SHOULD NOT CREATED",
+                "market_introduce": "SHOULD NOT BE CREATED",
                 "market_address": "ABC",
             },
             format="json",
@@ -127,7 +157,7 @@ class MarketTestCase(APITestCase):
         self.assertEqual(invalid_response.status_code, 400)
 
     def test_get_market_info(self):
-        # 마켓 정보 생성
+        # 마켓 정보 가져오기 테스트
         self.client.post(
             path="/api/market",
             data={
@@ -262,13 +292,92 @@ class MarketTestCase(APITestCase):
                 "reason": "허위 정보 게시",
                 "details": "잘못된 정보를 포함한 마켓 설명",
             },
-            format="json",
         )
-        self.assertEqual(response.status_code, 201)
         self.assertEqual(response.data["reported_user"], self.test_user.id)
         self.assertEqual(response.data["reason"], "허위 정보 게시")
 
+    def test_get_service_list(self):
+        # 서비스 리스트 가져오기 테스트
+
+        # 1. 테스트 마켓 생성
+        response = self.client.post(
+            path="/api/market",
+            data={
+                "market_name": self.TEST_MARKET_NAME,
+                "market_introduce": self.TEST_MARKET_INTRODUCE,
+                "market_address": self.TEST_MARKET_ADDRESS,
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, 201)
+
+        market_uuid = response.data.get("market_uuid", None)
+        self.assertIsNotNone(market_uuid, None)
+
+        # 2. 해당 마켓에 대한 서비스 10개 생성
+        for i in range(10):
+            response = self.client.post(
+                path=f"/api/market/{market_uuid}/service",
+                data=self.TEST_SERVICE_CREATE_DATA,
+                format="json",
+            )
+            self.assertEqual(response.status_code, 201)
+
+        # 3. DB에 존재하는 전체 서비스 리스트 가져오기 (10개 만들었으니까 총 10개 있어야 함)
+        response = self.client.get(path=f"/api/market/services", format="json")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data.get("results", None)), 10)
+
+        # 4. 특정 market에 속한 서비스 리스트 가져오기
+        # market_uuid에 10개 만들었으므로 10개 있어야함
+        response = self.client.get(
+            path=f"/api/market/{market_uuid}/service", format="json"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 10)
+
+    def test_service_update_suspend_field(self):
+        # 1. 테스트 마켓 생성
+        response = self.client.post(
+            path="/api/market",
+            data={
+                "market_name": self.TEST_MARKET_NAME,
+                "market_introduce": self.TEST_MARKET_INTRODUCE,
+                "market_address": self.TEST_MARKET_ADDRESS,
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, 201)
+        market_uuid = response.data.get("market_uuid", None)
+        self.assertIsNotNone(market_uuid, None)
+
+        # 2. 해당 마켓에 대한 서비스 생성
+        response = self.client.post(
+            path=f"/api/market/{market_uuid}/service",
+            data=self.TEST_SERVICE_CREATE_DATA,
+            format="json",
+        )
+        self.assertEqual(response.status_code, 201)
+        service_uuid = response.data.get("service_uuid", None)
+        self.assertNotEqual(service_uuid, None)
+
+        service = Service.objects.filter(service_uuid=service_uuid).first()
+        self.assertEqual(service.suspended, False)
+
+        # 3. 서비스 suspended 업데이트 시도
+        response = self.client.put(
+            path=f"/api/market/{market_uuid}/service/{service_uuid}",
+            data={"suspended": True},
+            format="json",
+        )
+        self.assertEqual(response.status_code, 200)
+        updated_service: Service = Service.objects.filter(
+            service_uuid=service_uuid
+        ).first()
+        self.assertNotEqual(service.suspended, updated_service.suspended)
+
     def tearDown(self):
+        Service.objects.all().delete()
         Market.objects.all().delete()
         Reformer.objects.all().delete()
         User.objects.all().delete()

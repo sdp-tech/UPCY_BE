@@ -253,6 +253,21 @@ class MarketTestCase(APITestCase):
         # 마켓 정보가 삭제 되었는지 확인
         self.assertEqual(Market.objects.filter(market_uuid=market_uuid).count(), 0)
 
+    def test_report_market(self):
+        # 마켓 신고가 정상적으로 작동하는 것
+        response = self.client.post(
+            path="/api/market/report",
+            data={
+                "reported_user_id": self.test_user.id,
+                "reason": "허위 정보 게시",
+                "details": "잘못된 정보를 포함한 마켓 설명",
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data["reported_user"], self.test_user.id)
+        self.assertEqual(response.data["reason"], "허위 정보 게시")
+
     def tearDown(self):
         Market.objects.all().delete()
         Reformer.objects.all().delete()

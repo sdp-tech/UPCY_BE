@@ -2,14 +2,6 @@ from rest_framework import serializers
 
 from market.models import Market
 
-from rest_framework import serializers
-from market.models import Report
-
-class ReportSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Report
-        fields = ['reported_user', 'reporter_user', 'reason', 'details']
-
 
 class MarketSerializer(serializers.ModelSerializer):
     market_uuid = serializers.UUIDField(read_only=True)

@@ -7,6 +7,7 @@ from market.views.image_upload_view import (
 )
 from market.views.market_view.market_create_list_view import MarketCreateListView
 from market.views.market_view.market_crud_view import MarketCrudView
+from market.views.report_views import ReportUserView
 from market.views.service_view.service_create_list_view import (
     GetAllServiceView,
     MarketServiceCreateListView,
@@ -83,4 +84,5 @@ urlpatterns = [
         ServiceOptionImageUploadView.as_view(),
         name="market_service_option_image_upload",
     ),
+    path("/report", ReportUserView.as_view(), name="report_user"),
 ]

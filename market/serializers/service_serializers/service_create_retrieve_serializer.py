@@ -128,10 +128,14 @@ class ServiceRetrieveSerializer(serializers.ModelSerializer):
     market_uuid = serializers.ReadOnlyField(
         source="market.market_uuid"
     )  # https://www.django-rest-framework.org/api-guide/fields/#readonlyfield
+    reformer_nickname = serializers.ReadOnlyField(
+        source="market.reformer.user.nickname"
+    )
 
     class Meta:
         model = Service
         fields = [
+            "reformer_nickname",
             "market_uuid",
             "service_uuid",
             "service_title",

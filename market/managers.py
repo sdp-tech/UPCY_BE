@@ -56,7 +56,17 @@ class MarketManager(models.Manager):
 class ServiceManager(models.Manager):
 
     def get_all_service_queryset(self) -> QuerySet:
-        queryset: QuerySet = self.model.objects.select_related("market").all()
+        queryset: QuerySet = (
+            self.model.objects.select_related("market__reformer__user")
+            .prefetch_related(
+                "service_style",
+                "service_image",
+                "service_material",
+                "service_option",
+                "service_option__service_option_image",
+            )
+            .all()
+        )
         if not queryset.exists():
             raise ObjectDoesNotExist("There are no services in the database")
         return queryset

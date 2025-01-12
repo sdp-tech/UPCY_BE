@@ -142,7 +142,7 @@ class ServiceRetrieveSerializer(serializers.ModelSerializer):
         images = []
         for service_option in obj.service_option.all():
             for service_option_image in service_option.service_option_image.all():
-                images.append({"image": service_option_image.image})
+                images.append({"image": service_option_image.image.url})
         return images
 
     class Meta:

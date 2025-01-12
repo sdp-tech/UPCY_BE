@@ -1,4 +1,7 @@
+from typing import Any, List
+
 from rest_framework import serializers
+from rest_framework.fields import SerializerMethodField
 
 from market.models import (
     Service,
@@ -122,6 +125,9 @@ class ServiceCreateSerializer(serializers.ModelSerializer):
 
 class ServiceRetrieveSerializer(serializers.ModelSerializer):
     service_option = ServiceOptionSerializer(many=True)
+    service_option_images = SerializerMethodField(
+        method_name="get_service_option_images"
+    )
     service_style = ServiceStyleSerializer(many=True)
     service_material = ServiceMaterialSerializer(many=True)
     service_image = ServiceImageSerializer(many=True)
@@ -131,6 +137,13 @@ class ServiceRetrieveSerializer(serializers.ModelSerializer):
     reformer_nickname = serializers.ReadOnlyField(
         source="market.reformer.user.nickname"
     )
+
+    def get_service_option_images(self, obj) -> List[Any]:
+        images = []
+        for service_option in obj.service_option.all():
+            for service_option_image in service_option.service_option_image.all():
+                images.append({"image": service_option_image.image})
+        return images
 
     class Meta:
         model = Service
@@ -146,6 +159,7 @@ class ServiceRetrieveSerializer(serializers.ModelSerializer):
             "basic_price",
             "max_price",
             "service_option",
+            "service_option_images",
             "service_material",
             "service_image",
             "suspended",

@@ -1,4 +1,4 @@
-name: Check code quality, run test code and Deploy to Amazon ECR
+name: Check code quality, run test code
 
 on:
   pull_request:

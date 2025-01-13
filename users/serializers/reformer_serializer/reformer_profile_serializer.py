@@ -8,6 +8,9 @@ from users.models.reformer import (
     ReformerEducation,
     ReformerFreelancer,
 )
+from users.serializers.user_serializer.user_information_serializer import (
+    UserInformationSerializer,
+)
 
 
 class ReformerCertificationSerializer(serializers.ModelSerializer):
@@ -143,7 +146,7 @@ class ReformerFreelancerSerializer(serializers.ModelSerializer):
 
 
 class ReformerProfileSerializer(serializers.Serializer):
-    nickname = serializers.SerializerMethodField()
+    user_info = serializers.SerializerMethodField()
     education = ReformerEducationSerializer(many=True, required=False)
     certification = ReformerCertificationSerializer(many=True, required=False)
     awards = ReformerAwardsSerializer(many=True, required=False)
@@ -152,10 +155,8 @@ class ReformerProfileSerializer(serializers.Serializer):
     reformer_link = serializers.CharField(required=True)
     reformer_area = serializers.CharField(required=True)
 
-    def get_nickname(self, obj):
-        # Reformer에서 user 객체에 존재하는 nickname 가져오기 위한 함수
-        # SerializerMethodField가 사용한다.
-        return obj.user.nickname
+    def get_user_info(self, obj):
+        return UserInformationSerializer(obj.user).data
 
     def validate(self, attrs):
         # 1. 요청한 user가 이미 reformer 프로필을 생성했는가?

@@ -51,7 +51,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(max_length=64, unique=True)  # 이메일
     phone = models.CharField(max_length=15, null=True, blank=True)  # 휴대전화 번호
     full_name = models.CharField(max_length=40, null=True, blank=True)  # 실명
-    nickname = models.CharField(max_length=20, null=True, blank=True)  # 사용자 닉네임
+    nickname = models.CharField(
+        max_length=20, null=True, blank=True, unique=True
+    )  # 사용자 닉네임
     agreement_terms = models.BooleanField(
         default=False
     )  # 선택 약관 동의 여부 -> 필수 약관은 프론트에서 알아서 처리한다고 합니다

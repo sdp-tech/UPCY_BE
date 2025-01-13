@@ -10,6 +10,12 @@ from market.models import (
     ServiceOption,
     ServiceStyle,
 )
+from market.serializers.service_serializers.service_option.service_option_retrieve_serializer import (
+    ServiceOptionRetrieveSerializer,
+)
+from users.serializers.reformer_serializer.reformer_profile_serializer import (
+    ReformerProfileSerializer,
+)
 
 
 class ServiceStyleSerializer(serializers.ModelSerializer):
@@ -124,19 +130,17 @@ class ServiceCreateSerializer(serializers.ModelSerializer):
 
 
 class ServiceRetrieveSerializer(serializers.ModelSerializer):
-    service_option = ServiceOptionSerializer(many=True)
-    service_option_images = SerializerMethodField(
-        method_name="get_service_option_images"
-    )
+    reformer_info = serializers.SerializerMethodField(read_only=True)
+    service_option = ServiceOptionRetrieveSerializer(many=True)
     service_style = ServiceStyleSerializer(many=True)
     service_material = ServiceMaterialSerializer(many=True)
     service_image = ServiceImageSerializer(many=True)
     market_uuid = serializers.ReadOnlyField(
         source="market.market_uuid"
     )  # https://www.django-rest-framework.org/api-guide/fields/#readonlyfield
-    reformer_nickname = serializers.ReadOnlyField(
-        source="market.reformer.user.nickname"
-    )
+
+    def get_reformer_info(self, obj):
+        return ReformerProfileSerializer(obj.market.reformer).data
 
     def get_service_option_images(self, obj) -> List[Any]:
         images = []
@@ -148,7 +152,7 @@ class ServiceRetrieveSerializer(serializers.ModelSerializer):
     class Meta:
         model = Service
         fields = [
-            "reformer_nickname",
+            "reformer_info",
             "market_uuid",
             "service_uuid",
             "service_title",
@@ -159,7 +163,6 @@ class ServiceRetrieveSerializer(serializers.ModelSerializer):
             "basic_price",
             "max_price",
             "service_option",
-            "service_option_images",
             "service_material",
             "service_image",
             "suspended",

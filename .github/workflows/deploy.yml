@@ -42,6 +42,10 @@ jobs:
           poetry run black . --check
 
       - name: 임시 데이터베이스 Migration
+        env:
+          DJANGO_SETTINGS_MODULE: "config.settings"
+          DJANGO_DEBUG_MODE: true
+          UPCY_SECRET_KEY: "test123123123123123123123" # 진짜 SECRET 키 아닙니다.
         run: |
           poetry run python manage.py migrate
 

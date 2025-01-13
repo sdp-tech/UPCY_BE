@@ -1,6 +1,8 @@
 from rest_framework.test import APIClient, APITestCase
-from users.models.reformer import Reformer, ReformerEducation, ReformerCertification
+
+from users.models.reformer import Reformer, ReformerCertification, ReformerEducation
 from users.models.user import User
+
 
 class ReformerTestCase(APITestCase):
 
@@ -220,18 +222,22 @@ class ReformerTestCase(APITestCase):
         response = self.client.post(
             path="/api/user/reformer", data=self.reformer_data, format="json"
         )
-        reformer_education = ReformerEducation.objects.filter(reformer=self.test_user.reformer_profile).first()
-        self.assertEqual(reformer_education.school, self.reformer_data["education"][0]["school"])
+        reformer_education = ReformerEducation.objects.filter(
+            reformer=self.test_user.reformer_profile
+        ).first()
+        self.assertEqual(
+            reformer_education.school, self.reformer_data["education"][0]["school"]
+        )
         self.assertEqual(response.status_code, 201)
 
         user: User = User.objects.get_user_by_email(email=self.test_user.email).first()
         self.assertEqual(user.role, "reformer")
 
         # 2. 학력 정보 조회
-        response = self.client.get(
-            path="/api/user/reformer/education", format="json"
+        response = self.client.get(path="/api/user/reformer/education", format="json")
+        self.assertEqual(
+            response.data[0].get("school"), self.reformer_data["education"][0]["school"]
         )
-        self.assertEqual(response.data[0].get("school"), self.reformer_data["education"][0]["school"])
         self.assertEqual(response.status_code, 200)
 
     def test_get_reformer_cert_list(self):
@@ -239,8 +245,12 @@ class ReformerTestCase(APITestCase):
         response = self.client.post(
             path="/api/user/reformer", data=self.reformer_data, format="json"
         )
-        reformer_certification = ReformerCertification.objects.filter(reformer=self.test_user.reformer_profile).first()
-        self.assertEqual(reformer_certification.name, self.reformer_data["certification"][0]["name"])
+        reformer_certification = ReformerCertification.objects.filter(
+            reformer=self.test_user.reformer_profile
+        ).first()
+        self.assertEqual(
+            reformer_certification.name, self.reformer_data["certification"][0]["name"]
+        )
         self.assertEqual(response.status_code, 201)
 
         user: User = User.objects.get_user_by_email(email=self.test_user.email).first()
@@ -251,7 +261,10 @@ class ReformerTestCase(APITestCase):
             path="/api/user/reformer/certification", format="json"
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data[0].get("certification_uuid"), str(reformer_certification.certification_uuid))
+        self.assertEqual(
+            response.data[0].get("certification_uuid"),
+            str(reformer_certification.certification_uuid),
+        )
 
     def get_access_token(self, user: User):
         login_data = {"email": user.email, "password": "123123"}

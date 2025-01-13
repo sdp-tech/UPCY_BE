@@ -365,16 +365,26 @@ class MarketTestCase(APITestCase):
             self.assertEqual(response.status_code, 201)
 
         # 3. 서비스 생성된 날짜 오름차순으로 데이터 가져오기
-        response = self.client.get(path=f"/api/market/services?sort=created", format="json")
+        response = self.client.get(
+            path=f"/api/market/services?sort=created", format="json"
+        )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data.get("results", None)), 10)
-        self.assertLess(response.data["results"][0]["created"], response.data["results"][1]["created"])
+        self.assertLess(
+            response.data["results"][0]["created"],
+            response.data["results"][1]["created"],
+        )
 
         # 서비스 업데이트 된 날짜 내림차순으로 데이터 가져오기
-        response = self.client.get(path=f"/api/market/services?sort=-updated", format="json")
+        response = self.client.get(
+            path=f"/api/market/services?sort=-updated", format="json"
+        )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data.get("results", None)), 10)
-        self.assertLess(response.data["results"][1]["updated"], response.data["results"][0]["updated"])
+        self.assertLess(
+            response.data["results"][1]["updated"],
+            response.data["results"][0]["updated"],
+        )
 
         # 4. 특정 market에 속한 서비스 리스트 가져오기
         # market_uuid에 10개 만들었으므로 10개 있어야함

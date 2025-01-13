@@ -10,7 +10,6 @@ from users.models.user import User
 class ReformerEmailView(APIView):
     permission_classes = [AllowAny]
 
-
     def get(self, request, nickname: str) -> Response:
         try:
             user = User.objects.filter(nickname=nickname)

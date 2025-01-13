@@ -60,16 +60,6 @@ urlpatterns = [
     path("/token/verify", UserTokenVerifyView.as_view(), name="token_verify"),
     path("/token/refresh", UserTokenRefreshView.as_view(), name="token_refresh"),
     path("/reformer", ReformerProfileView.as_view(), name="reformer"),
-    # path(
-    #     "/reformer/<str:email>",
-    #     ReformerSpecificProfileView.as_view(),
-    #     name="specific_reformer",
-    # ),
-    # path(
-    #     "/reformer/nickname/<str:nickname>",
-    #     ReformerEmailView.as_view(),
-    #     name="reformer_email_data",
-    # ),
     path(
         "/reformer/education",
         ReformerEducationCreateListView.as_view(),

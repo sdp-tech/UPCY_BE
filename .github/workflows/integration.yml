@@ -3,7 +3,7 @@ name: Integration Test
 on:
   pull_request:
     branches:
-      - upcy-14th-backend-dev
+      - main
     types:
       - opened
       - reopened

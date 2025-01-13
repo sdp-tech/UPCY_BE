@@ -3,7 +3,7 @@ name: Check code quality, run test code
 on:
   pull_request:
     branches:
-      - upcy-14th-backend-dev
+      - main
     types:
       - closed
 

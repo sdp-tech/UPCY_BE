@@ -1,55 +1,27 @@
 from django.urls import path
 
-from users.views.reformer_view.reformer_awards_view.reformer_awards_create_list_view import (
-    ReformerAwardsCreateListView,
-)
-from users.views.reformer_view.reformer_awards_view.reformer_awards_document_view import (
-    ReformerAwardsDocumentView,
-)
-from users.views.reformer_view.reformer_awards_view.reformer_awards_view import (
-    ReformerAwardsView,
-)
-from users.views.reformer_view.reformer_career_view.reformer_career_create_list_view import (
-    ReformerCareerCreateListView,
-)
-from users.views.reformer_view.reformer_career_view.reformer_career_document_view import (
-    ReformerCareerDocumentView,
-)
-from users.views.reformer_view.reformer_career_view.reformer_career_view import (
-    ReformerCareerView,
-)
-from users.views.reformer_view.reformer_certification_view.reformer_certification_create_list_view import (
-    ReformerCertificationCreateListView,
-)
-from users.views.reformer_view.reformer_certification_view.reformer_certification_document_view import (
-    ReformerCertificationDocumentView,
-)
-from users.views.reformer_view.reformer_certification_view.reformer_certificaton_view import (
-    ReformerCertificationView,
-)
-from users.views.reformer_view.reformer_education_view.reformer_education_create_list_view import (
-    ReformerEducationCreateListView,
-)
-from users.views.reformer_view.reformer_education_view.reformer_education_document_view import (
-    ReformerEducationDocumentView,
-)
-from users.views.reformer_view.reformer_education_view.reformer_education_view import (
-    ReformerEducationView,
-)
-from users.views.reformer_view.reformer_email_view import ReformerEmailView
-from users.views.reformer_view.reformer_freelancer_view.reformer_freelancer_create_list_view import (
-    ReformerFreelancerCreateListView,
-)
-from users.views.reformer_view.reformer_freelancer_view.reformer_freelancer_document_view import (
-    ReformerFreelancerDocumentView,
-)
-from users.views.reformer_view.reformer_freelancer_view.reformer_freelancer_view import (
-    ReformerFreelancerView,
-)
+from users.views.reformer_view.reformer_awards_view.reformer_awards_create_list_view import ReformerAwardsCreateListView
+from users.views.reformer_view.reformer_awards_view.reformer_awards_document_view import ReformerAwardsDocumentView
+from users.views.reformer_view.reformer_awards_view.reformer_awards_view import ReformerAwardsView
+from users.views.reformer_view.reformer_career_view.reformer_career_create_list_view import ReformerCareerCreateListView
+from users.views.reformer_view.reformer_career_view.reformer_career_document_view import ReformerCareerDocumentView
+from users.views.reformer_view.reformer_career_view.reformer_career_view import ReformerCareerView
+from users.views.reformer_view.reformer_certification_view.reformer_certification_create_list_view import \
+    ReformerCertificationCreateListView
+from users.views.reformer_view.reformer_certification_view.reformer_certification_document_view import \
+    ReformerCertificationDocumentView
+from users.views.reformer_view.reformer_certification_view.reformer_certificaton_view import ReformerCertificationView
+from users.views.reformer_view.reformer_education_view.reformer_education_create_list_view import \
+    ReformerEducationCreateListView
+from users.views.reformer_view.reformer_education_view.reformer_education_document_view import \
+    ReformerEducationDocumentView
+from users.views.reformer_view.reformer_education_view.reformer_education_view import ReformerEducationView
+from users.views.reformer_view.reformer_freelancer_view.reformer_freelancer_create_list_view import \
+    ReformerFreelancerCreateListView
+from users.views.reformer_view.reformer_freelancer_view.reformer_freelancer_document_view import \
+    ReformerFreelancerDocumentView
+from users.views.reformer_view.reformer_freelancer_view.reformer_freelancer_view import ReformerFreelancerView
 from users.views.reformer_view.reformer_profile_view import ReformerProfileView
-from users.views.reformer_view.reformer_specific_profile_view import (
-    ReformerSpecificProfileView,
-)
 from users.views.token_view.token_view import UserTokenRefreshView, UserTokenVerifyView
 from users.views.user_view.user_auth_view import *
 from users.views.user_view.user_crud_view import *
@@ -64,16 +36,16 @@ urlpatterns = [
     path("/token/verify", UserTokenVerifyView.as_view(), name="token_verify"),
     path("/token/refresh", UserTokenRefreshView.as_view(), name="token_refresh"),
     path("/reformer", ReformerProfileView.as_view(), name="reformer"),
-    path(
-        "/reformer/<str:email>",
-        ReformerSpecificProfileView.as_view(),
-        name="specific_reformer",
-    ),
-    path(
-        "/reformer/nickname/<str:nickname>",
-        ReformerEmailView.as_view(),
-        name="reformer_email_data",
-    ),
+    # path(
+    #     "/reformer/<str:email>",
+    #     ReformerSpecificProfileView.as_view(),
+    #     name="specific_reformer",
+    # ),
+    # path(
+    #     "/reformer/nickname/<str:nickname>",
+    #     ReformerEmailView.as_view(),
+    #     name="reformer_email_data",
+    # ),
     path(
         "/reformer/education",
         ReformerEducationCreateListView.as_view(),

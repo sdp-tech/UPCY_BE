@@ -8,14 +8,12 @@ from users.models.user import User
 
 
 class ReformerEmailView(APIView):
-    permission_classes = [
-        AllowAny,
-    ]
+    permission_classes = [AllowAny]
+
 
     def get(self, request, nickname: str) -> Response:
         try:
-            user = User.objects.get(nickname=nickname)
-            # check if the user is a reformer
+            user = User.objects.filter(nickname=nickname)
             reformer_profile = Reformer.objects.get(user=user)
             if not reformer_profile:
                 raise Reformer.DoesNotExist(

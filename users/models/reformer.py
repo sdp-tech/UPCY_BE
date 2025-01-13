@@ -16,7 +16,7 @@ def get_portfolio_upload_path(instance, filename):
     return f"users/{email_name}/reformer/portfolio/{filename}"
 
 
-class Reformer(models.Model):
+class Reformer(TimeStampedModel):
     # 리포머 기본 프로필 정보
     # 닉네임, 소개글은 User 테이블에 있는 필드 사용 -> 리포머 생성 요청 시 필요
     user = models.OneToOneField(
@@ -31,7 +31,7 @@ class Reformer(models.Model):
         db_table = "reformer_profile"
 
 
-class ReformerEducation(models.Model):
+class ReformerEducation(TimeStampedModel):
     # 리포머 학력
     reformer = models.ForeignKey(
         "users.Reformer", on_delete=models.CASCADE, related_name="reformer_education"
@@ -50,7 +50,7 @@ class ReformerEducation(models.Model):
         db_table = "reformer_education"
 
 
-class ReformerCertification(models.Model):
+class ReformerCertification(TimeStampedModel):
     # 리포머 자격증 내역
     reformer = models.ForeignKey(
         "users.Reformer",
@@ -70,7 +70,7 @@ class ReformerCertification(models.Model):
         db_table = "reformer_certification"
 
 
-class ReformerAwards(models.Model):
+class ReformerAwards(TimeStampedModel):
     # 리포머 수상 내역
     reformer = models.ForeignKey(
         "users.Reformer", on_delete=models.CASCADE, related_name="reformer_awards"
@@ -88,7 +88,7 @@ class ReformerAwards(models.Model):
         db_table = "reformer_awards"
 
 
-class ReformerCareer(models.Model):
+class ReformerCareer(TimeStampedModel):
     # 리포머 경력
     reformer = models.ForeignKey(
         "users.Reformer", on_delete=models.CASCADE, related_name="reformer_career"
@@ -109,7 +109,7 @@ class ReformerCareer(models.Model):
         db_table = "reformer_career"
 
 
-class ReformerFreelancer(models.Model):
+class ReformerFreelancer(TimeStampedModel):
     # 리포머 프리랜서/외주 경력
     reformer = models.ForeignKey(
         "users.Reformer", on_delete=models.CASCADE, related_name="reformer_freelancer"

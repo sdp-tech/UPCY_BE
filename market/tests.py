@@ -325,7 +325,6 @@ class MarketTestCase(APITestCase):
 
         # 3. DB에 존재하는 전체 서비스 리스트 가져오기 (10개 만들었으니까 총 10개 있어야 함)
         response = self.client.get(path=f"/api/market/services", format="json")
-        print(response.data)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data.get("results", None)), 10)
 

@@ -27,7 +27,7 @@ class ReformerProfileView(APIView):
             user=user
         ).first()  # 사용자의 프로필에 연결되어 있는 리포머 프로필 데이터를 가져온다.
         if not reformer_profile:  # 없다면 Exception
-            raise Reformer.DoesNotExist(
+            raise ObjectDoesNotExist(
                 "해당 사용자는 리포머 프로필이 등록되어 있지 않습니다."
             )
 

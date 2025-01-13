@@ -42,7 +42,7 @@ class ReformerProfileView(APIView):
         serializer = ReformerProfileSerializer(
             data=request.data, context={"request": request}
         )
-        serializer.is_valid()
+        serializer.is_valid(raise_exception=True)
         serializer.save()
         self.user_service.update_user_role(
             user=user, role="reformer"

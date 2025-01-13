@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 
+from core.exceptions import view_exception_handler
 from users.models.user import User
 from users.serializers.user_serializer.user_login_serializer import UserLoginSerializer
 from users.serializers.user_serializer.user_signup_serializer import (
@@ -17,28 +18,20 @@ from users.services import UserService
 class UserSignUpApi(APIView):
     permission_classes = [AllowAny]
 
+    @view_exception_handler
     def post(self, request):
-        try:
-            requested_data = UserSignUpSerializer(data=request.data)
-            if requested_data.is_valid(raise_exception=True):
-                data = requested_data.validated_data
+        serializer = UserSignUpSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
 
-                UserService.user_sign_up(data)
+        UserService.user_sign_up(data)
 
-                return Response(
-                    {
-                        "message": "Success",
-                    },
-                    status=status.HTTP_201_CREATED,
-                )
-        except ValidationError as e:
-            return Response(
-                data={"message": str(e)}, status=status.HTTP_400_BAD_REQUEST
-            )
-        except Exception as e:
-            return Response(
-                data={"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+        return Response(
+            {
+                "message": "Success",
+            },
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class UserLoginApi(APIView):

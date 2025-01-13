@@ -12,6 +12,14 @@ class UserSignUpSerializer(serializers.ModelSerializer):
                 "User that using this email already exists."
             )
 
+        if (
+            "nickname" in attrs
+            and User.objects.filter(nickname=attrs["nickname"]).exists()
+        ):
+            raise serializers.ValidationError(
+                "User that using this nickname already exists"
+            )
+
         if attrs["password"] is None or attrs["password"] == "":
             raise serializers.ValidationError("Password is required.")
 

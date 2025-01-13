@@ -89,7 +89,7 @@ class ReformerTestCase(APITestCase):
             path="/api/user/reformer", data=self.reformer_data, format="json"
         )
         self.assertEqual(response.status_code, 400)
-        self.assertIn("message", response.data)
+        self.assertIn("Validation Error", response.data.get("error"))
 
     def test_reformer_create_missing_fields(self):
         # 필요한 필드가 누락된 경우 에러가 발생함
@@ -101,7 +101,9 @@ class ReformerTestCase(APITestCase):
             path="/api/user/reformer", data=incomplete_data, format="json"
         )
         self.assertEqual(response.status_code, 400)
-        self.assertIn("message", response.data)  # 에러 메시지 확인
+        self.assertEqual(
+            "Validation Error", response.data.get("error")
+        )  # 에러 메시지 확인
 
     def test_reformer_get(self):
         # 리포머 생성
@@ -183,7 +185,7 @@ class ReformerTestCase(APITestCase):
         # 존재하지 않는 리포머 삭제를 시도하면 에러
         response = self.client.delete(path="/api/user/reformer", format="json")
         self.assertEqual(response.status_code, 404)
-        self.assertIn("message", response.data)
+        self.assertIn("Object Does Not Exist", response.data.get("error"))
 
     def test_reformer_delete_after_update(self):
         # 리포머 생성

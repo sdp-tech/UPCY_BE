@@ -5,6 +5,7 @@ from typing import Dict
 from boto3 import client
 from django.contrib.auth.hashers import check_password
 from django.db import transaction
+from django.db.models.query_utils import Q
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
@@ -22,19 +23,14 @@ class UserService:
         """
         사용자 회원가입 함수
         """
-        try:
-            if User.objects.filter(
-                email=user_data["email"]
-            ).exists():  # email에 해당하는 사용자가 이미 존재하는지 확인
-                raise ValidationError("A user with this email already exists.")
-            # 없으면 생성
-            user = User.objects.create_user(**user_data)
-            user.save()
+        if User.objects.filter(
+            Q(email=user_data["email"]) | Q(nickname=user_data.get("nickname", None))
+        ).exists():  # email 또는 nickname에 대해 이미 중복된 정보를 사용하는 사용자가 존재하는지 확인
+            raise ValidationError("A user with this email already exists.")
 
-        except ValidationError as e:
-            raise ValidationError(f"Validation Error: {str(e)}")
-        except Exception as e:
-            raise Exception(f"An error occurred during sign-up: {str(e)}")
+        # 없으면 생성
+        user = User.objects.create_user(**user_data)
+        user.save()
 
     @staticmethod
     def login(email: str, password: str) -> Dict:

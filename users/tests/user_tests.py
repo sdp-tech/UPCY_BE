@@ -57,6 +57,62 @@ class UserTestCase(APITestCase):
         self.assertEqual(created_user.nickname, request_data["nickname"])
         self.assertEqual(created_user.introduce, request_data["introduce"])
 
+    def test_duplicate_email_user_create(self):
+        request_data = {
+            "email": "user@test.com",
+            "password": "123123",
+            "full_name": "hello",
+            "agreement_terms": True,
+            "nickname": "testuser",
+            "introduce": "Hello world",
+        }
+        response = self.client.post(
+            path="/api/user/signup", data=request_data, format="json"
+        )
+        self.assertEqual(response.status_code, 201)
+
+        dup_request_data = {
+            "email": "user@test.com",
+            "password": "123123",
+            "full_name": "hello",
+            "agreement_terms": True,
+            "nickname": "testuser",
+            "introduce": "Hello world",
+        }
+        response = self.client.post(
+            path="/api/user/signup", data=dup_request_data, format="json"
+        )
+        self.assertEqual(response.data.get("error"), "Validation Error")
+        self.assertEqual(response.status_code, 400)
+
+    def test_duplicate_nickname_user_create(self):
+        request_data = {
+            "email": "user@test.com",
+            "password": "123123",
+            "full_name": "hello",
+            "agreement_terms": True,
+            "nickname": "testuser",
+            "introduce": "Hello world",
+        }
+        response = self.client.post(
+            path="/api/user/signup", data=request_data, format="json"
+        )
+        self.assertEqual(response.status_code, 201)
+
+        dup_request_data = {
+            "email": "user2@test.com",
+            "password": "123123",
+            "full_name": "hello",
+            "agreement_terms": True,
+            "nickname": "testuser",
+            "introduce": "Hello world",
+        }
+        response = self.client.post(
+            path="/api/user/signup", data=dup_request_data, format="json"
+        )
+        self.assertEqual(response.data.get("error"), "Validation Error")
+        self.assertEqual(response.status_code, 400)
+
     def test_user_login(self):
         # 존재하지 않는 사용자로 로그인 시 400 에러 발생하는지 확인
         request_data = {"email": "admin@test.com", "password": "123123"}

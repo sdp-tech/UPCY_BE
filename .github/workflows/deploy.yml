@@ -41,13 +41,20 @@ jobs:
         run: |
           poetry run black . --check
 
+      - name: 임시 데이터베이스 Migration
+        env:
+          DJANGO_SETTINGS_MODULE: "config.settings"
+          DJANGO_DEBUG_MODE: true
+          UPCY_SECRET_KEY: "test123123123123123123123" # 진짜 SECRET 키 아닙니다.
+        run: |
+          poetry run python manage.py migrate
+
       - name: Django 테스트 실행
         env:
           DJANGO_SETTINGS_MODULE: "config.settings"
           DJANGO_DEBUG_MODE: true
           UPCY_SECRET_KEY: "test123123123123123123123" # 진짜 SECRET 키 아닙니다.
         run: |
-          poetry run python manage.py migrate                           # 데이터베이스 마이그레이션
           poetry run python manage.py test users.tests.user_tests       # User 모듈 테스트 실행
           poetry run python manage.py test users.tests.reformer_tests   # Reformer 모듈 테스트 실행
           poetry run python manage.py test                              # 그 이외 모듈 테스트 실행

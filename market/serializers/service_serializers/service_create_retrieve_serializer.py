@@ -1,4 +1,7 @@
+from typing import Any, List
+
 from rest_framework import serializers
+from rest_framework.fields import SerializerMethodField
 
 from market.models import (
     Service,
@@ -6,6 +9,12 @@ from market.models import (
     ServiceMaterial,
     ServiceOption,
     ServiceStyle,
+)
+from market.serializers.service_serializers.service_option.service_option_retrieve_serializer import (
+    ServiceOptionRetrieveSerializer,
+)
+from users.serializers.reformer_serializer.reformer_profile_serializer import (
+    ReformerProfileSerializer,
 )
 
 
@@ -121,21 +130,29 @@ class ServiceCreateSerializer(serializers.ModelSerializer):
 
 
 class ServiceRetrieveSerializer(serializers.ModelSerializer):
-    service_option = ServiceOptionSerializer(many=True)
+    reformer_info = serializers.SerializerMethodField(read_only=True)
+    service_option = ServiceOptionRetrieveSerializer(many=True)
     service_style = ServiceStyleSerializer(many=True)
     service_material = ServiceMaterialSerializer(many=True)
     service_image = ServiceImageSerializer(many=True)
     market_uuid = serializers.ReadOnlyField(
         source="market.market_uuid"
     )  # https://www.django-rest-framework.org/api-guide/fields/#readonlyfield
-    reformer_nickname = serializers.ReadOnlyField(
-        source="market.reformer.user.nickname"
-    )
+
+    def get_reformer_info(self, obj):
+        return ReformerProfileSerializer(obj.market.reformer).data
+
+    def get_service_option_images(self, obj) -> List[Any]:
+        images = []
+        for service_option in obj.service_option.all():
+            for service_option_image in service_option.service_option_image.all():
+                images.append({"image": service_option_image.image.url})
+        return images
 
     class Meta:
         model = Service
         fields = [
-            "reformer_nickname",
+            "reformer_info",
             "market_uuid",
             "service_uuid",
             "service_title",

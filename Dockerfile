@@ -1,39 +1,57 @@
-# pull official base image
-FROM python:3.10-alpine as builder
+# Python 3.12 slim 이미지를 기반으로 사용
+FROM python:3.12-slim
 
-# ubuntu 사용자 및 그룹 추가
-RUN addgroup -S ubuntu && adduser -S ubuntu -G ubuntu
+# 이미지의 유지 관리자를 지정
+LABEL maintainer="sullungim"
 
-# 로그 디렉토리 및 파일 생성
-RUN mkdir -p /var/log/uwsgi/UPCY
-RUN chown -R ubuntu:ubuntu /var/log/uwsgi
-RUN chmod -R 777 /var/log/uwsgi
+# 환경 변수 설정
+ENV PYTHONUNBUFFERED=1 \
+    TZ=Asia/Seoul \
+    POETRY_HOME=/opt/poetry \
+    PATH="/opt/poetry/bin:$PATH" \
+    POETRY_VIRTUALENVS_CREATE=false
 
-# 의존성 패키지 설치 및 삭제
+# 필요한 패키지 설치 및 Poetry 설치
+RUN apt-get update && \
+    apt-get install --no-install-recommends -y curl tzdata && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    curl -sSL https://install.python-poetry.org | python3 - && \
+    poetry --version
 
-RUN apk update && apk add python3 python3-dev mariadb-dev build-base coreutils linux-headers pcre-dev && pip3 install mysqlclient && apk del python3-dev mariadb-dev build-base
-RUN apk add --no-cache gcc musl-dev python3-dev mariadb-connector-c-dev
+# 작업 디렉토리 설정
+WORKDIR /app
 
-RUN pip install ruamel.yaml.clib
+# Poetry 파일 복사
+COPY pyproject.toml poetry.lock ./
 
-# 애플리케이션 디렉토리로 작업 디렉토리 설정
-WORKDIR /home/ubuntu/UPCY_BE
+# 프로젝트 의존성 설치
+RUN poetry install --no-root --no-interaction
 
-# 가상 환경 생성
-RUN python3 -m venv /home/ubuntu/myvenv
+# 프로젝트 파일 복사
+COPY . .
 
-# requirements.txt 파일을 복사한 후 패키지 설치
-COPY requirements.txt /home/ubuntu/UPCY_BE/requirements.txt
-RUN /home/ubuntu/myvenv/bin/pip install --upgrade pip
-RUN /home/ubuntu/myvenv/bin/pip install -r requirements.txt
+# Production level에서는 DEBUG_MODE를 false로 설정
+ENV DJANGO_DEBUG_MODE=false
 
-# 애플리케이션 소스 복사
-COPY . /home/ubuntu/UPCY_BE/
+# 시간대 설정
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-# 소유자 변경
-RUN chown -R ubuntu:ubuntu /home/ubuntu/UPCY_BE
+# 사용자 추가 및 권한 설정
+RUN adduser --disabled-password --no-create-home --uid 1000 django-user && \
+    chown -R django-user:django-user /app
 
-USER ubuntu
+# 로그 디렉토리 설정
+RUN mkdir -p /app/logs && \
+    chown -R django-user:django-user /app/logs
 
-# 기본 명령어 설정
-ENTRYPOINT ["/home/ubuntu/myvenv/bin/uwsgi", "--ini", "/home/ubuntu/UPCY_BE/.config/uwsgi/UPCY.ini"]
+# 포트 노출
+EXPOSE 8000
+
+# 사용자 전환
+USER django-user
+
+# Django 프로젝트 실행
+# Dockerfile을 사용하는 경우 = Production level
+# 개발시에는 그냥 터미널 열고 python manage.py runserver로 실행해주세용
+CMD ["sh", "-c", "python manage.py makemigrations && python manage.py migrate && gunicorn --workers 3 --bind 0.0.0.0:8000 config.wsgi:application"]

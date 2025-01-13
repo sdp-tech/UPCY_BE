@@ -10,7 +10,12 @@ class ServiceOptionImageSerializer(serializers.ModelSerializer):
 
 
 class ServiceOptionRetrieveSerializer(serializers.ModelSerializer):
-    service_option_image = ServiceOptionImageSerializer(many=True)
+    service_option_images = serializers.SerializerMethodField()
+
+    def get_service_option_images(self, obj):
+        return ServiceOptionImageSerializer(
+            instance=obj.service_option_image, many=True
+        ).data
 
     class Meta:
         model = ServiceOption
@@ -19,5 +24,5 @@ class ServiceOptionRetrieveSerializer(serializers.ModelSerializer):
             "option_name",
             "option_content",
             "option_price",
-            "service_option_image",
+            "service_option_images",
         ]

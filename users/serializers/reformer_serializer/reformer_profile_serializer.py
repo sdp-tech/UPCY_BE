@@ -8,7 +8,9 @@ from users.models.reformer import (
     ReformerEducation,
     ReformerFreelancer,
 )
-from users.serializers.user_serializer.user_information_serializer import UserInformationSerializer
+from users.serializers.user_serializer.user_information_serializer import (
+    UserInformationSerializer,
+)
 
 
 class ReformerCertificationSerializer(serializers.ModelSerializer):

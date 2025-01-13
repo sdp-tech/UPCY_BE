@@ -13,6 +13,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: 캐시 무효화
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pypoetry
+            ~/.cache/pip
+          key: ${{ runner.os }}-poetry-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-poetry-
+
       - name: 코드 Checkout
         uses: actions/checkout@v4
 

@@ -27,6 +27,14 @@ jobs:
         run: |
           curl -sSL https://install.python-poetry.org | python3 -
           export PATH="$HOME/.local/bin:$PATH"
+      
+      - name: 캐시 무효화
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pypoetry
+          key: ${{ runner.os }}-poetry-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-poetry-
 
       - name: 의존성 설치
         run: |
@@ -47,7 +55,6 @@ jobs:
           DJANGO_DEBUG_MODE: true
           UPCY_SECRET_KEY: "test123123123123123123123" # 진짜 SECRET 키 아닙니다.
         run: |
-          rm db.sqlite3 || true
           poetry run python manage.py migrate
 
       - name: Django 테스트 실행

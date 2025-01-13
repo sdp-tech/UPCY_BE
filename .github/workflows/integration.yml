@@ -1,0 +1,57 @@
+name: Integration Test
+
+on:
+  pull_request:
+    branches:
+      - upcy-14th-backend-dev
+    types:
+      - opened
+
+jobs:
+  test:
+    name: Django API Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 코드 Checkout
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v3
+        with:
+          python-version: "3.12"
+
+      - name: Poetry 설치
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          export PATH="$HOME/.local/bin:$PATH"
+
+      - name: 의존성 설치
+        run: |
+          poetry install --no-root
+        shell: bash
+
+      - name: 코드 스타일 검사 (isort)
+        run: |
+          poetry run isort . --check-only
+
+      - name: 코드 스타일 검사 (black)
+        run: |
+          poetry run black . --check
+
+      - name: 임시 데이터베이스 Migration
+        env:
+          DJANGO_SETTINGS_MODULE: "config.settings"
+          DJANGO_DEBUG_MODE: true
+          UPCY_SECRET_KEY: "test123123123123123123123" # 진짜 SECRET 키 아닙니다.
+        run: |
+          poetry run python manage.py migrate
+
+      - name: Django 테스트 실행
+        env:
+          DJANGO_SETTINGS_MODULE: "config.settings"
+          DJANGO_DEBUG_MODE: true
+          UPCY_SECRET_KEY: "test123123123123123123123" # 진짜 SECRET 키 아닙니다.
+        run: |
+          poetry run python manage.py test users.tests.user_tests       # User 모듈 테스트 실행
+          poetry run python manage.py test users.tests.reformer_tests   # Reformer 모듈 테스트 실행
+          poetry run python manage.py test                              # 그 이외 모듈 테스트 실행

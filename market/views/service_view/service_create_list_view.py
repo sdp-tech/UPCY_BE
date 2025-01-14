@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.db.models import QuerySet
 from rest_framework import status
 from rest_framework.generics import ListAPIView
@@ -15,9 +16,6 @@ from market.serializers.service_serializers.service_create_retrieve_serializer i
     ServiceRetrieveSerializer,
 )
 from market.services import temporary_status_check
-from users.serializers.reformer_serializer.reformer_profile_serializer import (
-    ReformerProfileSerializer,
-)
 
 
 class MarketServiceCreateListView(ServiceQueryParamMixin, APIView):
@@ -62,20 +60,28 @@ class MarketServiceCreateListView(ServiceQueryParamMixin, APIView):
         """
         서비스 생성 메서드
         """
-        market: Market = Market.objects.get_market_by_market_uuid(
-            market_uuid=kwargs.get("market_uuid")
-        )
+        with transaction.atomic():
+            market: Market = Market.objects.get_market_by_market_uuid(
+                market_uuid=kwargs.get("market_uuid")
+            )
 
-        serializer = ServiceCreateSerializer(
-            data=request.data, context={"market": market}
-        )
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
+            serializer = ServiceCreateSerializer(
+                data=request.data, context={"market": market}
+            )
+            serializer.is_valid(raise_exception=True)
+            service_instance = serializer.save()
 
-        return Response(
-            data=serializer.data,
-            status=status.HTTP_201_CREATED,
-        )
+            service_instance = Service.objects.prefetch_related(
+                "service_style",
+                "service_option",
+                "service_material",
+                "service_option__service_option_image",
+            ).get(service_uuid=service_instance.service_uuid)
+
+            return Response(
+                data=ServiceCreateSerializer(instance=service_instance).data,
+                status=status.HTTP_201_CREATED,
+            )
 
 
 class GetAllServiceView(ServiceQueryParamMixin, ListAPIView):

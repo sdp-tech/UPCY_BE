@@ -4,6 +4,7 @@ from typing import Dict
 
 from boto3 import client
 from django.contrib.auth.hashers import check_password
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.db.models.query_utils import Q
 from django.utils import timezone
@@ -39,7 +40,7 @@ class UserService:
         """
         user = User.objects.filter(email=email).first()
         if not user:
-            raise User.DoesNotExist
+            raise ObjectDoesNotExist("User does not exist.")
 
         if not user.check_password(password):
             raise ValidationError("아이디나 비밀번호가 올바르지 않습니다.")

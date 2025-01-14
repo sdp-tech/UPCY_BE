@@ -9,18 +9,18 @@ class UserTestCase(APITestCase):
         self.client = APIClient()
         self.test_user = User.objects.create_user(
             email="test@test.com",
-            password="123123",
+            password="jbs89hh@kjn!",
             phone="01012341234",
             nickname="nickname",
             introduce="hello, django",
         )
-        self.login_request_data = {"email": "test@test.com", "password": "123123"}
+        self.login_request_data = {"email": "test@test.com", "password": "jbs89hh@kjn!"}
 
     def test_user_create(self):
         # 정상적인 순서로 회원가입을 진행한 경우
         request_data = {
             "email": "user@test.com",
-            "password": "123123",
+            "password": "jbs89hh@kjn!",
             "full_name": "hello",
             "agreement_terms": True,
         }
@@ -38,7 +38,7 @@ class UserTestCase(APITestCase):
         # 선택 정보까지 포함해서 회원가입 테스트
         request_data = {
             "email": "user@test.com",
-            "password": "123123",
+            "password": "jbs89hh@kjn!",
             "full_name": "hello",
             "agreement_terms": True,
             "nickname": "testuser",
@@ -60,7 +60,7 @@ class UserTestCase(APITestCase):
     def test_duplicate_email_user_create(self):
         request_data = {
             "email": "user@test.com",
-            "password": "123123",
+            "password": "jbs89hh@kjn!",
             "full_name": "hello",
             "agreement_terms": True,
             "nickname": "testuser",
@@ -73,10 +73,10 @@ class UserTestCase(APITestCase):
 
         dup_request_data = {
             "email": "user@test.com",
-            "password": "123123",
+            "password": "jbs89hh@kjn!",
             "full_name": "hello",
             "agreement_terms": True,
-            "nickname": "testuser",
+            "nickname": "testuser2",
             "introduce": "Hello world",
         }
         response = self.client.post(
@@ -88,7 +88,7 @@ class UserTestCase(APITestCase):
     def test_duplicate_nickname_user_create(self):
         request_data = {
             "email": "user@test.com",
-            "password": "123123",
+            "password": "jbs89hh@kjn!",
             "full_name": "hello",
             "agreement_terms": True,
             "nickname": "testuser",
@@ -101,7 +101,7 @@ class UserTestCase(APITestCase):
 
         dup_request_data = {
             "email": "user2@test.com",
-            "password": "123123",
+            "password": "jbs89hh@kjn!",
             "full_name": "hello",
             "agreement_terms": True,
             "nickname": "testuser",
@@ -113,18 +113,31 @@ class UserTestCase(APITestCase):
         self.assertEqual(response.data.get("error"), "Validation Error")
         self.assertEqual(response.status_code, 400)
 
+    def test_invalid_email_format_create(self):
+        request_data = {
+            "email": "uasdf",
+            "password": "a0hu5894je@",
+            "full_name": "hello",
+            "agreement_terms": True,
+            "nickname": "testuser",
+            "introduce": "Hello world",
+        }
+        response = self.client.post(
+            path="/api/user/signup", data=request_data, format="json"
+        )
+        self.assertEqual(response.status_code, 400)
+
     def test_user_login(self):
         # 존재하지 않는 사용자로 로그인 시 400 에러 발생하는지 확인
-        request_data = {"email": "admin@test.com", "password": "123123"}
+        request_data = {"email": "admin@test.com", "password": "jbs89hh@kjn!"}
         response = self.client.post(
             path="/api/user/login", data=request_data, format="json"
         )
         self.assertEqual(response.status_code, 404)
 
         # 이메일 로그인 시 토큰 발급이 정상적으로 동작하는지 확인
-        request_data = {"email": "test@test.com", "password": "123123"}
         response = self.client.post(
-            path="/api/user/login", data=request_data, format="json"
+            path="/api/user/login", data=self.login_request_data, format="json"
         )
 
         self.assertEqual(response.status_code, 200)

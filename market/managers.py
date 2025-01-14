@@ -57,13 +57,23 @@ class ServiceManager(models.Manager):
 
     def get_all_service_queryset(self) -> QuerySet:
         queryset: QuerySet = (
-            self.model.objects.select_related("market__reformer__user")
+            self.model.objects
+            .select_related(
+                "market",
+                "market__reformer",
+                "market__reformer__user"
+            )
             .prefetch_related(
                 "service_style",
                 "service_image",
                 "service_material",
                 "service_option",
                 "service_option__service_option_image",
+                "market__reformer__reformer_education",
+                "market__reformer__reformer_certification",
+                "market__reformer__reformer_awards",
+                "market__reformer__reformer_career",
+                "market__reformer__reformer_freelancer"
             )
             .all()
         )
@@ -76,7 +86,19 @@ class ServiceManager(models.Manager):
     ) -> QuerySet:
         queryset: QuerySet = self.model.objects.filter(
             market__market_uuid=market_uuid, temporary=temporary
-        ).select_related("market", "market__reformer", "market__reformer__user")
+        ).select_related(
+            "market__reformer__user",
+        ).prefetch_related(
+            "market__reformer__reformer_education",
+            "market__reformer__reformer_certification",
+            "market__reformer__reformer_awards",
+            "market__reformer__reformer_career",
+            "market__reformer__reformer_freelancer",
+            "service_option__service_option_image",
+            "service_material",
+            "service_style",
+            "service_image"
+        )
         if not queryset.exists():
             raise ObjectDoesNotExist("Service not found")
 

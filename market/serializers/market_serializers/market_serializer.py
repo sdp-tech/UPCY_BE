@@ -18,8 +18,6 @@ class MarketSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
-        market = Market.objects.create(
+        return Market.objects.create(
             reformer=self.context.get("reformer"), **validated_data
         )
-        market.save()
-        return market

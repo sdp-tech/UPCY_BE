@@ -325,7 +325,6 @@ class MarketTestCase(APITestCase):
 
         # 3. DB에 존재하는 전체 서비스 리스트 가져오기 (10개 만들었으니까 총 10개 있어야 함)
         response = self.client.get(path=f"/api/market/services", format="json")
-        print(response.data)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data.get("results", None)), 10)
 
@@ -341,58 +340,71 @@ class MarketTestCase(APITestCase):
         # 서비스 리스트 가져오기 테스트
 
         # 1. 테스트 마켓 생성
-        response = self.client.post(
-            path="/api/market",
-            data={
-                "market_name": self.TEST_MARKET_NAME,
-                "market_introduce": self.TEST_MARKET_INTRODUCE,
-                "market_address": self.TEST_MARKET_ADDRESS,
-            },
-            format="json",
-        )
-        self.assertEqual(response.status_code, 201)
-
-        market_uuid = response.data.get("market_uuid", None)
-        self.assertIsNotNone(market_uuid, None)
-
-        # 2. 해당 마켓에 대한 서비스 10개 생성
-        for i in range(10):
+        # 쿼리 최적화를 통해 5개 발생하는 쿼리를 4개로 줄였습니다.
+        with self.assertNumQueries(4):
             response = self.client.post(
-                path=f"/api/market/{market_uuid}/service",
-                data=self.TEST_SERVICE_CREATE_DATA,
+                path="/api/market",
+                data={
+                    "market_name": self.TEST_MARKET_NAME,
+                    "market_introduce": self.TEST_MARKET_INTRODUCE,
+                    "market_address": self.TEST_MARKET_ADDRESS,
+                },
                 format="json",
             )
             self.assertEqual(response.status_code, 201)
 
+            market_uuid = response.data.get("market_uuid", None)
+            self.assertIsNotNone(market_uuid, None)
+
+        # 2. 서비스 10개 생성
+        # 이 부분에서 쿼리가 210개가 넘게 발생해서 수정 필요
+        # 1차 수정 시도 1회의 loop에 대해 -> 21개의 쿼리 발생
+        # -> 적절한 수정을 통해 13개로 줄임
+        for i in range(10):
+            with self.assertNumQueries(13):
+                response = self.client.post(
+                    path=f"/api/market/{market_uuid}/service",
+                    data=self.TEST_SERVICE_CREATE_DATA,
+                    format="json",
+                )
+                self.assertEqual(response.status_code, 201)
+
         # 3. 서비스 생성된 날짜 오름차순으로 데이터 가져오기
-        response = self.client.get(
-            path=f"/api/market/services?sort=created", format="json"
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data.get("results", None)), 10)
-        self.assertLess(
-            response.data["results"][0]["created"],
-            response.data["results"][1]["created"],
-        )
+        # 수정 전 : 한번 조회 시 59개의 쿼리 발생
+        # 1차 수정 -> prefetch_related, select_related 수정하여 14개로 줄임
+        with self.assertNumQueries(14):
+            response = self.client.get(
+                path=f"/api/market/services?sort=created", format="json"
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.data.get("results", None)), 10)
+            self.assertLess(
+                response.data["results"][0]["created"],
+                response.data["results"][1]["created"],
+            )
 
         # 서비스 업데이트 된 날짜 내림차순으로 데이터 가져오기
-        response = self.client.get(
-            path=f"/api/market/services?sort=-updated", format="json"
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data.get("results", None)), 10)
-        self.assertLess(
-            response.data["results"][1]["updated"],
-            response.data["results"][0]["updated"],
-        )
+        with self.assertNumQueries(14):
+            response = self.client.get(
+                path=f"/api/market/services?sort=-updated", format="json"
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.data.get("results", None)), 10)
+            self.assertLess(
+                response.data["results"][1]["updated"],
+                response.data["results"][0]["updated"],
+            )
 
         # 4. 특정 market에 속한 서비스 리스트 가져오기
         # market_uuid에 10개 만들었으므로 10개 있어야함
-        response = self.client.get(
-            path=f"/api/market/{market_uuid}/service", format="json"
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data), 10)
+        # 수정 전 : 1회 호출 시 123회의 쿼리 발생 (N+1 문제 발생)
+        # 1차 수정 -> prefetch_related, select_related 수정하여 13개로 줄임
+        with self.assertNumQueries(13):
+            response = self.client.get(
+                path=f"/api/market/{market_uuid}/service", format="json"
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.data), 10)
 
     def test_service_update_suspend_field(self):
         # 1. 테스트 마켓 생성

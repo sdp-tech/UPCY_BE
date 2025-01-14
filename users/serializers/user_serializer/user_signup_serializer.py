@@ -1,6 +1,7 @@
-from rest_framework import serializers
-from django.core.validators import EmailValidator
 from django.contrib.auth.password_validation import validate_password
+from django.core.validators import EmailValidator
+from rest_framework import serializers
+
 from users.models.user import User
 
 
@@ -15,6 +16,7 @@ def email_validation(email):
         raise serializers.ValidationError("Email already in use.")
 
     return True
+
 
 def validate_password_field(password):
     try:

@@ -33,12 +33,16 @@ class MarketCreateListView(APIView):
     def post(self, request) -> Response:
         # 리포머 프로필이 존재하는지 확인
         # reformer: Reformer = Reformer.objects.select_related("user").filter(user=request.user).first()
-        reformer: Reformer = getattr(request.user, "reformer_profile", None) # 이렇게 하면 쿼리자체의 길이를 줄일 수 있음 (더 깔끔)
+        reformer: Reformer = getattr(
+            request.user, "reformer_profile", None
+        )  # 이렇게 하면 쿼리자체의 길이를 줄일 수 있음 (더 깔끔)
         if not reformer:
             raise ObjectDoesNotExist("Reformer not found")
 
         # 리포머가 생성한 마켓이 이미 존재하는지 확인
-        if Market.objects.check_if_market_exists(reformer=reformer):  # 이미 마켓 인스턴스가 리포머에 대해 존재한다면 유효하지 않은 요청
+        if Market.objects.check_if_market_exists(
+            reformer=reformer
+        ):  # 이미 마켓 인스턴스가 리포머에 대해 존재한다면 유효하지 않은 요청
             raise ValidationError("This reformer has already created a market.")
 
         serializer = MarketSerializer(data=request.data, context={"reformer": reformer})

@@ -1,6 +1,5 @@
-from django.db.models import QuerySet
 from django.db import transaction
-
+from django.db.models import QuerySet
 from rest_framework import status
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import AllowAny

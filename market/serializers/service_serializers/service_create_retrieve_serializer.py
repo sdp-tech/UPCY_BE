@@ -1,7 +1,8 @@
 from typing import Any, List
-from django.db import transaction
 
+from django.db import transaction
 from rest_framework import serializers
+
 from market.models import (
     Service,
     ServiceImage,
@@ -80,16 +81,21 @@ class ServiceCreateSerializer(serializers.ModelSerializer):
         #         market_service=market_service, **style
         #     )
         #     service_style.save()
-        service_style_list = [ServiceStyle(market_service=market_service, **style) for style in service_style]
+        service_style_list = [
+            ServiceStyle(market_service=market_service, **style)
+            for style in service_style
+        ]
         ServiceStyle.objects.bulk_create(service_style_list)
-
 
         # for option in service_option:
         #     service_option = ServiceOption.objects.create(
         #         market_service=market_service, **option
         #     )
         #     service_option.save()
-        service_option_list = [ServiceOption(market_service=market_service, **option) for option in service_option]
+        service_option_list = [
+            ServiceOption(market_service=market_service, **option)
+            for option in service_option
+        ]
         ServiceOption.objects.bulk_create(service_option_list)
 
         # for material in service_material:
@@ -97,7 +103,10 @@ class ServiceCreateSerializer(serializers.ModelSerializer):
         #         market_service=market_service, **material
         #     )
         #     service_material.save()
-        service_material_list = [ServiceMaterial(market_service=market_service, **material) for material in service_material]
+        service_material_list = [
+            ServiceMaterial(market_service=market_service, **material)
+            for material in service_material
+        ]
         ServiceMaterial.objects.bulk_create(service_material_list)
 
         return market_service

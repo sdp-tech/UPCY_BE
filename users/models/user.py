@@ -16,8 +16,12 @@ def get_user_profile_image_upload_path(instance, filename):
     return f"users/{email_name}/profile-image/{filename}"
 
 
-def default_nickname_generator(instance):
-    return instance.email.split("@")[0] + str(random_generator.random_number(digits=20))
+def default_nickname_generator(email):
+    return (
+        email.split("@")[0]
+        + email.split("@")[1]
+        + str(random_generator.random_number(digits=20))
+    )
 
 
 class UserManager(BaseUserManager):
@@ -59,9 +63,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     phone = models.CharField(max_length=15, null=True, blank=True)  # 휴대전화 번호
     full_name = models.CharField(max_length=40, null=True, blank=True)  # 실명
     nickname = models.CharField(
-        max_length=100,
-        default=default_nickname_generator,
-        unique=True,
+        max_length=100, unique=True, blank=True
     )  # 사용자 닉네임
     agreement_terms = models.BooleanField(
         default=False
@@ -90,6 +92,12 @@ class User(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
     objects = UserManager()
+
+    def save(self, *args, **kwargs):
+        if not self.nickname:  # 회원가입 시 nickname을 전달받지 못했다면, 랜덤으로 생성
+            nickname = default_nickname_generator(self.email)
+            self.nickname = nickname
+        super().save(*args, **kwargs)
 
     class Meta:
         db_table = "users"

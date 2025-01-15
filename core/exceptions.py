@@ -2,10 +2,10 @@ from functools import wraps
 
 from botocore.exceptions import ParamValidationError
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import IntegrityError
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
-from django.db import IntegrityError
 
 
 def view_exception_handler(func):

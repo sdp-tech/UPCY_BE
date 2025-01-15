@@ -1,3 +1,5 @@
+import logging
+
 from django.db import transaction
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
@@ -14,9 +16,8 @@ from users.serializers.user_serializer.user_signup_serializer import (
 )
 from users.services import UserService
 
-import logging
-
 logger = logging.getLogger(__name__)
+
 
 class UserSignUpApi(APIView):
     permission_classes = [AllowAny]

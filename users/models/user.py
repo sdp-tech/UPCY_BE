@@ -1,3 +1,4 @@
+import faker
 from django.contrib.auth.models import (
     AbstractBaseUser,
     BaseUserManager,
@@ -6,13 +7,17 @@ from django.contrib.auth.models import (
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import QuerySet
-import faker
 
 nickname_faker = faker.Faker("ko_KR")
+
 
 def get_user_profile_image_upload_path(instance, filename):
     email_name = instance.email.split("@")[0]
     return f"users/{email_name}/profile-image/{filename}"
+
+
+def default_nickname_generator():
+    return nickname_faker.user_name() + str(nickname_faker.random_number(digits=20))
 
 
 class UserManager(BaseUserManager):
@@ -54,7 +59,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     phone = models.CharField(max_length=15, null=True, blank=True)  # 휴대전화 번호
     full_name = models.CharField(max_length=40, null=True, blank=True)  # 실명
     nickname = models.CharField(
-        max_length=20, default=lambda: nickname_faker.user_name(), unique=True
+        max_length=100,
+        default=default_nickname_generator,
+        unique=True,
     )  # 사용자 닉네임
     agreement_terms = models.BooleanField(
         default=False

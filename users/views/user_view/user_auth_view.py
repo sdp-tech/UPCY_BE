@@ -24,7 +24,6 @@ class UserSignUpApi(APIView):
 
     @view_exception_handler
     def post(self, request):
-        logger.info(request.data)
         serializer = UserSignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data

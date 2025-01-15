@@ -1,4 +1,4 @@
-from django.contrib.auth.hashers import check_password
+from django.db import transaction
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -14,12 +14,16 @@ from users.serializers.user_serializer.user_signup_serializer import (
 )
 from users.services import UserService
 
+import logging
+
+logger = logging.getLogger(__name__)
 
 class UserSignUpApi(APIView):
     permission_classes = [AllowAny]
 
     @view_exception_handler
     def post(self, request):
+        logger.info(request.data)
         serializer = UserSignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data

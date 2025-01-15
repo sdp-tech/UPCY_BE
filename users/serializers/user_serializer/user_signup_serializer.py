@@ -1,21 +1,8 @@
 from django.contrib.auth.password_validation import validate_password
-from django.core.validators import EmailValidator
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
 
 from users.models.user import User
-
-
-def email_validation(email):
-    validator = EmailValidator()
-    try:
-        validator(email)
-    except serializers.ValidationError:
-        raise serializers.ValidationError("Invalid email address format.")
-
-    if User.objects.filter(email=email).exists():
-        raise serializers.ValidationError("Email already in use.")
-
-    return True
 
 
 def validate_password_field(password):
@@ -28,10 +15,6 @@ def validate_password_field(password):
 
 class UserSignUpSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
-
-    def validate_email(self, value):
-        email_validation(value)
-        return value
 
     def validate_nickname(self, value):
         if value == "":

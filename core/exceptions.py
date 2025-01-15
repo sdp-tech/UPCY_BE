@@ -5,6 +5,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
+from django.db import IntegrityError
 
 
 def view_exception_handler(func):
@@ -16,6 +17,11 @@ def view_exception_handler(func):
             return Response(
                 data={"error": "ValueError", "error_message": str(e)},
                 status=status.HTTP_400_BAD_REQUEST,
+            )
+        except IntegrityError as e:
+            return Response(
+                data={"error": "IntegrityError", "error_message": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
         except ValidationError as e:
             return Response(

@@ -242,3 +242,24 @@ if not DEBUG:
             "level": "DEBUG",
         },
     }
+else:
+    LOGGING = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "handlers": {
+            "console": {
+                "class": "logging.StreamHandler",
+            },
+        },
+        "loggers": {
+            "django": {
+                "handlers": ["console"],
+                "level": "DEBUG",
+                "propagate": True,
+            },
+        },
+        "root": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+        },
+    }

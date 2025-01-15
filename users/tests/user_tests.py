@@ -1,6 +1,7 @@
+import faker
 from rest_framework.test import APIClient, APITestCase
 
-from users.models.user import User
+from users.models.user import User, nickname_faker
 
 
 class UserTestCase(APITestCase):
@@ -126,6 +127,28 @@ class UserTestCase(APITestCase):
             path="/api/user/signup", data=request_data, format="json"
         )
         self.assertEqual(response.status_code, 400)
+
+    def test_various_email_user_test(self):
+        nick_faker = faker.Faker("ko_KR")
+        request_data = []
+        for i in range(10):
+            nickname = nick_faker.user_name()
+            request_data.append(
+                {
+                    "email": f"{nickname}@test.com",
+                    "password": "jbs89hh@kjn!",
+                    "full_name": "hello",
+                    "agreement_terms": True,
+                    "nickname": nickname,
+                    "introduce": "Hello world",
+                }
+            )
+
+        for data in request_data:
+            response = self.client.post(
+                path="/api/user/signup", data=data, format="json"
+            )
+            self.assertEqual(response.status_code, 201)
 
     def test_user_login(self):
         # 존재하지 않는 사용자로 로그인 시 400 에러 발생하는지 확인

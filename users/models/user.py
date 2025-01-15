@@ -8,7 +8,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import QuerySet
 
-nickname_faker = faker.Faker("ko_KR")
+random_generator = faker.Faker("ko_KR")
 
 
 def get_user_profile_image_upload_path(instance, filename):
@@ -16,8 +16,8 @@ def get_user_profile_image_upload_path(instance, filename):
     return f"users/{email_name}/profile-image/{filename}"
 
 
-def default_nickname_generator():
-    return nickname_faker.user_name() + str(nickname_faker.random_number(digits=20))
+def default_nickname_generator(instance):
+    return instance.email.split("@")[0] + str(random_generator.random_number(digits=20))
 
 
 class UserManager(BaseUserManager):

@@ -3,6 +3,7 @@ import uuid
 from django.db import models
 
 from core.models import TimeStampedModel
+from users.managers import ReformerManager
 from users.models.user import User
 
 
@@ -26,6 +27,8 @@ class Reformer(TimeStampedModel):
     reformer_area = models.CharField(
         max_length=100, blank=True, null=True
     )  # 리포머 활동 지역
+
+    objects = ReformerManager()
 
     class Meta:
         db_table = "reformer_profile"

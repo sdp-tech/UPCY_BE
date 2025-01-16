@@ -209,7 +209,7 @@ class ReformerProfileSerializer(serializers.Serializer):
         freelancer_data = validated_data.pop("freelancer", [])
 
         # 리포머 프로필 생성
-        profile = Reformer.objects.create(
+        profile = Reformer.objects.create_reformer(
             user=user,
             reformer_area=validated_data["reformer_area"],
             reformer_link=validated_data["reformer_link"],

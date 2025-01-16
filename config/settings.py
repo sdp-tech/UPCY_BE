@@ -254,8 +254,13 @@ else:
         "loggers": {
             "django": {
                 "handlers": ["console"],
-                "level": "INFO",
+                "level": "DEBUG",
                 "propagate": True,
+            },
+            "django.db.backends": {
+                "handlers": ["console"],
+                "level": "INFO",
+                "propagate": False,
             },
         },
         "root": {

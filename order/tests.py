@@ -363,6 +363,7 @@ class OrderTestCase(APITestCase):
         response = self.user_client.get(path="/api/orders", format="json")
 
         # Then
+        print(response.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("service_uuid", response.data[0])
         self.assertIn("order_uuid", response.data[0])

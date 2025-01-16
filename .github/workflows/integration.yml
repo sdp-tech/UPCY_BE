@@ -62,6 +62,9 @@ jobs:
         env:
           DJANGO_SETTINGS_MODULE: "config.settings"
           DJANGO_DEBUG_MODE: true
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_STORAGE_BUCKET_NAME: ${{ secrets.AWS_STORAGE_BUCKET_NAME }}
           UPCY_SECRET_KEY: "test123123123123123123123" # 진짜 SECRET 키 아닙니다.
         run: |
           poetry run python manage.py test users.tests.user_tests       # User 모듈 테스트 실행

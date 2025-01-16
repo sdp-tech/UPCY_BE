@@ -13,7 +13,6 @@ from order.serializers.order_create_serializer import (
     OrderCreateSerializer,
 )
 from order.serializers.order_retrieve_serializer import OrderRetrieveSerializer
-from users.models.user import User
 
 logger = logging.getLogger(__name__)
 

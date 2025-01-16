@@ -58,6 +58,12 @@ jobs:
         run: |
           poetry run python manage.py migrate
 
+      - name: 임시 테스트 리소스 생성
+        run: |
+          mkdir -p test_resources
+          echo "test 123" > test_resources/test1.jpg
+          echo "test 213" > test_resources/test2.jpg
+
       - name: Django 테스트 실행
         env:
           DJANGO_SETTINGS_MODULE: "config.settings"

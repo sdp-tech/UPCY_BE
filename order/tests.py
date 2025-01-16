@@ -299,7 +299,7 @@ class OrderTestCase(APITestCase):
     def test_get_order_list(self, _):
         # Given
         # 주문 5개 생성
-        for _ in range(5):
+        for itr in range(5):
             with open("./test_resources/test1.jpg", "rb") as f:
                 file_content = f.read()
                 file1 = SimpleUploadedFile(
@@ -349,6 +349,11 @@ class OrderTestCase(APITestCase):
                 ],
             )
             data.appendlist("images", [file1, file2])
+
+            if itr == 3:  # orderer 정보가 없는 경우도 테스트
+                data.pop("orderer_name")
+                data.pop("orderer_phone_number")
+                data.pop("orderer_address")
 
             self.user_client.post(path="/api/orders", data=data, format="multipart")
 

@@ -58,20 +58,6 @@ jobs:
         run: |
           poetry run python manage.py migrate
 
-      - name: 임시 테스트 리소스 생성
-        run: |
-          mkdir -p test_resources
-          poetry run python -c "
-          from PIL import Image
-          image = Image.new('RGB', (100, 100), color='red')
-          image.save('./test_resources/test1.jpg', 'JPEG')
-          "
-          poetry run python -c "
-          from PIL import Image
-          image = Image.new('RGB', (100, 100), color='red')
-          image.save('./test_resources/test2.jpg', 'JPEG')
-          "
-
       - name: Django 테스트 실행
         env:
           DJANGO_SETTINGS_MODULE: "config.settings"

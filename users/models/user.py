@@ -4,7 +4,7 @@ from django.db import models
 
 from users.managers import UserManager
 
-random_generator = faker.Faker("ko_KR")
+random_generator = faker.Faker("en_US")
 
 
 def get_user_profile_image_upload_path(instance, filename):

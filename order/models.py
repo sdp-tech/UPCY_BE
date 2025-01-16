@@ -6,7 +6,6 @@ from core.models import TimeStampedModel
 
 
 def get_order_image_upload_path(instance, filename):
-    order_uuid = instance.order_uuid
     return f"orders/{instance.order.order_uuid}/{instance.image_type}/{filename}"
 
 
@@ -18,12 +17,6 @@ class Order(TimeStampedModel):
         null=True,
         db_index=True,  # service 가지고 reformer, market까지 다 찾아야하니까 인덱스 설정
     )  # 어떤 서비스에 대한 주문인지
-    market = models.ForeignKey(
-        "market.Market",
-        on_delete=models.SET_NULL,
-        related_name="market_order",
-        null=True,
-    )  # 서비스의 마켓 정보 -> 마켓 정보를 통해 Reformer 정보를 가져올 수 있음 (1:1이므로)
 
     orderer = models.ForeignKey(
         "users.User", on_delete=models.CASCADE, related_name="orderer"
@@ -51,7 +44,7 @@ class Order(TimeStampedModel):
     service_price = models.PositiveIntegerField(null=True)  # 서비스 금액
     option_price = models.PositiveIntegerField(null=True)  # 옵션 추가 금액
     total_price = models.PositiveIntegerField(null=True)  # 저장된 필드로 변경
-    request_date = models.DateField(auto_now_add=True)  # 주문 시간
+    order_date = models.DateField(auto_now_add=True)  # 주문 시간
 
     def save(self, *args, **kwargs):
         self.total_price = (self.service_price or 0) + (self.option_price or 0)
@@ -62,14 +55,16 @@ class Order(TimeStampedModel):
 
 
 class OrdererInformation(TimeStampedModel):
-    # 만약 User 테이블에 있는 기본 정보가 아닌, 새로운 정보를 기입하는 경우, 이 테이블이 필요합니다.
-    user = models.ForeignKey("users.User", on_delete=models.CASCADE)
-    order = models.OneToOneField("order.Order", on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        "users.User", on_delete=models.CASCADE, related_name="user_order_information"
+    )
+    order = models.OneToOneField(
+        "order.Order", on_delete=models.CASCADE, related_name="orderer_information"
+    )
 
-    orderer_uuid = models.UUIDField(null=False, unique=True, default=uuid.uuid4)
     orderer_name = models.CharField(max_length=50, null=False)
     orderer_phone_number = models.CharField(max_length=50, null=False)
-    orderer_email = models.EmailField(max_length=254, null=False)
+    orderer_email = models.EmailField(max_length=254, null=True)
     orderer_address = models.TextField(null=False)
 
     class Meta:
@@ -104,16 +99,18 @@ class OrderImage(TimeStampedModel):
         "order.Order", on_delete=models.CASCADE, related_name="order_image"
     )
     image_type = models.CharField(
-        max_length=20, choices=[("order", "order"), ("additional", "additional")]
+        max_length=20,
+        choices=[("order", "order"), ("additional", "additional")],
+        default="order",
     )
     image_uuid = models.UUIDField(default=uuid.uuid4, unique=True)
     image = models.FileField(upload_to=get_order_image_upload_path)
 
 
-class TransactionOption(TimeStampedModel):
+class Transaction(TimeStampedModel):
     # 거래방식 정보를 관리하는 테이블
-    order = models.ForeignKey(
-        "order.Order", on_delete=models.CASCADE, related_name="transaction_option"
+    order = models.OneToOneField(
+        "order.Order", on_delete=models.CASCADE, related_name="transaction"
     )
     transaction_uuid = models.UUIDField(null=False, unique=True, default=uuid.uuid4)
     transaction_option = models.CharField(
@@ -121,14 +118,14 @@ class TransactionOption(TimeStampedModel):
     )  # 거래 방식 (택배 or 대면)
 
     class Meta:
-        db_table = "transaction_option"
+        db_table = "transaction"
 
 
 class DeliveryInformation(TimeStampedModel):
     # 택배 정보를 관리하는 테이블
     # 주문 정보 생성 시 transaction_option이 delivery인 경우, DeliveryInformation 새로 생성
     transaction = models.ForeignKey(
-        "order.TransactionOption",
+        "order.Transaction",
         on_delete=models.CASCADE,
         related_name="delivery_information",
     )

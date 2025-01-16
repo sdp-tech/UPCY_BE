@@ -163,3 +163,4 @@ services/photo/
 users/profile/
 .idea
 services/photo/
+test_resources/

@@ -194,13 +194,13 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         order_status: OrderStatus = OrderStatus.objects.create(order=order)
         logger.debug(f"10. OrderStatus 생성 성공")
 
-        trans: Transaction = Transaction.objects.create(
+        _transaction: Transaction = Transaction.objects.create(
             order=order, transaction_option=transaction_option
         )
-        if trans.transaction_option == "delivery":
+        if _transaction.transaction_option == "delivery":
             # DeliveryInformation에 들어가는 정보는 추후 Reformer가 업데이트 해야함
             # 여기서는 단순히 인스턴스만 생성
-            DeliveryInformation.objects.create(transaction=transaction)
+            DeliveryInformation.objects.create(transaction=_transaction)
         logger.debug(f"11. TransactionOption 생성 성공")
 
         return order

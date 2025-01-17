@@ -3,6 +3,7 @@ import uuid
 from django.db import models
 
 from core.models import TimeStampedModel
+from order.managers import OrderManager
 
 
 def get_order_image_upload_path(instance, filename):
@@ -45,6 +46,8 @@ class Order(TimeStampedModel):
     option_price = models.PositiveIntegerField(null=True)  # 옵션 추가 금액
     total_price = models.PositiveIntegerField(null=True)  # 저장된 필드로 변경
     order_date = models.DateField(auto_now_add=True)  # 주문 시간
+
+    objects = OrderManager()
 
     def save(self, *args, **kwargs):
         self.total_price = (self.service_price or 0) + (self.option_price or 0)

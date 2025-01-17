@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Dict, List
 
 from django.db.models import QuerySet
 
@@ -10,12 +10,14 @@ class QueryParamMixin:
 
         # QueryParamMixin 클래스를 상속받는 쪽에서 __init__ 메서드 오버라이드 하고
         # 만약 정렬 옵션을 추가하는 경우, self.ALLOWED_SORT_FIELDS.update() 사용해서 옵션 추가하시면 됩니다.
-        self.ALLOWED_SORT_FIELDS = {
+        self.ALLOWED_SORT_FIELDS: Dict[str, str] = {
             "created": "created",  # 생성 된 날짜 기준 오름차순
             "-created": "-created",  # 생성 된 날짜 기준 내림차순
             "updated": "updated",  # 업데이트 기준 오름차순
             "-updated": "-updated",  # 업데이트 기준 내림차순
         }
+
+        self.ALLOWED_FILTER_ARRAY: List = []
 
     def apply_filters_and_sorting(self, queryset: QuerySet, request: Any) -> QuerySet:
         """
@@ -28,7 +30,7 @@ class QueryParamMixin:
             if sort_param in self.ALLOWED_SORT_FIELDS:
                 queryset = queryset.order_by(self.ALLOWED_SORT_FIELDS[sort_param])
             else:
-                raise ValueError("정렬 파라미터 값이 올바르지 않습니다.")
+                raise ValueError("Invalid sort query parameter")
         else:
             queryset = queryset.order_by(
                 self.ALLOWED_SORT_FIELDS[self.DEFAULT_SORT]

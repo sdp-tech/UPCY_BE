@@ -7,4 +7,10 @@ class DeliveryStatusSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DeliveryInformation
-        fields = "__all__"
+        fields = [
+            "delivery_company",
+            "delivery_tracking_number",
+            "delivery_address",
+            "delivery_name",
+            "delivery_phone_number",
+        ]

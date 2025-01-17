@@ -7,7 +7,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from core.exceptions import view_exception_handler
+from order.mixins import OrderQueryParamMinxin
 from order.models import Order
+from order.pagination import OrderListPagination
 from order.serializers.order_create_serializer import (
     OrderCreateResponseSerializer,
     OrderCreateSerializer,
@@ -17,27 +19,36 @@ from order.serializers.order_retrieve_serializer import OrderRetrieveSerializer
 logger = logging.getLogger(__name__)
 
 
-class OrderView(APIView):
+class OrderView(OrderQueryParamMinxin, APIView):
     permission_classes = [IsAuthenticated]
+    paginator = OrderListPagination()
+
+    def get_queryset(self) -> QuerySet:
+        queryset: QuerySet = Order.objects.get_orders_by_orderer(self.request.user)
+        queryset = self.apply_filters_and_sorting(queryset, self.request)
+
+        return queryset
 
     @view_exception_handler
     def get(self, request):
-        queryset: QuerySet = Order.objects.filter(orderer=request.user)
+        queryset: QuerySet = self.get_queryset()
+
+        paginated_queryset = self.paginator.paginate_queryset(queryset, request)
         serializer: OrderRetrieveSerializer = OrderRetrieveSerializer(
-            instance=queryset, many=True
+            instance=paginated_queryset, many=True
         )
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     @view_exception_handler
     def post(self, request):
-        logger.info("POST : /api/orders")
-        logger.info(request.data)
+        logger.debug("POST : /api/orders")
+        logger.debug(request.data)
 
         serializer: OrderCreateSerializer = OrderCreateSerializer(
             data=request.data, context={"request": request}
         )
         serializer.is_valid(raise_exception=True)
-        logger.info("serializer 검증 완료 -> save() 호출")
+        logger.debug("serializer 검증 완료 -> save() 호출")
         order: Order = serializer.save()  # create 호출
 
         response_serializer: OrderCreateResponseSerializer = (

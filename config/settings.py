@@ -262,6 +262,11 @@ else:
                 "level": "INFO",
                 "propagate": False,
             },
+            "faker": {  # Faker 라이브러리 로깅 레벨 설정
+                "handlers": ["console"],
+                "level": "ERROR",
+                "propagate": False,
+            },
         },
         "root": {
             "handlers": ["console"],

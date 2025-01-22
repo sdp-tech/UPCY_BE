@@ -365,7 +365,7 @@ class OrderTestCase(APITestCase):
         self.assertEqual(Order.objects.all().count(), 5)
 
         # When
-        response = self.user_client.get(path="/api/orders", format="json")
+        response = self.user_client.get(path="/api/orders?type=customer", format="json")
 
         # Then
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -396,7 +396,7 @@ class OrderTestCase(APITestCase):
 
         # When
         response = self.user_client.get(
-            path="/api/orders?sort=totalprice",
+            path="/api/orders?type=customer&sort=totalprice",
             format="json",
         )
 
@@ -419,7 +419,7 @@ class OrderTestCase(APITestCase):
 
         # When
         response = self.user_client.get(
-            path="/api/orders?sort=-totalprice",
+            path="/api/orders?type=customer&sort=-totalprice",
             format="json",
         )
 
@@ -442,7 +442,7 @@ class OrderTestCase(APITestCase):
 
         # When
         response = self.user_client.get(
-            path="/api/orders?sort=date&limit=3&offset=0",
+            path="/api/orders?type=customer&sort=date&limit=3&offset=0",
             format="json",
         )
 
@@ -463,7 +463,7 @@ class OrderTestCase(APITestCase):
 
         # When
         response = self.user_client.get(
-            path="/api/orders?sort=-date&limit=3&offset=0",
+            path="/api/orders?type=customer&sort=-date&limit=3&offset=0",
             format="json",
         )
 
@@ -484,7 +484,7 @@ class OrderTestCase(APITestCase):
 
         # When
         response = self.user_client.get(
-            path="/api/orders?transaction=pickup", format="json"
+            path="/api/orders?type=customer&transaction=pickup", format="json"
         )
 
         # Then
@@ -499,7 +499,7 @@ class OrderTestCase(APITestCase):
 
         # When
         response = self.user_client.get(
-            path="/api/orders?transaction=delivery", format="json"
+            path="/api/orders?type=customer&transaction=delivery", format="json"
         )
 
         # Then
@@ -526,7 +526,7 @@ class OrderTestCase(APITestCase):
         # When
         for stat in stats:
             response = self.user_client.get(
-                path=f"/api/orders?status={stat}", format="json"
+                path=f"/api/orders?type=customer&status={stat}", format="json"
             )
 
             # Then
@@ -566,7 +566,7 @@ class OrderTestCase(APITestCase):
         end_date = date.today() + timedelta(days=5)
 
         response = self.user_client.get(
-            path=f"/api/orders?start_date={start_date.isoformat()}&end_date={end_date.isoformat()}",
+            path=f"/api/orders?type=customer&start_date={start_date.isoformat()}&end_date={end_date.isoformat()}",
             format="json",
         )
 
@@ -588,7 +588,7 @@ class OrderTestCase(APITestCase):
         end_date = date.today() + timedelta(days=10)
 
         response = self.user_client.get(
-            path=f"/api/orders?start_date={start_date.isoformat()}&end_date={end_date.isoformat()}",
+            path=f"/api/orders?type=customer&start_date={start_date.isoformat()}&end_date={end_date.isoformat()}",
             format="json",
         )
 
@@ -603,6 +603,67 @@ class OrderTestCase(APITestCase):
                 start_date <= order_date <= end_date,
                 f"Order date {order_date} is outside the range {start_date} to {end_date}.",
             )
+
+    def test_get_order_list_filter_by_reformer(self):
+        # Given
+        self.generate_order(num=5)
+        orders = Order.objects.all()
+        self.assertEqual(orders.count(), 5)
+
+        # When
+        response = self.reformer_client.get(
+            path=f"/api/orders?type=reformer",
+            format="json",
+        )
+
+        # Then
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 5)
+
+    def test_get_service_order_list(self):
+        # Given
+        # 주문 5개 생성
+        self.generate_order(num=5)
+        self.assertEqual(Order.objects.all().count(), 5)
+        service_uuid = str(self.temp_service.service_uuid)
+
+        # When
+        response = self.reformer_client.get(
+            path=f"/api/orders/services/{service_uuid}", format="json"
+        )
+
+        # Then
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 5) # temp_service에 5개의 주문이 생성되었으므로
+
+    def test_get_service_order_list_invalid_permission(self):
+        # Given
+        # 주문 5개 생성
+        self.generate_order(num=5)
+        self.assertEqual(Order.objects.all().count(), 5)
+        service_uuid = str(self.temp_service.service_uuid)
+
+        # When
+        response = self.user_client.get(
+            path=f"/api/orders/services/{service_uuid}", format="json"
+        )
+
+        # Then
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_get_service_order_list_no_content(self):
+        # Given
+        # No orders
+        service_uuid = str(self.temp_service.service_uuid)
+
+        # When
+        response = self.reformer_client.get(
+            path=f"/api/orders/services/{service_uuid}", format="json"
+        )
+
+        # Then
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(len(response.data), 0)
 
     def tearDown(self):
         patch.stopall()  # 활성화된 Mocking 중단

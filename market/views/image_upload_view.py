@@ -56,13 +56,17 @@ class MarketServiceImageUploadView(APIView):
         if not market_service:
             raise ObjectDoesNotExist("Cannot found service object with these uuids")
 
-        image_files = request.FILES.getlist(
-            "service_images"
-        )  # 이미지 파일 리스트를 request body에서 획득
-        if not image_files:
+        image_file = request.FILES.get("service_image")  # 이미지 파일 리스트를 request body에서 획득
+        if not image_file:
             raise ValidationError("There are no image files to upload")
 
-        self.service.upload_service_images(market_service, image_files)
+        image_size: str = request.data.get("image_size")
+        if not image_size:
+            raise ValidationError("Image size is required")
+
+        self.service.upload_service_images(
+            entity=market_service, image_file=image_file, image_size=image_size
+        )
         return Response(
             data={"message": "Successfully uploaded service image"},
             status=status.HTTP_200_OK,
@@ -92,8 +96,13 @@ class ServiceOptionImageUploadView(APIView):
         )  # 이미지 파일 리스트를 request body에서 획득
         if not image_files:
             raise ValidationError("There are no image files to upload")
+
+        image_size: str = request.data.get("image_size")
+        if not image_size:
+            raise ValidationError("Image size is required")
+
         self.service.upload_service_images(
-            entity=market_service_option, image_files=image_files
+            entity=market_service_option, image_files=image_files, image_size=image_size
         )
 
         return Response(

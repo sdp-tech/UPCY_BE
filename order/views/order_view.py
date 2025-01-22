@@ -31,6 +31,9 @@ class OrderView(OrderQueryParamMinxin, APIView):
 
     @view_exception_handler
     def get(self, request):
+        """
+        요청한 사람의 모든 주문 리스트를 반환하는 API
+        """
         queryset: QuerySet = self.get_queryset()
 
         paginated_queryset = self.paginator.paginate_queryset(queryset, request)

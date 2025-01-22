@@ -634,7 +634,9 @@ class OrderTestCase(APITestCase):
 
         # Then
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 5) # temp_service에 5개의 주문이 생성되었으므로
+        self.assertEqual(
+            len(response.data), 5
+        )  # temp_service에 5개의 주문이 생성되었으므로
 
     def test_get_service_order_list_invalid_permission(self):
         # Given

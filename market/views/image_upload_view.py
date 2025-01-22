@@ -56,7 +56,9 @@ class MarketServiceImageUploadView(APIView):
         if not market_service:
             raise ObjectDoesNotExist("Cannot found service object with these uuids")
 
-        image_file = request.FILES.get("service_image")  # 이미지 파일 리스트를 request body에서 획득
+        image_file = request.FILES.get(
+            "service_image"
+        )  # 이미지 파일 리스트를 request body에서 획득
         if not image_file:
             raise ValidationError("There are no image files to upload")
 

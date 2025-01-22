@@ -78,9 +78,13 @@ class MarketImageUploadService:
 
             # 엔티티 타입 별 쿼리 생성
             if isinstance(entity, Service):
-                ServiceImage.objects.create(market_service=entity, image=image_file, image_size=image_size)
+                ServiceImage.objects.create(
+                    market_service=entity, image=image_file, image_size=image_size
+                )
             elif isinstance(entity, ServiceOption):
-                ServiceOptionImage.objects.create(service_option=entity, image=image_file, image_size=image_size)
+                ServiceOptionImage.objects.create(
+                    service_option=entity, image=image_file, image_size=image_size
+                )
 
         except ValidationError as e:
             raise ValidationError(f"Validation Error: {str(e)}")

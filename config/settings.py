@@ -20,7 +20,6 @@ DJANGO_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
-    "django.contrib.staticfiles",
 ]
 
 PROJECT_APPS = [
@@ -57,7 +56,8 @@ CORS_ORIGIN_ALLOW_ALL = True
 CSRF_COOKIE_SECURE = False  # 개발 중일 때는 False로 설정
 CSRF_TRUSTED_ORIGINS = [
     "https://3d49-165-132-5-152.ngrok-free.app",
-    "https://upcy.co.kr",
+    "https://api.sullung.site",
+    "https://sullung.site",
 ]
 
 # 기본 인증 모델
@@ -162,10 +162,7 @@ TIME_ZONE = "Asia/Seoul"
 USE_I18N = True
 USE_TZ = True
 
-# 정적파일 저장 위치
-STATIC_URL = "static/"
-STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
-
+# DB 기본 PK 타입 설정
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # S3 설정

@@ -13,6 +13,16 @@ jobs:
   test:
     name: Django API Test
     runs-on: ubuntu-latest
+    env:
+      DJANGO_SETTINGS_MODULE: "config.settings"
+      DJANGO_DEBUG_MODE: true
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_STORAGE_BUCKET_NAME: ${{ secrets.AWS_STORAGE_BUCKET_NAME }}
+      UPCY_SECRET_KEY: "test123123123123123123123" # 진짜 SECRET 키 아닙니다.
+    strategy:
+      matrix:
+        test_modules: [users.tests.user_tests, users.tests_reformer_tests, market, order]
 
     steps:
       - name: 캐시 무효화
@@ -51,23 +61,9 @@ jobs:
           poetry run black . --check
 
       - name: 임시 데이터베이스 Migration
-        env:
-          DJANGO_SETTINGS_MODULE: "config.settings"
-          DJANGO_DEBUG_MODE: true
-          UPCY_SECRET_KEY: "test123123123123123123123" # 진짜 SECRET 키 아닙니다.
         run: |
           poetry run python manage.py migrate
 
       - name: Django 테스트 실행
-        env:
-          DJANGO_SETTINGS_MODULE: "config.settings"
-          DJANGO_DEBUG_MODE: true
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_STORAGE_BUCKET_NAME: ${{ secrets.AWS_STORAGE_BUCKET_NAME }}
-          UPCY_SECRET_KEY: "test123123123123123123123" # 진짜 SECRET 키 아닙니다.
         run: |
-          poetry run python manage.py test users.tests.user_tests       # User 모듈 테스트 실행
-          poetry run python manage.py test users.tests.reformer_tests   # Reformer 모듈 테스트 실행
-          poetry run python manage.py test market                       # Market, Service 테스트 실행
-          poetry run python manage.py test order                        # Order 모듈 테스트 실행
+          poetry run python manage.py test ${{ matrix.test_module }}

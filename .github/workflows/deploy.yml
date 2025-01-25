@@ -35,11 +35,10 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
         run: |
           # 도커 이미지 생성
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t .
 
           # ECR로 도커 이미지 PUSH
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
       - name: EC2에 배포 및 백엔드 어플리케이션 실행
         uses: appleboy/ssh-action@master

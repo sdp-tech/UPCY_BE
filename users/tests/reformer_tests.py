@@ -211,6 +211,27 @@ class ReformerTestCase(APITestCase):
         self.assertIsNotNone(reformer)
         self.assertEqual(reformer.reformer_link, self.reformer_data["reformer_link"])
 
+    def test_reformer_create_invalid_link(self):
+        # reformer_link에 잘못된 URL 형식이 전달되었을 때 오류가 반환되는지 확인
+        invalid_data = self.reformer_data.copy()
+        invalid_data["reformer_link"] = "not-a-valid-url"
+        response = self.client.post(
+            path="/api/user/reformer", data=invalid_data, format="json"
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("invalid URL", response.data.get("error"))
+
+    def test_reformer_unauthorized_access(self):
+        # 비인증 사용자가 접근할 경우 에러가 발생하는지 확인
+        self.client.credentials()
+        response = self.client.post(
+            path="/api/user/reformer", data=self.reformer_data, format="json"
+        )
+        self.assertEqual(response.status_code, 401)
+        self.assertIn(
+            "Authentication credentials were not provided", str(response.data)
+        )
+
     def test_reformer_role_check(self):
         # 리포머 생성 후 사용자 역할이 reformer가 되는 것을 다시 확인
         self.client.post(
@@ -268,12 +289,47 @@ class ReformerTestCase(APITestCase):
             str(reformer_certification.certification_uuid),
         )
 
+    def test_reformer_duplicate_education(self):
+        # 동일한 학력, 경력, 자격증 데이터를 중복하여 추가했을 때 중복을 허용하지 않는지 확인
+        self.client.post(
+            path="/api/user/reformer", data=self.reformer_data, format="json"
+        )
+
+        duplicate_education_data = self.reformer_data.copy()
+        duplicate_education_data["education"].append(
+            {
+                "school": "Test School",
+                "major": "Design",
+                "academic_status": "Graduated",
+            }
+        )
+
+        response = self.client.put(
+            path="/api/user/reformer", data=duplicate_education_data, format="json"
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(
+            "Duplicate education entries are not allowed", response.data.get("error")
+        )
+
     def get_access_token(self, user: User):
         login_data = {"email": user.email, "password": "123123"}
         response = self.client.post(
             path="/api/user/login", data=login_data, format="json"
         )
         return response.data["access"]
+
+    def test_reformer_delete_related_data(self):
+        # 리포머 삭제했을 때 관련된 학력, 경력, 자격증 데이터가 제대로 삭제되는지 확인
+        self.client.post(
+            path="/api/user/reformer", data=self.reformer_data, format="json"
+        )
+        self.client.delete(path="/api/user/reformer", format="json")
+
+        education_count = ReformerEducation.objects.filter(
+            reformer=self.test_user.reformer_profile
+        ).count()
+        self.assertEqual(education_count, 0)
 
     def tearDown(self):
         User.objects.all().delete()

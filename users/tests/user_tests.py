@@ -86,6 +86,34 @@ class UserTestCase(APITestCase):
         self.assertEqual(response.data.get("error"), "Validation Error")
         self.assertEqual(response.status_code, 400)
 
+    def test_password_change(self):
+        # 비밀번호 변경하는 과정이 정상적으로 작동하는지 확인
+        # 로그인 수행
+        response = self.client.post(
+            path="/api/user/login", data=self.login_request_data, format="json"
+        )
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + response.data["access"])
+
+        # 비밀번호 변경 요청
+        new_password = "NewSecurePassword@123"
+        request_data = {
+            "old_password": self.login_request_data["password"],
+            "new_password": new_password,
+        }
+        response = self.client.post(
+            path="/api/user/change-password", data=request_data, format="json"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Password changed successfully", str(response.data))
+
+        # 새 비밀번호로 로그인
+        login_data = {"email": "test@test.com", "password": new_password}
+        response = self.client.post(
+            path="/api/user/login", data=login_data, format="json"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("access", response.data)
+
     def test_duplicate_nickname_user_create(self):
         request_data = {
             "email": "user@test.com",

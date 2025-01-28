@@ -127,6 +127,8 @@ class OrderTestCase(APITestCase):
             data["transaction_option"] = "pickup" if rand < 0.5 else "delivery"
             if kwargs.get("type", None) == "delivery":
                 data["transaction_option"] = "delivery"
+            elif kwargs.get("type", None) == "pickup":
+                data["transaction_option"] = "pickup"
 
             data["service_price"] = 50000 + itr
             data["option_price"] = 50000 + 2 * itr
@@ -483,7 +485,7 @@ class OrderTestCase(APITestCase):
     def test_get_order_list_filter_by_transaction_pickup(self):
         # Given
         # 주문 5개 생성
-        self.generate_order(num=5)
+        self.generate_order(num=5, type="pickup")
         self.assertEqual(Order.objects.all().count(), 5)
 
         # When
@@ -498,7 +500,7 @@ class OrderTestCase(APITestCase):
     def test_get_order_list_filter_by_transaction_delivery(self):
         # Given
         # 주문 5개 생성
-        self.generate_order(num=5)
+        self.generate_order(num=5, type="delivery")
         self.assertEqual(Order.objects.all().count(), 5)
 
         # When

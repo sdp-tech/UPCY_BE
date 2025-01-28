@@ -8,7 +8,7 @@ from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
 
 from market.models import Market, Service, ServiceMaterial, ServiceOption
-from order.models import Order, OrderStatus
+from order.models import DeliveryInformation, Order, OrderStatus
 from users.models.reformer import Reformer
 from users.models.user import User
 
@@ -94,7 +94,7 @@ class OrderTestCase(APITestCase):
         )
         self.temp_service = Service.objects.all().first()
 
-    def generate_order(self, num):
+    def generate_order(self, num, **kwargs):
         for itr in range(num):
             with open("./test_resources/test1.jpg", "rb") as f:
                 file_content = f.read()
@@ -123,7 +123,12 @@ class OrderTestCase(APITestCase):
             data = MultiValueDict()
             rand = random.random()
             data["service_uuid"] = self.temp_service.service_uuid
-            data["transaction_option"] = "pickup" if rand < 0.5 else "delivery"
+
+            if kwargs.get("type", None) == "delivery":
+                data["transaction_option"] = "delivery"
+            else:
+                data["transaction_option"] = "pickup" if rand < 0.5 else "delivery"
+
             data["service_price"] = 50000 + itr
             data["option_price"] = 50000 + 2 * itr
             data["total_price"] = data["service_price"] + data["option_price"]
@@ -666,6 +671,72 @@ class OrderTestCase(APITestCase):
         # Then
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(len(response.data), 0)
+
+    def test_update_order_status_to_accepted(self):
+        # Given
+        # 주문 1개 생성
+        self.generate_order(num=1)
+        self.assertEqual(Order.objects.all().count(), 1)
+        order = Order.objects.all().first()
+
+        # When
+        response = self.reformer_client.patch(
+            path=f"/api/orders/{str(order.order_uuid)}/status",
+            data={"status": "accepted"},
+            format="json",
+        )
+
+        # Then
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(order.order_status.first().status, "accepted")
+
+    def test_update_order_status_to_rejected(self):
+        # Given
+        # 주문 1개 생성
+        self.generate_order(num=1)
+        self.assertEqual(Order.objects.all().count(), 1)
+        order = Order.objects.all().first()
+
+        # When
+        response = self.reformer_client.patch(
+            path=f"/api/orders/{str(order.order_uuid)}/status",
+            data={"status": "rejected"},
+            format="json",
+        )
+
+        # Then
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(order.order_status.first().status, "rejected")
+
+    def test_update_delivery_information(self):
+        # Given
+        # 주문 1개 생성
+        self.generate_order(num=1, type="delivery")
+        self.assertEqual(Order.objects.all().count(), 1)
+        order = Order.objects.all().first()
+
+        # When
+        transaction_uuid = str(order.transaction.transaction_uuid)
+
+        response = self.reformer_client.patch(
+            path=f"/api/orders/transactions/{transaction_uuid}/delivery",
+            data={
+                "delivery_status": "delivered",
+                "delivery_company": "Coupang",
+                "delivery_tracking_number": "1234567890",
+                "delivery_address": "somewhere",
+            },
+            format="json",
+        )
+
+        # Then
+        delivery_information: DeliveryInformation = (
+            order.transaction.delivery_information.first()
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(delivery_information.delivery_company, "Coupang")
+        self.assertEqual(delivery_information.delivery_tracking_number, "1234567890")
+        self.assertEqual(delivery_information.delivery_address, "somewhere")
 
     def tearDown(self):
         patch.stopall()  # 활성화된 Mocking 중단

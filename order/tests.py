@@ -124,10 +124,9 @@ class OrderTestCase(APITestCase):
             rand = random.random()
             data["service_uuid"] = self.temp_service.service_uuid
 
+            data["transaction_option"] = "pickup" if rand < 0.5 else "delivery"
             if kwargs.get("type", None) == "delivery":
                 data["transaction_option"] = "delivery"
-            else:
-                data["transaction_option"] = "pickup" if rand < 0.5 else "delivery"
 
             data["service_price"] = 50000 + itr
             data["option_price"] = 50000 + 2 * itr

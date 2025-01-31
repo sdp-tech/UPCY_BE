@@ -10,6 +10,16 @@ def get_order_image_upload_path(instance, filename):
     return f"orders/{instance.order.order_uuid}/{instance.image_type}/{filename}"
 
 
+class _OrderStatus(models.TextChoices):
+    ACCEPTED = "accepted", "수락"
+    REJECTED = "rejected", "거절"
+    PENDING = "pending", "대기"
+    RECEIVED = "received", "재료 수령"
+    PRODUCED = "produced", "제작 완료"
+    DELIVER = "deliver", "배송중"
+    END = "end", "거래 완료"
+
+
 class Order(TimeStampedModel):
     service = models.ForeignKey(
         "market.Service",
@@ -45,6 +55,7 @@ class Order(TimeStampedModel):
     service_price = models.PositiveIntegerField(null=True)  # 서비스 금액
     option_price = models.PositiveIntegerField(null=True)  # 옵션 추가 금액
     total_price = models.PositiveIntegerField(null=True)  # 저장된 필드로 변경
+    rejected_reason = models.TextField(null=True)  # 거절 사유
     order_date = models.DateField(auto_now_add=True)  # 주문 시간
 
     objects = OrderManager()
@@ -81,15 +92,7 @@ class OrderStatus(TimeStampedModel):
     )
     status = models.CharField(
         max_length=10,
-        choices=[
-            ("accepted", "수락"),
-            ("rejected", "거절"),
-            ("pending", "대기"),
-            ("received", "재료 수령"),
-            ("produced", "제작 완료"),
-            ("deliver", "배송중"),
-            ("end", "거래 완료"),
-        ],
+        choices=_OrderStatus.choices,
         default="pending",
     )
 

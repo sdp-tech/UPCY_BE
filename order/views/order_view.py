@@ -11,8 +11,15 @@ from core.exceptions import view_exception_handler
 from core.permissions import IsReformer
 from market.models import Service
 from order.mixins import OrderQueryParamMinxin
-from order.models import Order
+from order.models import (
+    DeliveryInformation,
+    Order,
+    OrderStatus,
+    Transaction,
+    _OrderStatus,
+)
 from order.pagination import OrderListPagination
+from order.serializers.delivery_status_serializer import DeliveryStatusSerializer
 from order.serializers.order_create_serializer import (
     OrderCreateResponseSerializer,
     OrderCreateSerializer,
@@ -101,3 +108,62 @@ class ServiceOrderListView(APIView):
 
         serializer = OrderRetrieveSerializer(instance=queryset, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+
+class OrderStatusUpdateView(APIView):
+    """
+    주문 UUID를 사용하여 주문 상태 정보를 업데이트 하는 API 구현체
+    """
+
+    permission_classes = [IsReformer]
+
+    @view_exception_handler
+    def patch(self, request, **kwargs):
+        _status: str = request.data.get("status")
+        if _status is None:
+            raise ValueError("status query parameter is required")
+
+        order: Order = Order.objects.filter(order_uuid=kwargs.get("order_uuid")).first()
+        if not order:
+            raise ObjectDoesNotExist("order not found")
+        order_status: OrderStatus = OrderStatus.objects.filter(order=order).first()
+
+        match _status:
+            case "accepted":
+                order_status.status = _OrderStatus.ACCEPTED
+            case "rejected":
+                order_status.status = _OrderStatus.REJECTED
+                order.rejected_reason = request.data.get("rejected_reason", None)
+            case "received":
+                order_status.status = _OrderStatus.RECEIVED
+            case "produced":
+                order_status.status = _OrderStatus.PRODUCED
+            case "deliver":
+                order_status.status = _OrderStatus.DELIVER
+            case "end":
+                order_status.status = _OrderStatus.END
+            case _:
+                raise ValueError("invalid status query parameter")
+        order.save()
+        order_status.save()
+        return Response(status=status.HTTP_200_OK)
+
+
+class DeliveryInformationUpdateView(APIView):
+    permission_classes = [IsReformer]
+
+    @view_exception_handler
+    def patch(self, request, **kwargs):
+        delivery_info: DeliveryInformation = (
+            DeliveryInformation.objects.select_related("transaction")
+            .filter(transaction__transaction_uuid=kwargs.get("transaction_uuid", None))
+            .first()
+        )
+        if not delivery_info:
+            raise ObjectDoesNotExist("Cannot found delivery information with this uuid")
+
+        serializer = DeliveryStatusSerializer(instance=delivery_info, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(instance=delivery_info, data=request.data)
+
+        return Response(status=status.HTTP_200_OK)

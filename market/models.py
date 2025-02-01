@@ -138,7 +138,6 @@ class ServiceImage(TimeStampedModel):
     image = models.FileField(
         upload_to=get_service_image_upload_path, null=False, max_length=255
     )
-    image_size = models.CharField(max_length=20, default="")
 
     class Meta:
         db_table = "market_service_image"
@@ -154,7 +153,6 @@ class ServiceOptionImage(TimeStampedModel):
     image = models.FileField(
         upload_to=get_service_option_image_upload_path, null=False, max_length=255
     )
-    image_size = models.CharField(max_length=20, default="")
 
     class Meta:
         db_table = "market_service_option_image"

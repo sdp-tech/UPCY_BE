@@ -9,4 +9,14 @@ urlpatterns = [
         ServiceOrderListView.as_view(),
         name="service_order_list",
     ),
+    path(
+        "/<uuid:order_uuid>/status",
+        OrderStatusUpdateView.as_view(),
+        name="order_update",
+    ),
+    path(
+        "/transactions/<uuid:transaction_uuid>/delivery",
+        DeliveryInformationUpdateView.as_view(),
+        name="delivery_update",
+    ),
 ]

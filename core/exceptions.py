@@ -18,6 +18,11 @@ def view_exception_handler(func):
                 data={"error": "ValueError", "error_message": str(e)},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        except PermissionError as e:
+            return Response(
+                data={"error": "PermissionError", "error_message": str(e)},
+                status=status.HTTP_403_FORBIDDEN,
+            )
         except IntegrityError as e:
             return Response(
                 data={"error": "IntegrityError", "error_message": str(e)},

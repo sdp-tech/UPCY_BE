@@ -1,14 +1,7 @@
-# 클라우드 아키텍쳐
+# 프로젝트 + 클라우드 아키텍쳐
+![image](https://github.com/user-attachments/assets/c785d351-e3b3-413e-a32c-829b516ac4f4)
 
-
-
-![image](https://github.com/user-attachments/assets/910f79f5-80f7-4420-9897-088adaacec95)
-
-# 프로젝트 아키텍쳐
-
-추가 예정...
-
-## 기술 스택
+## 백엔드 기술 스택
 ![Django](https://img.shields.io/badge/Django-092E20?style=for-the-badge&logo=django&logoColor=white)
 ![Gunicorn](https://img.shields.io/badge/Gunicorn-499848?style=for-the-badge&logo=gunicorn&logoColor=white)
 ![DRF](https://img.shields.io/badge/DRF-FF1709?style=for-the-badge&logo=django&logoColor=white)

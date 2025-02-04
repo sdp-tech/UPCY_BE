@@ -247,12 +247,20 @@ else:
             "console": {
                 "class": "logging.StreamHandler",
             },
+            "null": {
+                "class": "logging.NullHandler",
+            },
         },
         "loggers": {
             "django": {
                 "handlers": ["console"],
                 "level": "DEBUG",
                 "propagate": True,
+            },
+            "django.request": {
+                "handlers": ["null"],
+                "level": "ERROR",
+                "propagate": False,
             },
             "django.db.backends": {
                 "handlers": ["console"],

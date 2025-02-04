@@ -20,7 +20,7 @@ class RequestLoggingMiddleware:
         content_type: str = request.headers.get("Content-Type", "").lower()
 
         if "multipart/form-data" in content_type:
-            request_body = "[multipart/form-data] (truncated)"
+            request_body = "{'multipart': '[multipart/form-data] (truncated)'}"
         else:
             raw_request_body = request.body.decode("utf-8", errors="replace")
             if content_length > MAX_BODY_SIZE:
@@ -52,12 +52,12 @@ class RequestLoggingMiddleware:
                         "client_ip": request.META.get("REMOTE_ADDR", ""),
                         "path": request.get_full_path(),
                         "method": request.method,
-                        "body": request_body,
+                        "body": json.dumps(request_body),
                     },
                     "response": {
                         "status_code": response.status_code,
                         "headers": dict(response.headers),
-                        "body": response_body,
+                        "body": json.dumps(response_body),
                         "duration": f"{duration:.3f}s",
                         "response_size": len(response.content),
                     },

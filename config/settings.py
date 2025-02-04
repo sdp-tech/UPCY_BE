@@ -204,6 +204,9 @@ if not DEBUG:
             "console": {
                 "class": "logging.StreamHandler",
             },
+            "null": {
+                "class": "logging.NullHandler",
+            },
         },
         "loggers": {
             "boto3": {
@@ -219,8 +222,8 @@ if not DEBUG:
                 "level": "INFO",
             },
             "django.request": {
-                "handlers": ["console"],
-                "level": "INFO",
+                "handlers": ["null"],
+                "level": "ERROR",
                 "propagate": False,
             },
             "django.db.backends": {

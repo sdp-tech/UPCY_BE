@@ -57,7 +57,7 @@ class RequestLoggingMiddleware:
                     "response": {
                         "status_code": response.status_code,
                         "headers": dict(response.headers),
-                        "body": response_body,
+                        "body": json.dumps(response_body),
                         "duration": f"{duration:.3f}s",
                         "response_size": len(response.content),
                     },

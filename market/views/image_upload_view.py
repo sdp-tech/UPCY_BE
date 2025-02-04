@@ -93,12 +93,8 @@ class ServiceOptionImageUploadView(APIView):
         if not image_files:
             raise ValidationError("There are no image files to upload")
 
-        image_size: str = request.data.get("image_size")
-        if not image_size:
-            raise ValidationError("Image size is required")
-
         self.service.upload_service_images(
-            entity=market_service_option, image_files=image_files, image_size=image_size
+            entity=market_service_option, image_files=image_files
         )
 
         return Response(

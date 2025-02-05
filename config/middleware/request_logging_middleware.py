@@ -67,7 +67,8 @@ class RequestLoggingMiddleware:
                     },
                 },
                 indent=2,
-            ) + "\n"
+            )
+            + "\n"
         )
 
         return response

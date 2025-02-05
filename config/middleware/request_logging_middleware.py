@@ -1,3 +1,4 @@
+import datetime
 import json
 import logging
 import time
@@ -38,21 +39,17 @@ class RequestLoggingMiddleware:
         except (json.JSONDecodeError, UnicodeDecodeError):
             response_body = response.content.decode("utf-8", errors="replace")
 
-        # 응답 본문이 문자열이 아니면 문자열로 변환
-        if not isinstance(response_body, str):
-            response_body_str = json.dumps(response_body)
-        else:
-            response_body_str = response_body
+        response_body = json.dumps(response_body)
 
         # 문자열화된 응답 본문 크기 제한 적용
-        if len(response_body_str) > MAX_BODY_SIZE:
-            response_body_str = response_body_str[:MAX_BODY_SIZE] + "... [Truncated]"
+        if len(response_body) > MAX_BODY_SIZE:
+            response_body = response_body[:MAX_BODY_SIZE] + "... [Truncated]"
 
         # 응답 로그 기록
         logger.info(
             json.dumps(
                 {
-                    "timestamp": time.time(),
+                    "timestamp": datetime.datetime.now().isoformat(),
                     "request": {
                         "headers": dict(request.headers),
                         "user_agent": request.META.get("HTTP_USER_AGENT", ""),
@@ -64,7 +61,7 @@ class RequestLoggingMiddleware:
                     "response": {
                         "status_code": response.status_code,
                         "headers": dict(response.headers),
-                        "body": response_body_str,
+                        "body": response_body,
                         "duration": f"{duration:.3f}s",
                         "response_size": len(response.content),
                     },

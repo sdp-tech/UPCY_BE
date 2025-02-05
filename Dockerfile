@@ -6,6 +6,7 @@ LABEL maintainer="sullungim"
 
 # 환경 변수 설정
 ENV PYTHONUNBUFFERED=1 \
+    TZ=Asia/Seoul \
     POETRY_HOME=/opt/poetry \
     PATH="/opt/poetry/bin:$PATH" \
     POETRY_VIRTUALENVS_CREATE=false
@@ -23,7 +24,7 @@ WORKDIR /app
 # Poetry 파일 복사
 COPY pyproject.toml poetry.lock ./
 
-# 의존성 설치 (의존성만 설치하고 프로젝트 소스는 복사하지 않음)
+# 프로젝트 의존성 설치
 RUN poetry install --no-root --no-interaction
 
 # Deploy stage
@@ -34,7 +35,7 @@ LABEL maintainer="sullungim"
 # 환경변수 설정
 ENV PATH="/opt/poetry/bin:$PATH"
 ENV PYTHONUNBUFFERED=1
-ENV DJANGO_DEBUG_MODE=true
+ENV DJANGO_DEBUG_MODE=false
 ENV POETRY_VIRTUALENVS_CREATE=false
 
 # 사용자 추가 및 권한 설정

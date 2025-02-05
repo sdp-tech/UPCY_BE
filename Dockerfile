@@ -34,7 +34,7 @@ LABEL maintainer="sullungim"
 # 환경변수 설정
 ENV PATH="/opt/poetry/bin:$PATH"
 ENV PYTHONUNBUFFERED=1
-ENV DJANGO_DEBUG_MODE=true
+ENV DJANGO_DEBUG_MODE=false
 ENV POETRY_VIRTUALENVS_CREATE=false
 
 # 사용자 추가 및 권한 설정

@@ -446,6 +446,46 @@ class MarketTestCase(APITestCase):
         ).first()
         self.assertNotEqual(service.suspended, updated_service.suspended)
 
+    def test_service_update_temporary_field(self):
+        # 1. 테스트 마켓 생성
+        response = self.client.post(
+            path="/api/market",
+            data={
+                "market_name": self.TEST_MARKET_NAME,
+                "market_introduce": self.TEST_MARKET_INTRODUCE,
+                "market_address": self.TEST_MARKET_ADDRESS,
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, 201)
+        market_uuid = response.data.get("market_uuid", None)
+        self.assertIsNotNone(market_uuid, None)
+
+        # 2. 해당 마켓에 대한 서비스 생성
+        response = self.client.post(
+            path=f"/api/market/{market_uuid}/service",
+            data=self.TEST_SERVICE_CREATE_DATA,
+            format="json",
+        )
+        self.assertEqual(response.status_code, 201)
+        service_uuid = response.data.get("service_uuid", None)
+        self.assertNotEqual(service_uuid, None)
+
+        service = Service.objects.filter(service_uuid=service_uuid).first()
+        self.assertEqual(service.suspended, False)
+
+        # 3. 서비스 temporary 값 업데이트 시도
+        response = self.client.put(
+            path=f"/api/market/{market_uuid}/service/{service_uuid}",
+            data={"temporary": True},
+            format="json",
+        )
+        self.assertEqual(response.status_code, 200)
+        updated_service: Service = Service.objects.filter(
+            service_uuid=service_uuid
+        ).first()
+        self.assertNotEqual(service.temporary, updated_service.temporary)
+
     def tearDown(self):
         Service.objects.all().delete()
         Market.objects.all().delete()

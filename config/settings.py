@@ -236,6 +236,16 @@ if not DEBUG:
                 "level": "DEBUG",
                 "propagate": True,
             },
+            "faker": {
+                "handlers": ["null"],
+                "level": "DEBUG",
+                "propagate": False,
+            },
+            "faker.providers": {
+                "handlers": ["null"],
+                "level": "DEBUG",
+                "propagate": False,
+            },
         },
         "root": {
             "handlers": ["console"],
@@ -271,13 +281,13 @@ else:
                 "propagate": False,
             },
             "faker": {
-                "handlers": ["console"],
-                "level": "ERROR",
+                "handlers": ["null"],
+                "level": "DEBUG",
                 "propagate": False,
             },
             "faker.providers": {
-                "handlers": ["console"],
-                "level": "ERROR",
+                "handlers": ["null"],
+                "level": "DEBUG",
                 "propagate": False,
             },
         },

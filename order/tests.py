@@ -95,23 +95,37 @@ class OrderTestCase(APITestCase):
         )
         self.temp_service = Service.objects.all().first()
 
+    def get_image_resources(self):
+        with open("./test_resources/test1.jpg", "rb") as f:
+            file_content = f.read()
+            file1 = SimpleUploadedFile(
+                "test1.jpg",
+                file_content,
+                content_type="image/jpeg",
+            )
+            file3 = SimpleUploadedFile(
+                "test1.jpg",
+                file_content,
+                content_type="image/jpeg",
+            )
+
+        with open("./test_resources/test2.jpg", "rb") as f:
+            file_content = f.read()
+            file2 = SimpleUploadedFile(
+                "test2.jpg",
+                file_content,
+                content_type="image/jpeg",
+            )
+            file4 = SimpleUploadedFile(
+                "test2.jpg",
+                file_content,
+                content_type="image/jpeg",
+            )
+        return [file1, file2, file3, file4]
+
     def generate_order(self, num, **kwargs):
         for itr in range(num):
-            with open("./test_resources/test1.jpg", "rb") as f:
-                file_content = f.read()
-                file1 = SimpleUploadedFile(
-                    "test1.jpg",
-                    file_content,
-                    content_type="image/jpeg",
-                )
-
-            with open("./test_resources/test2.jpg", "rb") as f:
-                file_content = f.read()
-                file2 = SimpleUploadedFile(
-                    "test2.jpg",
-                    file_content,
-                    content_type="image/jpeg",
-                )
+            image_resource = self.get_image_resources()
 
             # 주문자가 선택한 재료, 옵션
             selected_materials = ServiceMaterial.objects.filter(
@@ -152,7 +166,8 @@ class OrderTestCase(APITestCase):
                     str(selected_options[1].option_uuid),
                 ],
             )
-            data.appendlist("images", [file1, file2])
+            data.appendlist("images", image_resource[:2])
+            data.appendlist("additional_request_images", image_resource[2:])
 
             if itr == 3:  # orderer 정보가 없는 경우도 테스트
                 data.pop("orderer_name")
@@ -169,23 +184,9 @@ class OrderTestCase(APITestCase):
     )
     def test_pickup_order_create_with_basic_user_info(self, _):
         # Given
-        # 주문자가 주문 생성 시 전달할 예시 파일 2개 있다고 가정
+        # 주문자가 주문 생성 시 전달할 예시 파일 4개 있다고 가정 (order, additional)
         # 주문자 정보는 기본 User 객체에서 가져온다 (추가 주문자 정보 X)
-        with open("./test_resources/test1.jpg", "rb") as f:
-            file_content = f.read()
-            file1 = SimpleUploadedFile(
-                "test1.jpg",
-                file_content,
-                content_type="image/jpeg",
-            )
-
-        with open("./test_resources/test2.jpg", "rb") as f:
-            file_content = f.read()
-            file2 = SimpleUploadedFile(
-                "test2.jpg",
-                file_content,
-                content_type="image/jpeg",
-            )
+        image_resources = self.get_image_resources()
 
         # 주문자가 선택한 재료, 옵션
         selected_materials = ServiceMaterial.objects.filter(
@@ -217,7 +218,8 @@ class OrderTestCase(APITestCase):
                 str(selected_options[1].option_uuid),
             ],
         )
-        data.appendlist("images", [file1, file2])
+        data.appendlist("images", image_resources[:2])
+        data.appendlist("additional_request_images", image_resources[2:])
 
         # When
         # user_client 사용해서 주문 생성
@@ -234,8 +236,10 @@ class OrderTestCase(APITestCase):
         ).first()
         self.assertIsNotNone(order)  # Order 객체가 생성되었는지 확인
         self.assertEqual(
-            order.order_image.count(), 2
-        )  # Order와 연결된 이미지 개수가 2개인지 확인
+            order.order_image.count(), 4
+        )  # Order와 연결된 이미지 개수가 4개인지 확인
+        self.assertEqual(order.order_image.filter(image_type="order").count(), 2)
+        self.assertEqual(order.order_image.filter(image_type="additional").count(), 2)
         self.assertEqual(
             order.order_status.count(), 1
         )  # Order와 연결된 OrderStatus 객체가 생성되었는지 확인
@@ -259,21 +263,7 @@ class OrderTestCase(APITestCase):
         # Given
         # 주문자가 주문 생성 시 전달할 예시 파일 2개 있다고 가정
         # 주문자 정보는 기본 User 객체에서 가져온다 (추가 주문자 정보 X)
-        with open("./test_resources/test1.jpg", "rb") as f:
-            file_content = f.read()
-            file1 = SimpleUploadedFile(
-                "test1.jpg",
-                file_content,
-                content_type="image/jpeg",
-            )
-
-        with open("./test_resources/test2.jpg", "rb") as f:
-            file_content = f.read()
-            file2 = SimpleUploadedFile(
-                "test2.jpg",
-                file_content,
-                content_type="image/jpeg",
-            )
+        image_resources = self.get_image_resources()
 
         # 주문자가 선택한 재료, 옵션
         selected_materials = ServiceMaterial.objects.filter(
@@ -308,7 +298,8 @@ class OrderTestCase(APITestCase):
                 str(selected_options[1].option_uuid),
             ],
         )
-        data.appendlist("images", [file1, file2])
+        data.appendlist("images", image_resources[:2])
+        data.appendlist("additional_request_images", image_resources[2:])
 
         # When
         # user_client 사용해서 주문 생성
@@ -325,8 +316,10 @@ class OrderTestCase(APITestCase):
         ).first()
         self.assertIsNotNone(order)  # Order 객체가 생성되었는지 확인
         self.assertEqual(
-            order.order_image.count(), 2
-        )  # Order와 연결된 이미지 개수가 2개인지 확인
+            order.order_image.count(), 4
+        )  # Order와 연결된 이미지 개수가 4개인지 확인
+        self.assertEqual(order.order_image.filter(image_type="order").count(), 2)
+        self.assertEqual(order.order_image.filter(image_type="additional").count(), 2)
         self.assertEqual(
             order.order_status.count(), 1
         )  # Order와 연결된 OrderStatus 객체가 생성되었는지 확인

@@ -146,25 +146,25 @@ class ReformerTestCase(APITestCase):
         self.assertEqual(reformer.reformer_link, update_data["reformer_link"])
         self.assertEqual(reformer.reformer_area, update_data["reformer_area"])
 
-        def test_reformer_update_without_permissions(self):
-            # 리포머 역할이 아닌 사용자가 리포머 정보를 업데이트 하려고 할 때 403 오류 발생
-            non_reformer_user = User.objects.create_user(
-                email="nonreformer@test.com", password="123123"
-            )
-            self.client.credentials(
-                HTTP_AUTHORIZATION="Bearer " + self.get_access_token(non_reformer_user)
-            )
+    def test_reformer_update_without_permissions(self):
+        # 리포머 역할이 아닌 사용자가 리포머 정보를 업데이트 하려고 할 때 403 오류 발생
+        non_reformer_user = User.objects.create_user(
+            email="nonreformer@test.com", password="123123"
+        )
+        self.client.credentials(
+            HTTP_AUTHORIZATION="Bearer " + self.get_access_token(non_reformer_user)
+        )
 
-            update_data = {
-                "reformer_link": "https://new-link.com",
-                "reformer_area": "busan",
-            }
-            response = self.client.put(
-                path="/api/user/reformer", data=update_data, format="json"
-            )
+        update_data = {
+            "reformer_link": "https://new-link.com",
+            "reformer_area": "busan",
+        }
+        response = self.client.put(
+            path="/api/user/reformer", data=update_data, format="json"
+        )
 
-            self.assertEqual(response.status_code, 403)
-            self.assertIn("detail", response.data)  # 권한 오류 메시지 확인
+        self.assertEqual(response.status_code, 403)
+        self.assertIn("detail", response.data)  # 권한 오류 메시지 확인
 
     def test_reformer_delete(self):
         # 리포머 생성

@@ -157,8 +157,8 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # 언어 및 시간 환경 설정
-LANGUAGE_CODE = "ko-kr"
-TIME_ZONE = "Asia/Seoul"
+LANGUAGE_CODE = "en-us"
+TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
@@ -204,6 +204,9 @@ if not DEBUG:
             "console": {
                 "class": "logging.StreamHandler",
             },
+            "null": {
+                "class": "logging.NullHandler",
+            },
         },
         "loggers": {
             "boto3": {
@@ -219,8 +222,8 @@ if not DEBUG:
                 "level": "INFO",
             },
             "django.request": {
-                "handlers": ["console"],
-                "level": "INFO",
+                "handlers": ["null"],
+                "level": "ERROR",
                 "propagate": False,
             },
             "django.db.backends": {
@@ -232,6 +235,16 @@ if not DEBUG:
                 "handlers": ["console"],
                 "level": "DEBUG",
                 "propagate": True,
+            },
+            "faker": {
+                "handlers": ["null"],
+                "level": "DEBUG",
+                "propagate": False,
+            },
+            "faker.providers": {
+                "handlers": ["null"],
+                "level": "DEBUG",
+                "propagate": False,
             },
         },
         "root": {
@@ -247,6 +260,9 @@ else:
             "console": {
                 "class": "logging.StreamHandler",
             },
+            "null": {
+                "class": "logging.NullHandler",
+            },
         },
         "loggers": {
             "django": {
@@ -254,19 +270,24 @@ else:
                 "level": "DEBUG",
                 "propagate": True,
             },
+            "django.request": {
+                "handlers": ["null"],
+                "level": "ERROR",
+                "propagate": False,
+            },
             "django.db.backends": {
                 "handlers": ["console"],
                 "level": "INFO",
                 "propagate": False,
             },
             "faker": {
-                "handlers": ["console"],
-                "level": "ERROR",
+                "handlers": ["null"],
+                "level": "DEBUG",
                 "propagate": False,
             },
             "faker.providers": {
-                "handlers": ["console"],
-                "level": "ERROR",
+                "handlers": ["null"],
+                "level": "DEBUG",
                 "propagate": False,
             },
         },

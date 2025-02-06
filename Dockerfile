@@ -1,5 +1,5 @@
 # Python 3.12 slim 이미지를 기반으로 사용
-FROM python:3.12-slim
+FROM python:3.12-slim AS builder
 
 # 이미지의 유지 관리자를 지정
 LABEL maintainer="sullungim"
@@ -13,11 +13,10 @@ ENV PYTHONUNBUFFERED=1 \
 
 # 필요한 패키지 설치 및 Poetry 설치
 RUN apt-get update && \
-    apt-get install --no-install-recommends -y curl tzdata && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* && \
+    apt-get install -y --no-install-recommends curl && \
     curl -sSL https://install.python-poetry.org | python3 - && \
-    poetry --version
+    poetry --version \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # 작업 디렉토리 설정
 WORKDIR /app
@@ -28,18 +27,31 @@ COPY pyproject.toml poetry.lock ./
 # 프로젝트 의존성 설치
 RUN poetry install --no-root --no-interaction
 
-# 프로젝트 파일 복사
-COPY . .
+# Deploy stage
+FROM python:3.12-slim AS deploy
 
-# Production level에서는 DEBUG_MODE를 false로 설정
+LABEL maintainer="sullungim"
+
+# 환경변수 설정
+ENV PATH="/opt/poetry/bin:$PATH"
+ENV PYTHONUNBUFFERED=1
 ENV DJANGO_DEBUG_MODE=false
-
-# 시간대 설정
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+ENV POETRY_VIRTUALENVS_CREATE=false
 
 # 사용자 추가 및 권한 설정
-RUN adduser --disabled-password --no-create-home --uid 1000 django-user && \
-    chown -R django-user:django-user /app
+RUN useradd --no-create-home --uid 1000 django-user
+
+# 작업 디렉토리 설정
+WORKDIR /app
+
+# 빌드 스테이지에서 필요한 파일 복사
+COPY --from=builder /opt/poetry /opt/poetry
+COPY --from=builder /app /app
+COPY --from=builder /usr/local/lib /usr/local/lib
+COPY --from=builder /usr/local/bin /usr/local/bin
+
+# 프로젝트 파일 복사
+COPY --chown=django-user:django-user . .
 
 # 로그 디렉토리 설정
 RUN mkdir -p /app/logs && \

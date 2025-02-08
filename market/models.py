@@ -1,9 +1,12 @@
 import uuid
 
+from django.conf import settings
+from django.contrib.auth.models import User
 from django.db import models
 
 from core.models import TimeStampedModel
 from market.managers import MarketManager, ServiceManager, ServiceMaterialManager
+from users.models.reformer import Reformer
 
 
 def get_market_thumbnail_upload_path(instance, filename):

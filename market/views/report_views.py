@@ -1,47 +1,37 @@
 # market/views/report_views.py
-
 from rest_framework import status
+from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
+from rest_framework.serializers import ValidationError
 from rest_framework.views import APIView
 
-from market.models import Report
+from core.exceptions import view_exception_handler
 from market.serializers.report_serializer.reporter_serializer import ReportSerializer
 from users.models.user import User
 
 
 class ReportUserView(APIView):
+
+    @view_exception_handler
     def post(self, request):
-        data = request.data
-        try:
-            reported_user = User.objects.get(id=data["reported_user_id"])
-            reporter_user = User.objects.get(id=request.user.id)
+        # 신고대상
+        reported_user_id: str = request.data.get("reported_user_id")
+        if not reported_user_id:
+            raise ValidationError("reported_user_id is required")
+        reported_user: User = User.objects.filter(id=reported_user_id).first()
+        if not reported_user:
+            raise NotFound("reported_user does not exist")
 
-            report: Report = Report.objects.create(
-                reported_user=reported_user,
-                reporter_user=reporter_user,
-                reason=data["reason"],
-                details=data.get("details", ""),
-            )
-            serializer = ReportSerializer(instance=report)
+        # 신고자
+        reporter: User = request.user
 
-            report_count = Report.objects.filter(reported_user=reported_user).count()
-            serializer.data["report_count"] = report_count
-
-            if report_count >= 5:
-                reported_user.is_active = False
-                reported_user.save()
-
-                return Response(data=serializer.data, status=status.HTTP_200_OK)
-
-            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
-
-        except User.DoesNotExist:
-            return Response(
-                {"status": "error", "message": "사용자를 찾을 수 없습니다."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-        except Exception as e:
-            return Response(
-                data={"status": "error", "details": str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+        # 신고 인스턴스 생성 및 신고 횟수 누적
+        data = request.data.copy()
+        data.pop("reported_user_id", None)
+        serializer = ReportSerializer(
+            data=request.data,
+            context={"reporter": reporter, "reported_user": reported_user},
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(status=status.HTTP_201_CREATED)

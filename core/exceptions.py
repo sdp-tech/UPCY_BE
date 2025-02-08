@@ -4,7 +4,7 @@ from botocore.exceptions import ParamValidationError
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
 from rest_framework import status
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.response import Response
 
 
@@ -35,6 +35,14 @@ def view_exception_handler(func):
                     "error_message": str(e),
                 },
                 status=status.HTTP_400_BAD_REQUEST,
+            )
+        except NotFound as e:
+            return Response(
+                data={
+                    "error": "Not Found",
+                    "error_message": str(e),
+                },
+                status=status.HTTP_404_NOT_FOUND,
             )
         except ObjectDoesNotExist as e:
             return Response(

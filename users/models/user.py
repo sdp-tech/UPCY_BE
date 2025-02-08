@@ -45,7 +45,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         null=False,
         default="customer",
     )  # 사용자 타입 (일반 사용자, 리포머, 관리자)
-    # customer 가입시 사용하는 필드
+    report_count = models.PositiveIntegerField(default=0)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
@@ -55,7 +55,14 @@ class User(AbstractBaseUser, PermissionsMixin):
         if not self.nickname:  # 회원가입 시 nickname을 전달받지 못했다면, 랜덤으로 생성
             nickname = default_nickname_generator(self.email)
             self.nickname = nickname
+
         super().save(*args, **kwargs)
+
+    def update_report_count(self):
+        self.report_count += 1
+        if self.report_count >= 5:
+            self.is_active = False
+        super().save(update_fields=["report_count", "is_active"])
 
     class Meta:
         db_table = "users"

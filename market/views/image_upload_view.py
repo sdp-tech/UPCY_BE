@@ -94,7 +94,7 @@ class ServiceOptionImageUploadView(APIView):
             raise ValidationError("There are no image files to upload")
 
         self.service.upload_service_images(
-            entity=market_service_option, image_files=image_files
+            entity=market_service_option, image_file=image_files
         )
 
         return Response(

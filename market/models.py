@@ -28,7 +28,7 @@ def get_service_option_image_upload_path(instance, filename):
     email_name = (
         instance.service_option.market_service.market.reformer.user.email.split("@")[0]
     )  # market을 통해 reformer에 접근
-    market_uuid = instance.service_option.market_service.market.market_name
+    market_uuid = instance.service_option.market_service.market.market_uuid
     service_uuid = instance.service_option.market_service.service_uuid
     return f"users/{email_name}/market/{market_uuid}/service/{service_uuid}/option/{filename}"
 

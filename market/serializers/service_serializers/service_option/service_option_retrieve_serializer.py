@@ -1,3 +1,4 @@
+from django.db.models.query import QuerySet
 from rest_framework import serializers
 
 from market.models import ServiceOption, ServiceOptionImage
@@ -13,9 +14,8 @@ class ServiceOptionRetrieveSerializer(serializers.ModelSerializer):
     service_option_images = serializers.SerializerMethodField()
 
     def get_service_option_images(self, obj):
-        return ServiceOptionImageSerializer(
-            instance=obj.service_option_image, many=True
-        ).data
+        queryset: QuerySet = obj.service_option_image.all()
+        return ServiceOptionImageSerializer(instance=queryset, many=True).data
 
     class Meta:
         model = ServiceOption

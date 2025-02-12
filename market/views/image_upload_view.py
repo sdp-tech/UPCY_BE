@@ -1,3 +1,5 @@
+from typing import Any, List
+
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
@@ -56,13 +58,15 @@ class MarketServiceImageUploadView(APIView):
         if not market_service:
             raise ObjectDoesNotExist("Cannot found service object with these uuids")
 
-        image_file = request.FILES.get(
+        image_files: List[Any] = request.FILES.getlist(
             "service_image"
         )  # 이미지 파일 리스트를 request body에서 획득
-        if not image_file:
+        if not image_files:
             raise ValidationError("There are no image files to upload")
 
-        self.service.upload_service_images(entity=market_service, image_file=image_file)
+        self.service.upload_service_images(
+            entity=market_service, image_files=image_files
+        )
         return Response(
             data={"message": "Successfully uploaded service image"},
             status=status.HTTP_200_OK,

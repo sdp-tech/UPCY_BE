@@ -369,7 +369,7 @@ class OrderTestCase(APITestCase):
 
         # Then
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn("service", response.data[0])
+        self.assertIn("service_info", response.data[0])
         self.assertIn("order_uuid", response.data[0])
         self.assertIn("order_date", response.data[0])
         self.assertIn("orderer_information", response.data[0])

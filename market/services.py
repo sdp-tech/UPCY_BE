@@ -68,17 +68,19 @@ class MarketImageUploadService:
 
     @staticmethod
     @transaction.atomic
-    def upload_service_images(entity: Any, image_file) -> None:
+    def upload_service_images(entity: Any, image_files) -> None:
         """
         서비스 소개 이미지를 S3에 업로드 및 데이터베이스에 저장하는 함수
         """
         try:
             # 파일 유효성 검증
-            validate_image_files([image_file])
+            validate_image_files(image_files)
 
-            # 엔티티 타입 별 쿼리 생성
             if isinstance(entity, Service):
-                ServiceImage.objects.create(market_service=entity, image=image_file)
+                bulk_images: List[ServiceImage] = []
+                for image_file in image_files:
+                    bulk_images.append(ServiceImage(market_service=entity, image=image_file))
+                ServiceImage.objects.bulk_create(bulk_images)
 
         except ValidationError as e:
             raise ValidationError(f"Validation Error: {str(e)}")

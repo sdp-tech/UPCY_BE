@@ -79,7 +79,7 @@ class ServiceOptionImageUploadView(APIView):
 
     @view_exception_handler
     def post(self, request, **kwargs):
-        market_service_option = (
+        market_service_option: ServiceOption = (
             ServiceOption.objects.filter(
                 market_service__market__market_uuid=kwargs.get("market_uuid"),
                 market_service__service_uuid=kwargs.get("service_uuid"),
@@ -91,7 +91,7 @@ class ServiceOptionImageUploadView(APIView):
         if not market_service_option:
             raise ObjectDoesNotExist("Cannot found service option with these uuids")
 
-        image_files = request.FILES.getlist(
+        image_files: List[Any] = request.FILES.getlist(
             "option_image"
         )  # 이미지 파일 리스트를 request body에서 획득
         if not image_files:

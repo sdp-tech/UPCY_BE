@@ -93,7 +93,7 @@ class MarketImageUploadService:
     @transaction.atomic
     def upload_service_option_images(entity: Any, image_files) -> None:
         """
-        서비스 소개 이미지를 S3에 업로드 및 데이터베이스에 저장하는 함수
+        서비스 옵션 이미지를 S3에 업로드 및 데이터베이스에 저장하는 함수
         """
         try:
             # 파일 유효성 검증

@@ -79,7 +79,9 @@ class MarketImageUploadService:
             if isinstance(entity, Service):
                 bulk_images: List[ServiceImage] = []
                 for image_file in image_files:
-                    bulk_images.append(ServiceImage(market_service=entity, image=image_file))
+                    bulk_images.append(
+                        ServiceImage(market_service=entity, image=image_file)
+                    )
                 ServiceImage.objects.bulk_create(bulk_images)
 
         except ValidationError as e:

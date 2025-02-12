@@ -1,5 +1,8 @@
 from rest_framework import serializers
 
+from market.serializers.service_serializers.service_create_retrieve_serializer import (
+    ServiceRetrieveSerializer,
+)
 from market.serializers.service_serializers.service_material.service_material_retrieve_serializer import (
     ServiceMaterialRetrieveSerializer,
 )
@@ -23,7 +26,7 @@ from users.serializers.user_serializer.user_information_serializer import (
 
 
 class OrderRetrieveSerializer(serializers.ModelSerializer):
-    service_uuid = serializers.SerializerMethodField(read_only=True)
+    service = ServiceRetrieveSerializer(read_only=True)
     reformer = serializers.SerializerMethodField(read_only=True)
     materials = ServiceMaterialRetrieveSerializer(many=True, read_only=True)
     additional_options = ServiceOptionRetrieveSerializer(many=True, read_only=True)
@@ -32,9 +35,6 @@ class OrderRetrieveSerializer(serializers.ModelSerializer):
     transaction = TransactionSerializer(read_only=True)
     delivery_status = serializers.SerializerMethodField(read_only=True)
     images = OrderImageSerializer(source="order_image", many=True, read_only=True)
-
-    def get_service_uuid(self, obj):
-        return obj.service.service_uuid
 
     def get_reformer(self, obj):
         reformer = obj.service.market.reformer
@@ -57,7 +57,7 @@ class OrderRetrieveSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = [
-            "service_uuid",
+            "service",
             "reformer",
             "order_uuid",
             "order_date",

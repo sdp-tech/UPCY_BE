@@ -9,7 +9,7 @@ from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
 
 from market.models import Market, Service, ServiceMaterial, ServiceOption
-from order.models import DeliveryInformation, Order, OrderStatus
+from order.models import DeliveryInformation, Order, OrderStatus, Transaction
 from users.models.reformer import Reformer
 from users.models.user import User
 
@@ -708,6 +708,8 @@ class OrderTestCase(APITestCase):
         # 주문 1개 생성
         self.generate_order(num=1, type="delivery")
         self.assertEqual(Order.objects.all().count(), 1)
+        self.assertEqual(Transaction.objects.all().count(), 1)
+        self.assertEqual(DeliveryInformation.objects.all().count(), 1)
         order = Order.objects.all().first()
 
         # When

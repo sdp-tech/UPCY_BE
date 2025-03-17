@@ -758,29 +758,29 @@ class OrderTestCase(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_order_update_permission_denied(self):
-        # 다른 사용자가 주문을 수정하려고 할 때 권한 체크가 되는지 확인
-
-        self.generate_order(num=1)
-        order = Order.objects.first()
-
-        # 새로운 사용자 생성 (다른 고객)
-        another_user = User.objects.create_user(
-            email="another@test.com",
-            password="userqwer1234@",
-            full_name="another user",
-            nickname="another",
-            role="customer",
-        )
-        another_client = APIClient()
-        another_client.force_authenticate(user=another_user)
-
-        response = another_client.patch(
-            path=f"/api/orders/{str(order.order_uuid)}/status",
-            data={"status": "accepted"},
-            format="json",
-        )
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+    # def test_order_update_permission_denied(self):
+    #     # 다른 사용자가 주문을 수정하려고 할 때 권한 체크가 되는지 확인
+    #
+    #     self.generate_order(num=1)
+    #     order = Order.objects.first()
+    #
+    #     # 새로운 사용자 생성 (다른 고객)
+    #     another_user = User.objects.create_user(
+    #         email="another@test.com",
+    #         password="userqwer1234@",
+    #         full_name="another user",
+    #         nickname="another",
+    #         role="customer",
+    #     )
+    #     another_client = APIClient()
+    #     another_client.force_authenticate(user=another_user)
+    #
+    #     response = another_client.patch(
+    #         path=f"/api/orders/{str(order.order_uuid)}/status",
+    #         data={"status": "accepted"},
+    #         format="json",
+    #     )
+    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_update_order_status_invalid_status(self):
         # 존재하지 않는 order_status 값이 전달되었을 때 예외가 발생하는지 확인

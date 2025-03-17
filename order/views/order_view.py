@@ -8,16 +8,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from core.exceptions import view_exception_handler
-from core.permissions import IsCustomer, IsReformer
+from core.permissions import IsReformer
 from market.models import Service
 from order.mixins import OrderQueryParamMinxin
-from order.models import (
-    DeliveryInformation,
-    Order,
-    OrderStatus,
-    Transaction,
-    _OrderStatus,
-)
+from order.models import DeliveryInformation, Order, OrderStatus, _OrderStatus
 from order.pagination import OrderListPagination
 from order.serializers.delivery_status_serializer import DeliveryStatusSerializer
 from order.serializers.order_create_serializer import (
@@ -115,7 +109,7 @@ class OrderStatusUpdateView(APIView):
     주문 UUID를 사용하여 주문 상태 정보를 업데이트 하는 API 구현체
     """
 
-    permission_classes = [IsCustomer]
+    permission_classes = [IsAuthenticated]
 
     @view_exception_handler
     def patch(self, request, **kwargs):

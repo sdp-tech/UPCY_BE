@@ -1,6 +1,7 @@
 import logging
-from typing import Optional
+from typing import List, Optional
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from rest_framework import serializers
 
@@ -38,7 +39,7 @@ class OrderImageSerializer(serializers.ModelSerializer):
 
 class OrderCreateSerializer(serializers.ModelSerializer):
     order_uuid = serializers.UUIDField(read_only=True)
-    transaction_option = serializers.CharField()
+    transaction_option = serializers.CharField(required=True)
     service_uuid = serializers.UUIDField(write_only=True)
     materials = serializers.ListField(write_only=True)
     options = serializers.ListField(write_only=True)
@@ -46,11 +47,14 @@ class OrderCreateSerializer(serializers.ModelSerializer):
     orderer_phone_number = serializers.CharField(write_only=True, required=False)
     orderer_email = serializers.EmailField(write_only=True, required=False)
     orderer_address = serializers.CharField(write_only=True, required=False)
-    images = serializers.ListField(child=serializers.ImageField())
+    images = serializers.ListField(child=serializers.ImageField(), required=False)
+    additional_request_images = serializers.ListField(
+        child=serializers.ImageField(), required=False
+    )
     orderer = UserInformationSerializer(read_only=True)
-    service_price = serializers.IntegerField()
-    option_price = serializers.IntegerField()
-    total_price = serializers.IntegerField()
+    service_price = serializers.IntegerField(required=True)
+    option_price = serializers.IntegerField(required=True)
+    total_price = serializers.IntegerField(required=True)
 
     class Meta:
         model = Order
@@ -60,6 +64,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
             "transaction_option",
             "extra_material",
             "additional_request",
+            "additional_request_images",
             "service_price",
             "option_price",
             "total_price",
@@ -73,18 +78,8 @@ class OrderCreateSerializer(serializers.ModelSerializer):
             "orderer_address",
         ]
         extra_kwargs = {
-            "orderer_name": {"required": False},
-            "orderer_phone_number": {"required": False},
-            "orderer_email": {"required": False},
-            "orderer_address": {"required": False},
-            "transaction_option": {"required": True},
             "extra_material": {"required": False},
             "additional_request": {"required": False},
-            "service_price": {"required": True},
-            "option_price": {"required": True},
-            "total_price": {"required": True},
-            "order_date": {"required": False},
-            "images": {"required": False},
         }
 
     def validate(self, attrs):
@@ -117,14 +112,22 @@ class OrderCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data) -> Order:
         logger.debug(f"1. OrderSerializer.create() 호출됨: {validated_data}")
 
+        ##############################################################################
         # multipart data에서 images 따로 빼기
+        ##############################################################################
         images = validated_data.pop("images", [])
-        logger.debug(f"2. multipart data에서 images 따로 빼기 : {images}")
+        additional_images = validated_data.pop("additional_request_images", [])
+        logger.debug(f"2-1. multipart data에서 images 따로 빼기 : {images}")
+        logger.debug(
+            f"2-2. multipart data에서 additional_request_images 따로 빼기 : {additional_images}"
+        )
 
+        ##############################################################################
         # 주문자 정보가 주어졌다면 -> validated_data에서 빼기
         # 주문자 정보가 주어지지 않았다면 -> request.user로 찾으면 됨
         # 주문 조회할 때 Order 테이블과 연결된 OrdererInformation 테이블이 존재한다면, 해당 테이블을 쓰고
         # 주문 조회할 때 Order 테이블과 연결된 OrdererInformation 테이블이 존재하지 않아면, User 테이블에서 가져오면 된다.
+        ##############################################################################
         orderer_fields = [
             "orderer_name",
             "orderer_phone_number",
@@ -140,12 +143,14 @@ class OrderCreateSerializer(serializers.ModelSerializer):
 
         logger.debug(f"3. orderer_data : {orderer_data}")
 
+        ##############################################################################
+        # materials, options로 넘어온 UUID에 대한 ServiceMaterial, ServiceOption 객체 가져오기
+        ##############################################################################
         materials: list = validated_data.pop("materials", [])
         logger.debug(f"materials : {materials}")
         options: list = validated_data.pop("options", [])
         logger.debug(f"options : {options}")
 
-        # materials, options로 넘어온 UUID에 대한 ServiceMaterial, ServiceOption 객체 가져오기
         material_instances = ServiceMaterial.objects.filter(
             material_uuid__in=materials
         )  # in을 사용해서 리스트 안에 들어있는 모든 값에 대한 UUID에 해당하는 객체를 가져올 수 있음
@@ -153,23 +158,33 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         logger.debug(f"4. material_instances : {material_instances.count()}")
         logger.debug(f"5. option_instances : {option_instances.count()}")
 
+        ##############################################################################
         # Transaction option 추출
+        ##############################################################################
         transaction_option: str = validated_data.pop("transaction_option")
         logger.debug(f"6. transaction_option : {transaction_option}")
 
+        ##############################################################################
         # 서비스UUID 사용해서 서비스 객체 찾아오기
+        ##############################################################################
         service_uuid: Optional[str] = validated_data.pop("service_uuid", None)
         if not service_uuid:
             raise serializers.ValidationError("service_uuid is required")
         service: Service = Service.objects.filter(service_uuid=service_uuid).first()
+        if not service:
+            raise ObjectDoesNotExist("Cannot find service object with this uuid")
         validated_data["service"] = service
 
+        ##############################################################################
         # 주문 생성
+        ##############################################################################
         validated_data["orderer"] = self.context["request"].user
         order: Order = Order.objects.create(**validated_data)
         logger.debug(f"7. Order 생성 성공")
 
+        ##############################################################################
         # 주문자 정보 생성 (만약 따로 orderer 정보가 들어왔다면)
+        ##############################################################################
         if orderer_data:
             logger.debug("7-1. There is orderer data")
             OrdererInformation.objects.create(
@@ -182,18 +197,37 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         order.save()
         logger.debug(f"8. order : {order}")
 
+        ##############################################################################
         # 이미지 저장 인스턴스 생성
+        ##############################################################################
         if images:
-            queryset: list[OrderImage] = [
+            queryset: List[OrderImage] = [
                 OrderImage(order=order, image=image) for image in images
             ]
             OrderImage.objects.bulk_create(queryset)
-        logger.debug(f"9. OrderImage에 이미지 저장 성공")
+        logger.debug(f"9-1. OrderImage에 이미지 저장 성공")
         logger.debug(f"OrderImage 개수 : {len(OrderImage.objects.all())}")
 
-        order_status: OrderStatus = OrderStatus.objects.create(order=order)
+        if additional_images:
+            queryset: List[OrderImage] = [
+                OrderImage(order=order, image=image, image_type="additional")
+                for image in additional_images
+            ]
+            OrderImage.objects.bulk_create(queryset)
+        logger.debug(f"9-2. AdditionalOrderImage에 이미지 저장 성공")
+        logger.debug(
+            f"AdditionalOrderImage 개수 : {len(OrderImage.objects.filter(image_type='additional'))}"
+        )
+
+        ##############################################################################
+        # OrderStatus 생성
+        ##############################################################################
+        OrderStatus.objects.create(order=order)
         logger.debug(f"10. OrderStatus 생성 성공")
 
+        ##############################################################################
+        # Transaction 생성
+        ##############################################################################
         _transaction: Transaction = Transaction.objects.create(
             order=order, transaction_option=transaction_option
         )

@@ -1,5 +1,5 @@
 # 프로젝트 + 클라우드 아키텍쳐
-<img width="507" alt="스크린샷 2025-02-01 오후 2 42 25" src="https://github.com/user-attachments/assets/b7703af3-a2b6-4d21-b5d4-52ebc5e25b7f" />
+![image](https://github.com/user-attachments/assets/c785d351-e3b3-413e-a32c-829b516ac4f4)
 
 ## 백엔드 기술 스택
 ![Django](https://img.shields.io/badge/Django-092E20?style=for-the-badge&logo=django&logoColor=white)

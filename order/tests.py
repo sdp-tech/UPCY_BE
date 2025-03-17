@@ -2,13 +2,14 @@ import random
 from datetime import date, timedelta
 from unittest.mock import patch
 
+import black
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils.datastructures import MultiValueDict
 from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
 
 from market.models import Market, Service, ServiceMaterial, ServiceOption
-from order.models import DeliveryInformation, Order, OrderStatus
+from order.models import DeliveryInformation, Order, OrderStatus, Transaction
 from users.models.reformer import Reformer
 from users.models.user import User
 
@@ -94,23 +95,37 @@ class OrderTestCase(APITestCase):
         )
         self.temp_service = Service.objects.all().first()
 
+    def get_image_resources(self):
+        with open("./test_resources/test1.jpg", "rb") as f:
+            file_content = f.read()
+            file1 = SimpleUploadedFile(
+                "test1.jpg",
+                file_content,
+                content_type="image/jpeg",
+            )
+            file3 = SimpleUploadedFile(
+                "test1.jpg",
+                file_content,
+                content_type="image/jpeg",
+            )
+
+        with open("./test_resources/test2.jpg", "rb") as f:
+            file_content = f.read()
+            file2 = SimpleUploadedFile(
+                "test2.jpg",
+                file_content,
+                content_type="image/jpeg",
+            )
+            file4 = SimpleUploadedFile(
+                "test2.jpg",
+                file_content,
+                content_type="image/jpeg",
+            )
+        return [file1, file2, file3, file4]
+
     def generate_order(self, num, **kwargs):
         for itr in range(num):
-            with open("./test_resources/test1.jpg", "rb") as f:
-                file_content = f.read()
-                file1 = SimpleUploadedFile(
-                    "test1.jpg",
-                    file_content,
-                    content_type="image/jpeg",
-                )
-
-            with open("./test_resources/test2.jpg", "rb") as f:
-                file_content = f.read()
-                file2 = SimpleUploadedFile(
-                    "test2.jpg",
-                    file_content,
-                    content_type="image/jpeg",
-                )
+            image_resource = self.get_image_resources()
 
             # 주문자가 선택한 재료, 옵션
             selected_materials = ServiceMaterial.objects.filter(
@@ -151,7 +166,8 @@ class OrderTestCase(APITestCase):
                     str(selected_options[1].option_uuid),
                 ],
             )
-            data.appendlist("images", [file1, file2])
+            data.appendlist("images", image_resource[:2])
+            data.appendlist("additional_request_images", image_resource[2:])
 
             if itr == 3:  # orderer 정보가 없는 경우도 테스트
                 data.pop("orderer_name")
@@ -168,23 +184,9 @@ class OrderTestCase(APITestCase):
     )
     def test_pickup_order_create_with_basic_user_info(self, _):
         # Given
-        # 주문자가 주문 생성 시 전달할 예시 파일 2개 있다고 가정
+        # 주문자가 주문 생성 시 전달할 예시 파일 4개 있다고 가정 (order, additional)
         # 주문자 정보는 기본 User 객체에서 가져온다 (추가 주문자 정보 X)
-        with open("./test_resources/test1.jpg", "rb") as f:
-            file_content = f.read()
-            file1 = SimpleUploadedFile(
-                "test1.jpg",
-                file_content,
-                content_type="image/jpeg",
-            )
-
-        with open("./test_resources/test2.jpg", "rb") as f:
-            file_content = f.read()
-            file2 = SimpleUploadedFile(
-                "test2.jpg",
-                file_content,
-                content_type="image/jpeg",
-            )
+        image_resources = self.get_image_resources()
 
         # 주문자가 선택한 재료, 옵션
         selected_materials = ServiceMaterial.objects.filter(
@@ -216,7 +218,8 @@ class OrderTestCase(APITestCase):
                 str(selected_options[1].option_uuid),
             ],
         )
-        data.appendlist("images", [file1, file2])
+        data.appendlist("images", image_resources[:2])
+        data.appendlist("additional_request_images", image_resources[2:])
 
         # When
         # user_client 사용해서 주문 생성
@@ -233,8 +236,10 @@ class OrderTestCase(APITestCase):
         ).first()
         self.assertIsNotNone(order)  # Order 객체가 생성되었는지 확인
         self.assertEqual(
-            order.order_image.count(), 2
-        )  # Order와 연결된 이미지 개수가 2개인지 확인
+            order.order_image.count(), 4
+        )  # Order와 연결된 이미지 개수가 4개인지 확인
+        self.assertEqual(order.order_image.filter(image_type="order").count(), 2)
+        self.assertEqual(order.order_image.filter(image_type="additional").count(), 2)
         self.assertEqual(
             order.order_status.count(), 1
         )  # Order와 연결된 OrderStatus 객체가 생성되었는지 확인
@@ -258,21 +263,7 @@ class OrderTestCase(APITestCase):
         # Given
         # 주문자가 주문 생성 시 전달할 예시 파일 2개 있다고 가정
         # 주문자 정보는 기본 User 객체에서 가져온다 (추가 주문자 정보 X)
-        with open("./test_resources/test1.jpg", "rb") as f:
-            file_content = f.read()
-            file1 = SimpleUploadedFile(
-                "test1.jpg",
-                file_content,
-                content_type="image/jpeg",
-            )
-
-        with open("./test_resources/test2.jpg", "rb") as f:
-            file_content = f.read()
-            file2 = SimpleUploadedFile(
-                "test2.jpg",
-                file_content,
-                content_type="image/jpeg",
-            )
+        image_resources = self.get_image_resources()
 
         # 주문자가 선택한 재료, 옵션
         selected_materials = ServiceMaterial.objects.filter(
@@ -307,7 +298,8 @@ class OrderTestCase(APITestCase):
                 str(selected_options[1].option_uuid),
             ],
         )
-        data.appendlist("images", [file1, file2])
+        data.appendlist("images", image_resources[:2])
+        data.appendlist("additional_request_images", image_resources[2:])
 
         # When
         # user_client 사용해서 주문 생성
@@ -324,8 +316,10 @@ class OrderTestCase(APITestCase):
         ).first()
         self.assertIsNotNone(order)  # Order 객체가 생성되었는지 확인
         self.assertEqual(
-            order.order_image.count(), 2
-        )  # Order와 연결된 이미지 개수가 2개인지 확인
+            order.order_image.count(), 4
+        )  # Order와 연결된 이미지 개수가 4개인지 확인
+        self.assertEqual(order.order_image.filter(image_type="order").count(), 2)
+        self.assertEqual(order.order_image.filter(image_type="additional").count(), 2)
         self.assertEqual(
             order.order_status.count(), 1
         )  # Order와 연결된 OrderStatus 객체가 생성되었는지 확인
@@ -375,7 +369,7 @@ class OrderTestCase(APITestCase):
 
         # Then
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn("service_uuid", response.data[0])
+        self.assertIn("service_info", response.data[0])
         self.assertIn("order_uuid", response.data[0])
         self.assertIn("order_date", response.data[0])
         self.assertIn("orderer_information", response.data[0])
@@ -714,6 +708,8 @@ class OrderTestCase(APITestCase):
         # 주문 1개 생성
         self.generate_order(num=1, type="delivery")
         self.assertEqual(Order.objects.all().count(), 1)
+        self.assertEqual(Transaction.objects.all().count(), 1)
+        self.assertEqual(DeliveryInformation.objects.all().count(), 1)
         order = Order.objects.all().first()
 
         # When
@@ -738,6 +734,67 @@ class OrderTestCase(APITestCase):
         self.assertEqual(delivery_information.delivery_company, "Coupang")
         self.assertEqual(delivery_information.delivery_tracking_number, "1234567890")
         self.assertEqual(delivery_information.delivery_address, "somewhere")
+
+    def test_order_creation_missing_required_fields(self):
+        # 필수 필드가 누락되었을 때 올바르게 예외 처리되는지 확인
+
+        data = MultiValueDict()
+        data["transaction_option"] = "pickup"
+        # 필수 필드인 service_uuid, service_price, total_price 등을 누락한 상태
+
+        response = self.user_client.post(
+            path="/api/orders", data=data, format="multipart"
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_order_creation_with_invalid_data(self):
+        # 잘못된 데이터가 입력되었을 때 오류가 잘 반환되는지 확인
+        data = MultiValueDict()
+        data["transaction_option"] = "invalid_option"  # 잘못된 transaction_option 값
+        data["service_uuid"] = "invalid_uuid"  # 존재하지 않는 서비스 UUID
+
+        response = self.user_client.post(
+            path="/api/orders", data=data, format="multipart"
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_order_update_permission_denied(self):
+        # 다른 사용자가 주문을 수정하려고 할 때 권한 체크가 되는지 확인
+
+        self.generate_order(num=1)
+        order = Order.objects.first()
+
+        # 새로운 사용자 생성 (다른 고객)
+        another_user = User.objects.create_user(
+            email="another@test.com",
+            password="userqwer1234@",
+            full_name="another user",
+            nickname="another",
+            role="customer",
+        )
+        another_client = APIClient()
+        another_client.force_authenticate(user=another_user)
+
+        response = another_client.patch(
+            path=f"/api/orders/{str(order.order_uuid)}/status",
+            data={"status": "accepted"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_update_order_status_invalid_status(self):
+        # 존재하지 않는 order_status 값이 전달되었을 때 예외가 발생하는지 확인
+
+        self.generate_order(num=1)
+        order = Order.objects.first()
+
+        response = self.reformer_client.patch(
+            path=f"/api/orders/{str(order.order_uuid)}/status",
+            data={"status": "invalid_status"},  # 존재하지 않는 order_status 값
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def tearDown(self):
         patch.stopall()  # 활성화된 Mocking 중단

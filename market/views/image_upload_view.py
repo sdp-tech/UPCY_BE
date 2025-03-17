@@ -1,3 +1,5 @@
+from typing import Any, List
+
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
@@ -56,13 +58,15 @@ class MarketServiceImageUploadView(APIView):
         if not market_service:
             raise ObjectDoesNotExist("Cannot found service object with these uuids")
 
-        image_file = request.FILES.get(
+        image_files: List[Any] = request.FILES.getlist(
             "service_image"
         )  # 이미지 파일 리스트를 request body에서 획득
-        if not image_file:
+        if not image_files:
             raise ValidationError("There are no image files to upload")
 
-        self.service.upload_service_images(entity=market_service, image_file=image_file)
+        self.service.upload_service_images(
+            entity=market_service, image_files=image_files
+        )
         return Response(
             data={"message": "Successfully uploaded service image"},
             status=status.HTTP_200_OK,
@@ -75,7 +79,7 @@ class ServiceOptionImageUploadView(APIView):
 
     @view_exception_handler
     def post(self, request, **kwargs):
-        market_service_option = (
+        market_service_option: ServiceOption = (
             ServiceOption.objects.filter(
                 market_service__market__market_uuid=kwargs.get("market_uuid"),
                 market_service__service_uuid=kwargs.get("service_uuid"),
@@ -87,18 +91,14 @@ class ServiceOptionImageUploadView(APIView):
         if not market_service_option:
             raise ObjectDoesNotExist("Cannot found service option with these uuids")
 
-        image_files = request.FILES.getlist(
+        image_files: List[Any] = request.FILES.getlist(
             "option_image"
         )  # 이미지 파일 리스트를 request body에서 획득
         if not image_files:
             raise ValidationError("There are no image files to upload")
 
-        image_size: str = request.data.get("image_size")
-        if not image_size:
-            raise ValidationError("Image size is required")
-
-        self.service.upload_service_images(
-            entity=market_service_option, image_files=image_files, image_size=image_size
+        self.service.upload_service_option_images(
+            entity=market_service_option, image_files=image_files
         )
 
         return Response(

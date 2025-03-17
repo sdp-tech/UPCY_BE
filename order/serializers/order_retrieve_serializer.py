@@ -1,5 +1,8 @@
 from rest_framework import serializers
 
+from market.serializers.service_serializers.service_create_retrieve_serializer import (
+    ServiceRetrieveSerializer,
+)
 from market.serializers.service_serializers.service_material.service_material_retrieve_serializer import (
     ServiceMaterialRetrieveSerializer,
 )
@@ -14,13 +17,16 @@ from order.serializers.orderer_information_serializer import (
     OrdererInformationSerializer,
 )
 from order.serializers.transaction_serializer import TransactionSerializer
+from users.serializers.reformer_serializer.reformer_profile_serializer import (
+    ReformerProfileSerializer,
+)
 from users.serializers.user_serializer.user_information_serializer import (
     UserOrderInformationSerializer,
 )
 
 
 class OrderRetrieveSerializer(serializers.ModelSerializer):
-    service_uuid = serializers.SerializerMethodField(read_only=True)
+    service_info = serializers.SerializerMethodField(read_only=True)
     materials = ServiceMaterialRetrieveSerializer(many=True, read_only=True)
     additional_options = ServiceOptionRetrieveSerializer(many=True, read_only=True)
     order_status = OrderStatusSerailzier(many=True, read_only=True)
@@ -29,8 +35,8 @@ class OrderRetrieveSerializer(serializers.ModelSerializer):
     delivery_status = serializers.SerializerMethodField(read_only=True)
     images = OrderImageSerializer(source="order_image", many=True, read_only=True)
 
-    def get_service_uuid(self, obj):
-        return obj.service.service_uuid
+    def get_service_info(self, obj):
+        return ServiceRetrieveSerializer(obj.service).data
 
     def get_orderer_information(self, obj):
         # 만약, 기본 사용자 정보가 아닌, 새로운 사용자 정보를 기입하여 주문한 경우는, User 정보가 아니라, OrdererInformation 정보를 반환
@@ -42,13 +48,12 @@ class OrderRetrieveSerializer(serializers.ModelSerializer):
         delivery_information = obj.transaction.delivery_information
         if delivery_information.exists():
             return DeliveryStatusSerializer(delivery_information.first()).data
-        else:
-            return None
+        return None
 
     class Meta:
         model = Order
         fields = [
-            "service_uuid",
+            "service_info",
             "order_uuid",
             "order_date",
             "orderer_information",

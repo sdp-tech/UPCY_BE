@@ -1,4 +1,4 @@
-name: Check code quality, run test code
+name: Deploy sequence
 
 on:
   pull_request:

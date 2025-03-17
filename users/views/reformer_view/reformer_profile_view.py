@@ -1,11 +1,12 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError, transaction
 from rest_framework import serializers, status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from core.exceptions import view_exception_handler
+from core.permissions import IsReformer
 from users.models.reformer import Reformer
 from users.serializers.reformer_serializer.reformer_profile_serializer import (
     ReformerProfileSerializer,
@@ -17,8 +18,14 @@ from users.services import UserService
 
 
 class ReformerProfileView(APIView):
-    permission_classes = [IsAuthenticated]
     user_service = UserService()
+
+    def get_permissions(self):
+        if self.request.method in ["GET", "POST"]:
+            return [IsAuthenticated()]
+        elif self.request.method in ["PUT", "DELETE"]:
+            return [IsReformer()]
+        return super().get_permissions()
 
     @view_exception_handler
     def get(self, request) -> Response:

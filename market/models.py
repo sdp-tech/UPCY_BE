@@ -19,7 +19,7 @@ def get_service_image_upload_path(instance, filename):
     email_name = instance.market_service.market.reformer.user.email.split("@")[
         0
     ]  # market을 통해 reformer에 접근
-    market_uuid = instance.market_service.market.market_name
+    market_uuid = instance.market_service.market.market_uuid
     service_uuid = instance.market_service.service_uuid
     return f"users/{email_name}/market/{market_uuid}/service/{service_uuid}/{filename}"
 
@@ -28,10 +28,9 @@ def get_service_option_image_upload_path(instance, filename):
     email_name = (
         instance.service_option.market_service.market.reformer.user.email.split("@")[0]
     )  # market을 통해 reformer에 접근
-    market_uuid = instance.service_option.market_service.market.market_name
+    market_uuid = instance.service_option.market_service.market.market_uuid
     service_uuid = instance.service_option.market_service.service_uuid
-    option_uuid = instance.service_option.option_uuid
-    return f"users/{email_name}/market/{market_uuid}/service/{service_uuid}/option/{option_uuid}/{filename}"
+    return f"users/{email_name}/market/{market_uuid}/service/{service_uuid}/option/{filename}"
 
 
 class Market(TimeStampedModel):
@@ -160,10 +159,14 @@ class ServiceOptionImage(TimeStampedModel):
 
 class Report(models.Model):
     reported_user = models.ForeignKey(
-        "users.User", related_name="reports_received", on_delete=models.CASCADE
+        "users.User",
+        related_name="reports_received",
+        on_delete=models.CASCADE,
     )
     reporter_user = models.ForeignKey(
-        "users.User", related_name="reports_made", on_delete=models.CASCADE
+        "users.User",
+        related_name="reports_made",
+        on_delete=models.CASCADE,
     )
     reason = models.CharField(max_length=255)
     details = models.TextField(blank=True, null=True)

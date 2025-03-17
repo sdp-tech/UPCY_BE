@@ -75,6 +75,11 @@ urlpatterns = [
         name="service_style_view",
     ),
     path(
+        "/<uuid:market_uuid>/service/<uuid:service_uuid>/option",
+        ServiceOptionCreateListView.as_view(),
+        name="service_option_create_list_view",
+    ),
+    path(
         "/<uuid:market_uuid>/service/<uuid:service_uuid>/option/<uuid:option_uuid>",
         ServiceOptionView.as_view(),
         name="service_option_view",

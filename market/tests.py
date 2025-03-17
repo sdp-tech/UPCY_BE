@@ -284,17 +284,35 @@ class MarketTestCase(APITestCase):
         self.assertEqual(Market.objects.filter(market_uuid=market_uuid).count(), 0)
 
     def test_report_market(self):
-        # 마켓 신고가 정상적으로 작동하는 것
-        response = self.client.post(
-            path="/api/market/report",
-            data={
-                "reported_user_id": self.test_user.id,
-                "reason": "허위 정보 게시",
-                "details": "잘못된 정보를 포함한 마켓 설명",
-            },
-        )
-        self.assertEqual(response.data["reported_user"], self.test_user.id)
-        self.assertEqual(response.data["reason"], "허위 정보 게시")
+        # 마켓 신고가 정상적으로 작동하는지 확인
+        for i in range(3):
+            response = self.customer_client.post(
+                path="/api/market/report",
+                data={
+                    "reported_user_id": self.test_user.id,
+                    "reason": "허위 정보 게시",
+                    "details": "잘못된 정보를 포함한 마켓 설명",
+                },
+            )
+            self.assertEqual(response.status_code, 201)
+        self.test_user.refresh_from_db()
+        self.assertEqual(self.test_user.report_count, 3)
+
+    def test_report_market_if_exceed_threshold(self):
+        for i in range(5):
+            response = self.customer_client.post(
+                path="/api/market/report",
+                data={
+                    "reported_user_id": self.test_user.id,
+                    "reason": "허위 정보 게시",
+                    "details": "잘못된 정보를 포함한 마켓 설명",
+                },
+            )
+            self.assertEqual(response.status_code, 201)
+
+        self.test_user.refresh_from_db()
+        self.assertEqual(self.test_user.report_count, 5)
+        self.assertEqual(self.test_user.is_active, False)
 
     def test_get_service_list(self):
         # 서비스 리스트 가져오기 테스트
@@ -445,6 +463,46 @@ class MarketTestCase(APITestCase):
             service_uuid=service_uuid
         ).first()
         self.assertNotEqual(service.suspended, updated_service.suspended)
+
+    def test_service_update_temporary_field(self):
+        # 1. 테스트 마켓 생성
+        response = self.client.post(
+            path="/api/market",
+            data={
+                "market_name": self.TEST_MARKET_NAME,
+                "market_introduce": self.TEST_MARKET_INTRODUCE,
+                "market_address": self.TEST_MARKET_ADDRESS,
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, 201)
+        market_uuid = response.data.get("market_uuid", None)
+        self.assertIsNotNone(market_uuid, None)
+
+        # 2. 해당 마켓에 대한 서비스 생성
+        response = self.client.post(
+            path=f"/api/market/{market_uuid}/service",
+            data=self.TEST_SERVICE_CREATE_DATA,
+            format="json",
+        )
+        self.assertEqual(response.status_code, 201)
+        service_uuid = response.data.get("service_uuid", None)
+        self.assertNotEqual(service_uuid, None)
+
+        service = Service.objects.filter(service_uuid=service_uuid).first()
+        self.assertEqual(service.suspended, False)
+
+        # 3. 서비스 temporary 값 업데이트 시도
+        response = self.client.put(
+            path=f"/api/market/{market_uuid}/service/{service_uuid}",
+            data={"temporary": True},
+            format="json",
+        )
+        self.assertEqual(response.status_code, 200)
+        updated_service: Service = Service.objects.filter(
+            service_uuid=service_uuid
+        ).first()
+        self.assertNotEqual(service.temporary, updated_service.temporary)
 
     def tearDown(self):
         Service.objects.all().delete()

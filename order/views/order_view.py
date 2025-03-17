@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from core.exceptions import view_exception_handler
-from core.permissions import IsReformer
+from core.permissions import IsCustomer, IsReformer
 from market.models import Service
 from order.mixins import OrderQueryParamMinxin
 from order.models import (
@@ -115,7 +115,7 @@ class OrderStatusUpdateView(APIView):
     주문 UUID를 사용하여 주문 상태 정보를 업데이트 하는 API 구현체
     """
 
-    permission_classes = [IsReformer]
+    permission_classes = [IsCustomer]
 
     @view_exception_handler
     def patch(self, request, **kwargs):
@@ -144,7 +144,6 @@ class OrderStatusUpdateView(APIView):
                 order_status.status = _OrderStatus.END
             case _:
                 raise ValueError("invalid status query parameter")
-        order.save()
         order_status.save()
         return Response(status=status.HTTP_200_OK)
 

@@ -11,7 +11,7 @@ urlpatterns = [
     ),
     path(
         "/<uuid:order_uuid>/status",
-        OrderStatusUpdateView.as_view(),
+        OrderStatusView.as_view(),
         name="order_update",
     ),
     path(

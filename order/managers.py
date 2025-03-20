@@ -17,3 +17,14 @@ class OrderManager(models.Manager):
             .select_related("service", "service__market", "service__market__reformer")
             .filter(service__market__reformer__user=user)
         )
+
+
+class OrderStatusManager(models.Manager):
+
+    def get_order_status_by_order_uuid(self, order_uuid: str):
+        return (
+            super()
+            .get_queryset()
+            .select_related("order")
+            .filter(order__order_uuid=order_uuid)
+        )

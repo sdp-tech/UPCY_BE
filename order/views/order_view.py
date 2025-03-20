@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.query import QuerySet
@@ -10,7 +11,7 @@ from rest_framework.views import APIView
 from core.exceptions import view_exception_handler
 from core.permissions import IsReformer
 from market.models import Service
-from order.mixins import OrderQueryParamMinxin
+from order.mixins import OrderQueryParamMinxin, OrderStatusQueryParamMixin
 from order.models import DeliveryInformation, Order, OrderStatus, _OrderStatus
 from order.pagination import OrderListPagination
 from order.serializers.delivery_status_serializer import DeliveryStatusSerializer
@@ -19,6 +20,10 @@ from order.serializers.order_create_serializer import (
     OrderCreateSerializer,
 )
 from order.serializers.order_retrieve_serializer import OrderRetrieveSerializer
+from order.serializers.order_status_serializer import (
+    OrderStatusRejectedSerailzier,
+    OrderStatusRetrieveSerializer,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -67,14 +72,10 @@ class OrderView(OrderQueryParamMinxin, APIView):
 
     @view_exception_handler
     def post(self, request):
-        logger.debug("POST : /api/orders")
-        logger.debug(request.data)
-
         serializer: OrderCreateSerializer = OrderCreateSerializer(
             data=request.data, context={"request": request}
         )
         serializer.is_valid(raise_exception=True)
-        logger.debug("serializer 검증 완료 -> save() 호출")
         order: Order = serializer.save()  # create 호출
 
         response_serializer: OrderCreateResponseSerializer = (
@@ -104,7 +105,7 @@ class ServiceOrderListView(APIView):
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
 
-class OrderStatusUpdateView(APIView):
+class OrderStatusView(OrderStatusQueryParamMixin, APIView):
     """
     주문 UUID를 사용하여 주문 상태 정보를 업데이트 하는 API 구현체
     """
@@ -112,12 +113,40 @@ class OrderStatusUpdateView(APIView):
     permission_classes = [IsAuthenticated]
 
     @view_exception_handler
-    def patch(self, request, **kwargs):
+    def get(self, request, **kwargs) -> Response:
+        order_uuid: Optional[str] = kwargs.get("order_uuid", None)
+        if not order_uuid:
+            raise ValueError("order_uuid path parameter is required")
+
+        _status: Optional[str] = request.GET.get("filter", None)
+        queryset: QuerySet = OrderStatus.objects.get_order_status_by_order_uuid(
+            order_uuid=order_uuid
+        )
+        order_status: OrderStatus = self.apply_filters_and_sorting(
+            queryset=queryset, status=_status
+        ).first()
+
+        if _status == _OrderStatus.REJECTED:
+            serializer: OrderStatusRejectedSerailzier = OrderStatusRejectedSerailzier(
+                instance=order_status
+            )
+        else:
+            serializer: OrderStatusRetrieveSerializer = OrderStatusRetrieveSerializer(
+                instance=order_status
+            )
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+    @view_exception_handler
+    def patch(self, request, **kwargs) -> Response:
+        order_uuid: Optional[str] = kwargs.get("order_uuid", None)
+        if not order_uuid:
+            raise ValueError("order_uuid path parameter is required")
+
         _status: str = request.data.get("status")
         if _status is None:
             raise ValueError("status query parameter is required")
 
-        order: Order = Order.objects.filter(order_uuid=kwargs.get("order_uuid")).first()
+        order: Order = Order.objects.filter(order_uuid=order_uuid).first()
         if not order:
             raise ObjectDoesNotExist("order not found")
         order_status: OrderStatus = OrderStatus.objects.filter(order=order).first()
@@ -138,6 +167,7 @@ class OrderStatusUpdateView(APIView):
                 order_status.status = _OrderStatus.END
             case _:
                 raise ValueError("invalid status query parameter")
+        order.save()
         order_status.save()
         return Response(status=status.HTTP_200_OK)
 

@@ -796,6 +796,68 @@ class OrderTestCase(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_get_rejceted_order_status_with_order_uuid(self):
+        # Given
+        # 주문 1개 생성
+        self.generate_order(num=1)
+        self.assertEqual(Order.objects.all().count(), 1)
+        order = Order.objects.all().first()
+
+        # update order status update to reject
+        response = self.reformer_client.patch(
+            path=f"/api/orders/{str(order.order_uuid)}/status",
+            data={"status": "rejected", "rejected_reason": "this is test"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        order.refresh_from_db()
+        self.assertEqual(order.order_status.first().status, "rejected")
+        self.assertEqual(order.rejected_reason, "this is test")
+
+        # When
+        response = self.user_client.get(
+            path=f"/api/orders/{str(order.order_uuid)}/status",
+            query_params={"filter": "rejected"},
+            format="json",
+        )
+
+        # Then
+        order_status: OrderStatus = order.order_status.first()
+        self.assertEqual(order_status.status, response.data.get("status"))
+        self.assertEqual(order.rejected_reason, response.data.get("rejected_reason"))
+        self.assertIn("created", response.data)
+
+    def test_get_order_status_with_order_uuid(self):
+        # Given
+        # 주문 1개 생성
+        self.generate_order(num=1)
+        self.assertEqual(Order.objects.all().count(), 1)
+        order = Order.objects.all().first()
+
+        # update order status update to received
+        response = self.reformer_client.patch(
+            path=f"/api/orders/{str(order.order_uuid)}/status",
+            data={"status": "received"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        order.refresh_from_db()
+        self.assertEqual(order.order_status.first().status, "received")
+
+        # When
+        response = self.user_client.get(
+            path=f"/api/orders/{str(order.order_uuid)}/status",
+            query_params={"filter": "received"},
+            format="json",
+        )
+
+        # Then
+        order_status: OrderStatus = order.order_status.first()
+        self.assertEqual(order_status.status, response.data.get("status"))
+        self.assertIn("created", response.data)
+
     def tearDown(self):
         patch.stopall()  # 활성화된 Mocking 중단
         Order.objects.all().delete()

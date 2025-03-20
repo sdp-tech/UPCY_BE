@@ -3,7 +3,7 @@ import uuid
 from django.db import models
 
 from core.models import TimeStampedModel
-from order.managers import OrderManager
+from order.managers import OrderManager, OrderStatusManager
 
 
 def get_order_image_upload_path(instance, filename):
@@ -95,6 +95,8 @@ class OrderStatus(TimeStampedModel):
         choices=_OrderStatus.choices,
         default="pending",
     )
+
+    objects = OrderStatusManager()
 
     class Meta:
         db_table = "order_status"

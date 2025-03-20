@@ -1,10 +1,29 @@
-from datetime import date, timedelta
-from typing import Any, override
+from datetime import date
+from typing import Any, Optional, override
 
 from django.db.models import QuerySet
 from rest_framework.exceptions import ValidationError
 
 from core.mixins import QueryParamMixin
+from order.models import _OrderStatus
+
+
+class OrderStatusQueryParamMixin(QueryParamMixin):
+
+    def __init__(self):
+        super().__init__()
+        self.ALLOWED_FILTER_ARRAY = [choice[0] for choice in _OrderStatus.choices]
+
+    @override
+    def apply_filters_and_sorting(
+        self, queryset: QuerySet, status: Optional[str]
+    ) -> QuerySet:
+        if status:
+            if status not in self.ALLOWED_FILTER_ARRAY:
+                raise ValidationError("Invalid status query parameter")
+            return queryset.filter(status=status)
+        else:
+            return queryset
 
 
 class OrderQueryParamMinxin(QueryParamMixin):

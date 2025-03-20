@@ -12,14 +12,11 @@ from market.serializers.service_serializers.service_option.service_option_retrie
 from order.models import Order
 from order.serializers.delivery_status_serializer import DeliveryStatusSerializer
 from order.serializers.order_create_serializer import OrderImageSerializer
-from order.serializers.order_status_serializer import OrderStatusSerailzier
+from order.serializers.order_status_serializer import OrderStatusRetrieveSerializer
 from order.serializers.orderer_information_serializer import (
     OrdererInformationSerializer,
 )
 from order.serializers.transaction_serializer import TransactionSerializer
-from users.serializers.reformer_serializer.reformer_profile_serializer import (
-    ReformerProfileSerializer,
-)
 from users.serializers.user_serializer.user_information_serializer import (
     UserOrderInformationSerializer,
 )
@@ -29,7 +26,7 @@ class OrderRetrieveSerializer(serializers.ModelSerializer):
     service_info = serializers.SerializerMethodField(read_only=True)
     materials = ServiceMaterialRetrieveSerializer(many=True, read_only=True)
     additional_options = ServiceOptionRetrieveSerializer(many=True, read_only=True)
-    order_status = OrderStatusSerailzier(many=True, read_only=True)
+    order_status = OrderStatusRetrieveSerializer(many=True, read_only=True)
     orderer_information = serializers.SerializerMethodField(read_only=True)
     transaction = TransactionSerializer(read_only=True)
     delivery_status = serializers.SerializerMethodField(read_only=True)
